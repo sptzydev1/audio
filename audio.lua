@@ -372,15 +372,12 @@ local function renderPage(page)
         end
     end
     
-    local totalItems = #catalogItems
-    local totalPages = math.ceil(totalItems / itemsPerPage)
-    if totalPages < 1 then totalPages = 1 end
-    
+    local totalPages = math.max(1, math.ceil(#catalogItems / itemsPerPage))
     currentPage = math.clamp(page, 1, totalPages)
     pageLabel.Text = string.format("%d / %d", currentPage, totalPages)
     
     local startIndex = (currentPage - 1) * itemsPerPage + 1
-    local endIndex = math.min(startIndex + itemsPerPage - 1, totalItems)
+    local endIndex = math.min(startIndex + itemsPerPage - 1, #catalogItems)
     
     for i = startIndex, endIndex do
         local itemData = catalogItems[i]
