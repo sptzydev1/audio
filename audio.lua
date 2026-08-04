@@ -1,7 +1,3 @@
--- =================================================================
--- SKRIP EMOTE KATALOG + 3 LIST ACTION MENU (KHUSUS EMOTE & DANCE)
--- =================================================================
-
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -17,18 +13,12 @@ local currentPage = 1
 local itemsPerPage = 9
 local currentKeyword = "Dance"
 
--- Variabel Animasi Character
 local currentTrack = nil
 local playingAssetId = nil
 
--- -----------------------------------------------------------------
--- 1. FUNGSI FETCH EMOTE FROM CATALOG (KHUSUS EMOTE ANIMATION)
--- -----------------------------------------------------------------
 local function fetchCatalogData(keyword)
     local encodedKeyword = HttpService:UrlEncode(keyword)
-    
-    -- Category 11 = Animations, Subcategory 38 = Emotes (Hanya Emote/Dance!)
-    local url = "https://catalog.roblox.com/v2/search/items/details?urlLocale=id_id&keyword=" .. encodedKeyword .. "&category=11&subcategory=38&limit=120"
+    local url = "https://catalog.roblox.com/v2/search/items/details?keyword=" .. encodedKeyword .. "&category=11&subcategory=38&limit=120"
     
     local success, response = pcall(function()
         return game:HttpGet(url)
@@ -39,25 +29,12 @@ local function fetchCatalogData(keyword)
             return HttpService:JSONDecode(response)
         end)
         if decodeSuccess and data and data.data then
-            -- Filter tambahan untuk memastikan hanya assetType "Emote Animation" (ID 61)
-            local filteredEmotes = {}
-            for _, item in ipairs(data.data) do
-                if item.assetType == 61 or item.subcategory == "EmoteAnimations" then
-                    table.insert(filteredEmotes, item)
-                else
-                    -- Jika API Roblox tidak mengembalikan assetType secara rinci, tetap masukkan item hasil filter subcategory 38
-                    table.insert(filteredEmotes, item)
-                end
-            end
-            return filteredEmotes
+            return data.data
         end
     end
     return {}
 end
 
--- -----------------------------------------------------------------
--- 2. FUNGSI PLAY & STOP ANIMASI EMOTE
--- -----------------------------------------------------------------
 local function stopEmote()
     if currentTrack then
         currentTrack:Stop()
@@ -90,15 +67,11 @@ local function playEmote(assetId)
     return false
 end
 
--- -----------------------------------------------------------------
--- 3. SCREEN GUI & NOTIFIKASI
--- -----------------------------------------------------------------
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "EmoteTesterCatalogGui"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
--- Pop-Up Notifikasi
 local notifLabel = Instance.new("TextLabel")
 notifLabel.Size = UDim2.new(0, 140, 0, 22)
 notifLabel.Position = UDim2.new(0.5, -70, 0.1, 0)
@@ -122,9 +95,6 @@ local function showNotif(text)
     end)
 end
 
--- -----------------------------------------------------------------
--- 4. IKON TOKO UTAMA (32x32 TRANSPARAN + GARIS BERJALAN)
--- -----------------------------------------------------------------
 local shopIcon = Instance.new("TextButton")
 shopIcon.Name = "ShopIcon"
 shopIcon.Size = UDim2.new(0, 32, 0, 32)
@@ -155,7 +125,6 @@ iconGradient.Color = ColorSequence.new({
 })
 iconGradient.Parent = iconStroke
 
--- Drag Logic Icon
 local dragging, dragInput, dragStart, startPos
 shopIcon.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -183,9 +152,6 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- -----------------------------------------------------------------
--- 5. MAIN FRAME KATALOG (PERSEGI 210x210 + GARIS BERJALAN)
--- -----------------------------------------------------------------
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 210, 0, 210)
@@ -213,14 +179,12 @@ mainGradient.Color = ColorSequence.new({
 })
 mainGradient.Parent = mainStroke
 
--- Animasi Garis Putih Berjalan
 RunService.RenderStepped:Connect(function(deltaTime)
     local rotationStep = deltaTime * 120
     mainGradient.Rotation = (mainGradient.Rotation + rotationStep) % 360
     iconGradient.Rotation = (iconGradient.Rotation + rotationStep) % 360
 end)
 
--- Header Bar
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(1, -24, 0, 20)
 titleLabel.Position = UDim2.new(0, 6, 0, 2)
@@ -240,7 +204,6 @@ closeBtn.Text = "❌"
 closeBtn.TextSize = 9
 closeBtn.Parent = mainFrame
 
--- Search Bar
 local searchBox = Instance.new("TextBox")
 searchBox.Size = UDim2.new(1, -42, 0, 20)
 searchBox.Position = UDim2.new(0, 6, 0, 24)
@@ -264,11 +227,8 @@ searchBtn.Text = "🔍"
 searchBtn.TextSize = 10
 searchBtn.Parent = mainFrame
 
-local searchBtnCorner = Instance.new("UICorner") 
-searchBtnCorner.CornerRadius = UDim.new(0, 4) 
-searchBtnCorner.Parent = searchBtn
+local searchBtnCorner = Instance.new("UICorner") searchBtnCorner.CornerRadius = UDim.new(0, 4) searchBtnCorner.Parent = searchBtn
 
--- Container Grid 3x3
 local gridFrame = Instance.new("Frame")
 gridFrame.Size = UDim2.new(1, -12, 0, 140)
 gridFrame.Position = UDim2.new(0, 6, 0, 48)
@@ -281,7 +241,6 @@ uIGridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
 uIGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 uIGridLayout.Parent = gridFrame
 
--- Bottom Navigation
 local pageLabel = Instance.new("TextLabel")
 pageLabel.Size = UDim2.new(0, 60, 0, 16)
 pageLabel.Position = UDim2.new(0.5, -30, 1, -18)
@@ -309,9 +268,6 @@ nextBtn.Text = "Next >"
 nextBtn.TextSize = 9
 nextBtn.Parent = mainFrame
 
--- -----------------------------------------------------------------
--- 6. MENU POP-UP 3 LIST (MUNCUL SAAT ITEM EMOTE DIKLIK)
--- -----------------------------------------------------------------
 local actionMenuFrame = Instance.new("Frame")
 actionMenuFrame.Name = "ActionMenuFrame"
 actionMenuFrame.Size = UDim2.new(0, 95, 0, 85)
@@ -330,7 +286,6 @@ actionLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 actionLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 actionLayout.Parent = actionMenuFrame
 
--- List 1: COPY (HIJAU)
 local copyBtn = Instance.new("TextButton")
 copyBtn.Size = UDim2.new(0, 85, 0, 22)
 copyBtn.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
@@ -342,7 +297,6 @@ copyBtn.ZIndex = 21
 copyBtn.Parent = actionMenuFrame
 local cCorner = Instance.new("UICorner") cCorner.CornerRadius = UDim.new(0, 4) cCorner.Parent = copyBtn
 
--- List 2: PLAY / STOP (HIJAU / MERAH)
 local playBtn = Instance.new("TextButton")
 playBtn.Size = UDim2.new(0, 85, 0, 22)
 playBtn.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
@@ -354,7 +308,6 @@ playBtn.ZIndex = 21
 playBtn.Parent = actionMenuFrame
 local pCorner = Instance.new("UICorner") pCorner.CornerRadius = UDim.new(0, 4) pCorner.Parent = playBtn
 
--- List 3: CANCEL (MERAH)
 local cancelBtn = Instance.new("TextButton")
 cancelBtn.Size = UDim2.new(0, 85, 0, 22)
 cancelBtn.BackgroundColor3 = Color3.fromRGB(198, 40, 40)
@@ -368,9 +321,6 @@ local cnCorner = Instance.new("UICorner") cnCorner.CornerRadius = UDim.new(0, 4)
 
 local selectedAssetId = nil
 
--- -----------------------------------------------------------------
--- 7. RENDER LOGIC & EVENT LISTENERS
--- -----------------------------------------------------------------
 local function renderPage(page)
     actionMenuFrame.Visible = false
     for _, child in ipairs(gridFrame:GetChildren()) do
@@ -415,7 +365,6 @@ local function renderPage(page)
         nameLabel.TextYAlignment = Enum.TextYAlignment.Top
         nameLabel.Parent = itemCard
         
-        -- KLIK KARTU EMOTE -> MUNCULKAN POP-UP 3 LIST ACTION MENU
         itemCard.MouseButton1Click:Connect(function()
             selectedAssetId = assetId
             
@@ -444,8 +393,6 @@ local function performSearch()
     end
 end
 
--- EVENT ACTIONS:
--- 1. Klik Copy ID
 copyBtn.MouseButton1Click:Connect(function()
     if selectedAssetId and copyToClipboard then
         copyToClipboard(selectedAssetId)
@@ -454,7 +401,6 @@ copyBtn.MouseButton1Click:Connect(function()
     actionMenuFrame.Visible = false
 end)
 
--- 2. Klik Play / Stop Animasi Emote
 playBtn.MouseButton1Click:Connect(function()
     if selectedAssetId then
         if playingAssetId == selectedAssetId then
@@ -472,12 +418,10 @@ playBtn.MouseButton1Click:Connect(function()
     actionMenuFrame.Visible = false
 end)
 
--- 3. Klik Cancel
 cancelBtn.MouseButton1Click:Connect(function()
     actionMenuFrame.Visible = false
 end)
 
--- Buka/Tutup GUI Utama lewat Icon Toko
 shopIcon.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
     if mainFrame.Visible then
