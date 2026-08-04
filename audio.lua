@@ -1,5 +1,5 @@
 -- =================================================================
--- SKRIP EMOTE KATALOG + 3 LIST ACTION MENU (FIXED)
+-- SKRIP EMOTE KATALOG + 3 LIST ACTION MENU (FIXED PARENT ERROR)
 -- =================================================================
 
 local HttpService = game:GetService("HttpService")
@@ -243,6 +243,7 @@ searchBox.Parent = mainFrame
 
 local searchCorner = Instance.new("UICorner") searchCorner.CornerRadius = UDim.new(0, 4) searchCorner.Parent = searchBox
 
+-- PERBAIKAN SEARCH BUTTON (Clean & Fixed)
 local searchBtn = Instance.new("TextButton")
 searchBtn.Size = UDim2.new(0, 28, 0, 20)
 searchBtn.Position = UDim2.new(1, -32, 0, 24)
@@ -250,9 +251,11 @@ searchBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
 searchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 searchBtn.Text = "🔍"
 searchBtn.TextSize = 10
-searchBtn.Parent = mainFrame -- FIXED (sebelumnya searchBtn)
+searchBtn.Parent = mainFrame
 
-local searchBtnCorner = Instance.new("UICorner") searchBtnCorner.CornerRadius = UDim.new(0, 4) searchBtnCorner.Parent = searchBtn
+local searchBtnCorner = Instance.new("UICorner") 
+searchBtnCorner.CornerRadius = UDim.new(0, 4) 
+searchBtnCorner.Parent = searchBtn
 
 -- Container Grid 3x3
 local gridFrame = Instance.new("Frame")
