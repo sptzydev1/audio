@@ -1,5 +1,5 @@
 -- =================================================================
--- SKRIP EMOTE KATALOG + 3 LIST ACTION MENU (PLAY/STOP/COPY)
+-- SKRIP EMOTE KATALOG + 3 LIST ACTION MENU (FIXED)
 -- =================================================================
 
 local HttpService = game:GetService("HttpService")
@@ -26,7 +26,6 @@ local playingAssetId = nil
 -- -----------------------------------------------------------------
 local function fetchCatalogData(keyword)
     local encodedKeyword = HttpService:UrlEncode(keyword)
-    -- Category Emote Animations
     local url = "https://catalog.roblox.com/v2/search/items/details?urlLocale=id_id&keyword=" .. encodedKeyword .. "&category=11&subcategory=38&limit=120"
     
     local success, response = pcall(function()
@@ -251,10 +250,9 @@ searchBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
 searchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 searchBtn.Text = "🔍"
 searchBtn.TextSize = 10
-searchBtn.Parent = searchBtn
+searchBtn.Parent = mainFrame -- FIXED (sebelumnya searchBtn)
 
 local searchBtnCorner = Instance.new("UICorner") searchBtnCorner.CornerRadius = UDim.new(0, 4) searchBtnCorner.Parent = searchBtn
-searchBtn.Parent = mainFrame
 
 -- Container Grid 3x3
 local gridFrame = Instance.new("Frame")
@@ -413,10 +411,10 @@ local function renderPage(page)
             
             -- Perbarui warna & teks tombol Play jika emote ini sedang dimainkan
             if playingAssetId == selectedAssetId then
-                playBtn.BackgroundColor3 = Color3.fromRGB(198, 40, 40) -- Merah
+                playBtn.BackgroundColor3 = Color3.fromRGB(198, 40, 40)
                 playBtn.Text = "⏹ STOP"
             else
-                playBtn.BackgroundColor3 = Color3.fromRGB(46, 125, 50) -- Hijau
+                playBtn.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
                 playBtn.Text = "▶ PLAY"
             end
             
