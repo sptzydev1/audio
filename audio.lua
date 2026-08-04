@@ -11,6 +11,14 @@ local function getRandomName()
     return str
 end
 
+local function cleanInput(text)
+    if not text then return "" end
+    text = string.gsub(text, "^%s+", "")
+    text = string.gsub(text, "%s+$", "")
+    text = string.gsub(text, "[%c%z]", "")
+    return text
+end
+
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -25,7 +33,10 @@ local currentTrack = nil
 local playingAssetId = nil
 
 local function fetchCatalogData(keyword)
-    local encodedKeyword = HttpService:UrlEncode(keyword)
+    local sanitized = cleanInput(keyword)
+    if sanitized == "" then return nil end
+    
+    local encodedKeyword = HttpService:UrlEncode(sanitized)
     local url = "https://catalog.roblox.com/v1/search/items/details?Keyword=" .. encodedKeyword .. "&Limit=120"
     
     local success, response = pcall(function()
@@ -36,11 +47,11 @@ local function fetchCatalogData(keyword)
         local decodeSuccess, data = pcall(function()
             return HttpService:JSONDecode(response)
         end)
-        if decodeSuccess and data and data.data then
+        if decodeSuccess and data and data.data and #data.data > 0 then
             return data.data
         end
     end
-    return {}
+    return nil
 end
 
 local function stopEmote()
@@ -82,8 +93,8 @@ screenGui.Parent = PlayerGui
 
 local notifLabel = Instance.new("TextLabel")
 notifLabel.Name = getRandomName()
-notifLabel.Size = UDim2.new(0, 140, 0, 22)
-notifLabel.Position = UDim2.new(0.5, -70, 0.1, 0)
+notifLabel.Size = UDim2.new(0, 150, 0, 22)
+notifLabel.Position = UDim2.new(0.5, -75, 0.1, 0)
 notifLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 notifLabel.TextColor3 = Color3.fromRGB(85, 255, 127)
 notifLabel.TextSize = 10
@@ -96,10 +107,11 @@ local notifCorner = Instance.new("UICorner")
 notifCorner.CornerRadius = UDim.new(0, 5)
 notifCorner.Parent = notifLabel
 
-local function showNotif(text)
+local function showNotif(text, isError)
     notifLabel.Text = text
+    notifLabel.TextColor3 = isError and Color3.fromRGB(255, 85, 85) or Color3.fromRGB(85, 255, 127)
     notifLabel.Visible = true
-    task.delay(1.2, function()
+    task.delay(1.5, function()
         notifLabel.Visible = false
     end)
 end
@@ -422,18 +434,26 @@ local function renderPage(page)
 end
 
 local function performSearch()
-    local text = searchBox.Text
-    if text and text ~= "" then
-        currentKeyword = text
-        catalogItems = fetchCatalogData(currentKeyword)
-        renderPage(1)
+    local text = cleanInput(searchBox.Text)
+    if text ~= "" then
+        local newData = fetchCatalogData(text)
+        if newData then
+            currentKeyword = text
+            catalogItems = newData
+            renderPage(1)
+            showNotif("Found " .. #catalogItems .. " items", false)
+        else
+            showNotif("Tidak ditemukan!", true)
+        end
+    else
+        showNotif("Input Kosong!", true)
     end
 end
 
 copyBtn.MouseButton1Click:Connect(function()
     if selectedAssetId and copyToClipboard then
         copyToClipboard(selectedAssetId)
-        showNotif("Copied: " .. selectedAssetId)
+        showNotif("Copied: " .. selectedAssetId, false)
     end
     actionMenuFrame.Visible = false
 end)
@@ -442,13 +462,13 @@ playBtn.MouseButton1Click:Connect(function()
     if selectedAssetId then
         if playingAssetId == selectedAssetId then
             stopEmote()
-            showNotif("Stopped")
+            showNotif("Stopped", false)
         else
             local played = playEmote(selectedAssetId)
             if played then
-                showNotif("Playing!")
+                showNotif("Playing!", false)
             else
-                showNotif("Failed!")
+                showNotif("Failed!", true)
             end
         end
     end
@@ -463,7 +483,10 @@ shopIcon.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
     if mainFrame.Visible then
         if #catalogItems == 0 then
-            catalogItems = fetchCatalogData(currentKeyword)
+            local data = fetchCatalogData(currentKeyword)
+            if data then
+                catalogItems = data
+            end
         end
         renderPage(currentPage)
     else
