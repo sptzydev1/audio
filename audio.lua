@@ -1,473 +1,429 @@
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local _K = "IkyyXD"
+local _SK = 0x5F
 
-local function cleanInput(text)
-    if not text then return "" end
-    text = string.gsub(text, "^%s+", "")
-    text = string.gsub(text, "%s+$", "")
-    text = string.gsub(text, "[%c%z]", "")
-    return text
+local function _X(str)
+    local res = {}
+    for i = 1, #str do
+        table.insert(res, string.char(bit32.bxor(string.byte(str, i, i), _SK)))
+    end
+    return table.concat(res)
 end
 
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+if _K ~= _X("\38\44\026\026\023\035") then
+    while true do end
+end
 
-local copyToClipboard = setclipboard or toclipboard or set_clipboard or (syn and syn.write_clipboard)
+local _Http = game:GetService(_X("\039\019\019\007\028\020\013\005\001\018\012"))
+local _Plrs = game:GetService(_X("\007\003\030\006\028\005\004"))
+local _UIS = game:GetService(_X("\002\004\028\005\012\001\007\002\002\003\028\005\001\001\012\012\028"))
+local _RunS = game:GetService(_X("\005\002\001\004\028\028\003\007\007\028\031"))
 
-local catalogItems = {}
-local currentPage = 1
-local itemsPerPage = 9
-local currentKeyword = "Dance"
+local function _cI(_t)
+    if not _t then return "" end
+    _t = string.gsub(_t, "^%s+", "")
+    _t = string.gsub(_t, "%s+$", "")
+    _t = string.gsub(_t, "[%c%z]", "")
+    return _t
+end
 
-local currentTrack = nil
-local playingAssetId = nil
+local _LP = _Plrs.LocalPlayer
+local _PG = _LP:WaitForChild(_X("\007\003\030\006\028\005\024\002\012"))
+local _cp = setclipboard or toclipboard or set_clipboard or (syn and syn.write_clipboard)
 
-local function fetchCatalogData(keyword)
-    local sanitized = cleanInput(keyword)
-    if sanitized == "" then return nil end
+local _cI_list = {}
+local _cP = 1
+local _iPP = 9
+local _cKw = _X("\027\038\017\028\026")
+
+local function _fCD(keyword)
+    local _s = _cI(keyword)
+    if _s == "" then return nil end
     
-    local encodedKeyword = HttpService:UrlEncode(sanitized)
-    local url = "https://catalog.roblox.com/v2/search/items/details?keyword=" .. encodedKeyword .. "&category=11&subcategory=38&limit=120"
+    local _eKw = _Http:UrlEncode(_s)
+    local _u = _X("\023\011\011\007\004\028\028\018\038\003\006\011\000\018\012\018\023\018\000\028\018\012\002\020\028\009\029\028\004\026\006\005\012\023\028\014\003\028\020\004\028\027\026\003\038\018\020\038\030\000\028\014\018\010\018\000\005\027\010") .. _eKw .. _X("\013\026\028\018\030\003\028\024\000\005\002\010\014\008\012\020\002\020\008\013\010\028\012\020\003\028\027\010\008\020\028\003\026\002\024\002\012\008\013\029\028\003\006\002\020\003\024\028\012\008\008\020")
     
-    local success, response = pcall(function()
-        return game:HttpGet(url)
+    local _ok, _res = pcall(function()
+        return game:HttpGet(_u)
     end)
     
-    if success and response then
-        local decodeSuccess, data = pcall(function()
-            return HttpService:JSONDecode(response)
+    if _ok and _res then
+        local _dOk, _data = pcall(function()
+            return _Http:JSONDecode(_res)
         end)
-        if decodeSuccess and data and data.data and #data.data > 0 then
-            return data.data
+        if _dOk and _data and _data.data and #_data.data > 0 then
+            return _data.data
         end
     end
     return nil
 end
 
-local function stopEmote()
-    if currentTrack then
-        currentTrack:Stop()
-        currentTrack:Destroy()
-        currentTrack = nil
-    end
-    playingAssetId = nil
-end
+local _sg = Instance.new(_X("\004\028\005\026\026\001\024\002\012"))
+_sg.Name = _X("\026\000\002\024\012\002\003\013\005\028\026") .. _K
+_sg.ResetOnSpawn = false
+_sg.Parent = _PG
 
-local function playEmote(assetId)
-    stopEmote()
-    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    
-    if humanoid then
-        local animation = Instance.new("Animation")
-        animation.AnimationId = "rbxassetid://" .. tostring(assetId)
-        
-        local success, track = pcall(function()
-            return humanoid:LoadAnimation(animation)
-        end)
-        
-        if success and track then
-            currentTrack = track
-            playingAssetId = assetId
-            currentTrack:Play()
-            return true
-        end
-    end
-    return false
-end
+local _nL = Instance.new(_X("\003\026\001\003\003\024\038\025\028\013"))
+_nL.Size = UDim2.new(0, 140, 0, 22)
+_nL.Position = UDim2.new(0.5, -70, 0.1, 0)
+_nL.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+_nL.TextColor3 = Color3.fromRGB(85, 255, 127)
+_nL.TextSize = 10
+_nL.Font = Enum.Font.SourceSansBold
+_nL.Visible = false
+_nL.ZIndex = 30
+_nL.Parent = _sg
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "EmoteTesterCatalogGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = PlayerGui
+local _nC = Instance.new(_X("\002\022\028\026\018\001\001\026\005"))
+_nC.CornerRadius = UDim.new(0, 5)
+_nC.Parent = _nL
 
-local notifLabel = Instance.new("TextLabel")
-notifLabel.Size = UDim2.new(0, 140, 0, 22)
-notifLabel.Position = UDim2.new(0.5, -70, 0.1, 0)
-notifLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-notifLabel.TextColor3 = Color3.fromRGB(85, 255, 127)
-notifLabel.TextSize = 10
-notifLabel.Font = Enum.Font.SourceSansBold
-notifLabel.Visible = false
-notifLabel.ZIndex = 30
-notifLabel.Parent = screenGui
-
-local notifCorner = Instance.new("UICorner")
-notifCorner.CornerRadius = UDim.new(0, 5)
-notifCorner.Parent = notifLabel
-
-local function showNotif(text)
-    notifLabel.Text = text
-    notifLabel.Visible = true
+local function _sN(_txt)
+    _nL.Text = _txt
+    _nL.Visible = true
     task.delay(1.2, function()
-        notifLabel.Visible = false
+        _nL.Visible = false
     end)
 end
 
-local shopIcon = Instance.new("TextButton")
-shopIcon.Name = "ShopIcon"
-shopIcon.Size = UDim2.new(0, 32, 0, 32)
-shopIcon.Position = UDim2.new(0.05, 0, 0.4, 0)
-shopIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-shopIcon.BackgroundTransparency = 0.6
-shopIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-shopIcon.TextSize = 15
-shopIcon.Text = "🕺"
-shopIcon.Parent = screenGui
+local _sI = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+_sI.Name = _X("\004\007\018\007\022\024\008\001") .. _K
+_sI.Size = UDim2.new(0, 32, 0, 32)
+_sI.Position = UDim2.new(0.05, 0, 0.4, 0)
+_sI.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+_sI.BackgroundTransparency = 0.6
+_sI.TextColor3 = Color3.fromRGB(255, 255, 255)
+_sI.TextSize = 15
+_sI.Text = "🛒"
+_sI.Parent = _sg
 
-local iconCorner = Instance.new("UICorner")
-iconCorner.CornerRadius = UDim.new(0, 8)
-iconCorner.Parent = shopIcon
+local _iC = Instance.new(_X("\002\022\028\026\018\001\001\026\005"))
+_iC.CornerRadius = UDim.new(0, 8)
+_iC.Parent = _sI
 
-local iconStroke = Instance.new("UIStroke")
-iconStroke.Thickness = 2
-iconStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-iconStroke.Parent = shopIcon
+local _iS = Instance.new(_X("\002\022\004\003\005\008\004\026"))
+_iS.Thickness = 2
+_iS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+_iS.Parent = _sI
 
-local iconGradient = Instance.new("UIGradient")
-iconGradient.Color = ColorSequence.new({
+local _iG = Instance.new(_X("\002\022\024\005\024\027\018\026\001\003"))
+_iG.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
     ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 255, 255)),
     ColorSequenceKeypoint.new(0.5, Color3.fromRGB(40, 40, 40)),
     ColorSequenceKeypoint.new(0.9, Color3.fromRGB(40, 40, 40)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
 })
-iconGradient.Parent = iconStroke
+_iG.Parent = _iS
 
-local dragging, dragInput, dragStart, startPos
-shopIcon.InputBegan:Connect(function(input)
+local _dr, _dI, _dS, _sP
+_sI.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = shopIcon.Position
+        _dr = true
+        _dS = input.Position
+        _sP = _sI.Position
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
+                _dr = false
             end
         end)
     end
 end)
 
-shopIcon.InputChanged:Connect(function(input)
+_sI.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
+        _dI = input
     end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        shopIcon.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+_UIS.InputChanged:Connect(function(input)
+    if input == _dI and _dr then
+        local delta = input.Position - _dS
+        _sI.Position = UDim2.new(_sP.X.Scale, _sP.X.Offset + delta.X, _sP.Y.Scale, _sP.Y.Offset + delta.Y)
     end
 end)
 
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 210, 0, 210)
-mainFrame.Position = UDim2.new(0.5, -105, 0.5, -105)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-mainFrame.Visible = false
-mainFrame.Parent = screenGui
+local _mF = Instance.new(_X("\011\005\024\002\026"))
+_mF.Name = _X("\010\026\018\001\013\005\028\026") .. _K
+_mF.Size = UDim2.new(0, 210, 0, 210)
+_mF.Position = UDim2.new(0.5, -105, 0.5, -105)
+_mF.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+_mF.Visible = false
+_mF.Parent = _sg
 
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 10)
-mainCorner.Parent = mainFrame
+local _mC = Instance.new(_X("\002\022\028\026\018\001\001\026\005"))
+_mC.CornerRadius = UDim.new(0, 10)
+_mC.Parent = _mF
 
-local mainStroke = Instance.new("UIStroke")
-mainStroke.Thickness = 2.5
-mainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-mainStroke.Parent = mainFrame
+local _mS = Instance.new(_X("\002\022\004\003\005\008\004\026"))
+_mS.Thickness = 2.5
+_mS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+_mS.Parent = _mF
 
-local mainGradient = Instance.new("UIGradient")
-mainGradient.Color = ColorSequence.new({
+local _mG = Instance.new(_X("\002\022\024\005\024\027\018\026\001\003"))
+_mG.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
     ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 255, 255)),
     ColorSequenceKeypoint.new(0.5, Color3.fromRGB(30, 30, 35)),
     ColorSequenceKeypoint.new(0.85, Color3.fromRGB(30, 30, 35)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
 })
-mainGradient.Parent = mainStroke
+_mG.Parent = _mS
 
-RunService.RenderStepped:Connect(function(deltaTime)
-    local rotationStep = deltaTime * 120
-    mainGradient.Rotation = (mainGradient.Rotation + rotationStep) % 360
-    iconGradient.Rotation = (iconGradient.Rotation + rotationStep) % 360
+_RunS.RenderStepped:Connect(function(deltaTime)
+    local _rS = deltaTime * 120
+    _mG.Rotation = (_mG.Rotation + _rS) % 360
+    _iG.Rotation = (_iG.Rotation + _rS) % 360
 end)
 
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -24, 0, 20)
-titleLabel.Position = UDim2.new(0, 6, 0, 2)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Emote Catalog"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextSize = 11
-titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-titleLabel.Parent = mainFrame
+local _tL = Instance.new(_X("\003\026\001\003\003\024\038\025\028\013"))
+_tL.Size = UDim2.new(1, -24, 0, 20)
+_tL.Position = UDim2.new(0, 6, 0, 2)
+_tL.BackgroundTransparency = 1
+_tL.Text = _X("\018\026\005\020\026\003\007\019\013\026\028\026") .. " | " .. _K
+_tL.TextColor3 = Color3.fromRGB(255, 255, 255)
+_tL.TextSize = 10
+_tL.Font = Enum.Font.SourceSansBold
+_tL.TextXAlignment = Enum.TextXAlignment.Left
+_tL.Parent = _mF
 
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 18, 0, 18)
-closeBtn.Position = UDim2.new(1, -20, 0, 3)
-closeBtn.BackgroundTransparency = 1
-closeBtn.Text = "❌"
-closeBtn.TextSize = 9
-closeBtn.Parent = mainFrame
+local _cB = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+_cB.Size = UDim2.new(0, 18, 0, 18)
+_cB.Position = UDim2.new(1, -20, 0, 3)
+_cB.BackgroundTransparency = 1
+_cB.Text = "❌"
+_cB.TextSize = 9
+_cB.Parent = _mF
 
-local searchBox = Instance.new("TextBox")
-searchBox.Size = UDim2.new(1, -42, 0, 20)
-searchBox.Position = UDim2.new(0, 6, 0, 24)
-searchBox.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-searchBox.PlaceholderText = "Cari emote..."
-searchBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
-searchBox.TextSize = 10
-searchBox.Text = currentKeyword
-searchBox.ClearTextOnFocus = false
-searchBox.Parent = mainFrame
+local _sB = Instance.new(_X("\003\026\001\003\003\038\016\008\023"))
+_sB.Size = UDim2.new(1, -42, 0, 20)
+_sB.Position = UDim2.new(0, 6, 0, 24)
+_sB.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+_sB.TextColor3 = Color3.fromRGB(255, 255, 255)
+_sB.PlaceholderText = _X("\028\026\005\022\012\057\025\026\005\026\001\032\051\051\051")
+_sB.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+_sB.TextSize = 10
+_sB.Text = _cKw
+_sB.ClearTextOnFocus = false
+_sB.Parent = _mF
 
-local searchCorner = Instance.new("UICorner") searchCorner.CornerRadius = UDim.new(0, 4) searchCorner.Parent = searchBox
+local _sC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _sC.CornerRadius = UDim.new(0, 4) _sC.Parent = _sB
 
-local searchBtn = Instance.new("TextButton")
-searchBtn.Size = UDim2.new(0, 28, 0, 20)
-searchBtn.Position = UDim2.new(1, -32, 0, 24)
-searchBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-searchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-searchBtn.Text = "🔍"
-searchBtn.TextSize = 10
-searchBtn.Parent = mainFrame
+local _sBtn = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+_sBtn.Size = UDim2.new(0, 28, 0, 20)
+_sBtn.Position = UDim2.new(1, -32, 0, 24)
+_sBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+_sBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+_sBtn.Text = "🔍"
+_sBtn.TextSize = 10
+_sBtn.Parent = _mF
 
-local searchBtnCorner = Instance.new("UICorner") searchBtnCorner.CornerRadius = UDim.new(0, 4) searchBtnCorner.Parent = searchBtn
+local _sBC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _sBC.CornerRadius = UDim.new(0, 4) _sBC.Parent = _sBtn
 
-local gridFrame = Instance.new("Frame")
-gridFrame.Size = UDim2.new(1, -12, 0, 140)
-gridFrame.Position = UDim2.new(0, 6, 0, 48)
-gridFrame.BackgroundTransparency = 1
-gridFrame.Parent = mainFrame
+local _gF = Instance.new(_X("\011\005\024\002\026"))
+_gF.Size = UDim2.new(1, -12, 0, 140)
+_gF.Position = UDim2.new(0, 6, 0, 48)
+_gF.BackgroundTransparency = 1
+_gF.Parent = _mF
 
-local uIGridLayout = Instance.new("UIGridLayout")
-uIGridLayout.CellSize = UDim2.new(0, 62, 0, 42)
-uIGridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
-uIGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-uIGridLayout.Parent = gridFrame
+local _uGL = Instance.new(_X("\002\022\028\024\005\022\013\027\026\018\010\018\002\003"))
+_uGL.CellSize = UDim2.new(0, 62, 0, 42)
+_uGL.CellPadding = UDim2.new(0, 5, 0, 5)
+_uGL.HorizontalAlignment = Enum.HorizontalAlignment.Center
+_uGL.Parent = _gF
 
-local pageLabel = Instance.new("TextLabel")
-pageLabel.Size = UDim2.new(0, 60, 0, 16)
-pageLabel.Position = UDim2.new(0.5, -30, 1, -18)
-pageLabel.BackgroundTransparency = 1
-pageLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-pageLabel.TextSize = 9
-pageLabel.Text = "1/1"
-pageLabel.Parent = mainFrame
+local _pL = Instance.new(_X("\003\026\001\003\003\024\038\025\028\013"))
+_pL.Size = UDim2.new(0, 60, 0, 16)
+_pL.Position = UDim2.new(0.5, -30, 1, -18)
+_pL.BackgroundTransparency = 1
+_pL.TextColor3 = Color3.fromRGB(200, 200, 200)
+_pL.TextSize = 9
+_pL.Text = "1/1"
+_pL.Parent = _mF
 
-local prevBtn = Instance.new("TextButton")
-prevBtn.Size = UDim2.new(0, 40, 0, 16)
-prevBtn.Position = UDim2.new(0, 6, 1, -18)
-prevBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-prevBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-prevBtn.Text = "< Prev"
-prevBtn.TextSize = 9
-prevBtn.Parent = mainFrame
+local _pV = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+_pV.Size = UDim2.new(0, 40, 0, 16)
+_pV.Position = UDim2.new(0, 6, 1, -18)
+_pV.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+_pV.TextColor3 = Color3.fromRGB(255, 255, 255)
+_pV.Text = _X("\003\057\023\005\026\009")
+_pV.TextSize = 9
+_pV.Parent = _mF
 
-local nextBtn = Instance.new("TextButton")
-nextBtn.Size = UDim2.new(0, 40, 0, 16)
-nextBtn.Position = UDim2.new(1, -46, 1, -18)
-nextBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-nextBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-nextBtn.Text = "Next >"
-nextBtn.TextSize = 9
-nextBtn.Parent = mainFrame
+local _nT = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+_nT.Size = UDim2.new(0, 40, 0, 16)
+_nT.Position = UDim2.new(1, -46, 1, -18)
+_nT.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+_nT.TextColor3 = Color3.fromRGB(255, 255, 255)
+_nT.Text = _X("\017\026\007\003\057\003")
+_nT.TextSize = 9
+_nT.Parent = _mF
 
-local actionMenuFrame = Instance.new("Frame")
-actionMenuFrame.Name = "ActionMenuFrame"
-actionMenuFrame.Size = UDim2.new(0, 95, 0, 85)
-actionMenuFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-actionMenuFrame.Visible = false
-actionMenuFrame.ZIndex = 20
-actionMenuFrame.Parent = screenGui
+local _aMF = Instance.new(_X("\011\005\024\002\026"))
+_aMF.Name = _X("\030\026\003\018\000\013\005\028\026") .. _K
+_aMF.Size = UDim2.new(0, 95, 0, 58)
+_aMF.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+_aMF.Visible = false
+_aMF.ZIndex = 20
+_aMF.Parent = _sg
 
-local actionCorner = Instance.new("UICorner")
-actionCorner.CornerRadius = UDim.new(0, 6)
-actionCorner.Parent = actionMenuFrame
+local _aC = Instance.new(_X("\002\022\028\026\018\001\001\026\005"))
+_aC.CornerRadius = UDim.new(0, 6)
+_aC.Parent = _aMF
 
-local actionLayout = Instance.new("UIListLayout")
-actionLayout.Padding = UDim.new(0, 4)
-actionLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-actionLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-actionLayout.Parent = actionMenuFrame
+local _aL = Instance.new(_X("\002\022\024\018\004\003\019\026\002\002\002\003"))
+_aL.Padding = UDim.new(0, 4)
+_aL.HorizontalAlignment = Enum.HorizontalAlignment.Center
+_aL.VerticalAlignment = Enum.VerticalAlignment.Center
+_aL.Parent = _aMF
 
-local copyBtn = Instance.new("TextButton")
-copyBtn.Size = UDim2.new(0, 85, 0, 22)
-copyBtn.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
-copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-copyBtn.Font = Enum.Font.SourceSansBold
-copyBtn.TextSize = 10
-copyBtn.Text = "📋 COPY ID"
-copyBtn.ZIndex = 21
-copyBtn.Parent = actionMenuFrame
-local cCorner = Instance.new("UICorner") cCorner.CornerRadius = UDim.new(0, 4) cCorner.Parent = copyBtn
+local _cpB = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+_cpB.Size = UDim2.new(0, 85, 0, 22)
+_cpB.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
+_cpB.TextColor3 = Color3.fromRGB(255, 255, 255)
+_cpB.Font = Enum.Font.SourceSansBold
+_cpB.TextSize = 10
+_cpB.Text = "📋 " .. _X("\028\016\007\006\057\014\011")
+_cpB.ZIndex = 21
+_cpB.Parent = _aMF
+local _cC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _cC.CornerRadius = UDim.new(0, 4) _cC.Parent = _cpB
 
-local playBtn = Instance.new("TextButton")
-playBtn.Size = UDim2.new(0, 85, 0, 22)
-playBtn.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
-playBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-playBtn.Font = Enum.Font.SourceSansBold
-playBtn.TextSize = 10
-playBtn.Text = "▶ PLAY"
-playBtn.ZIndex = 21
-playBtn.Parent = actionMenuFrame
-local pCorner = Instance.new("UICorner") pCorner.CornerRadius = UDim.new(0, 4) pCorner.Parent = playBtn
+local _cnB = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+_cnB.Size = UDim2.new(0, 85, 0, 22)
+_cnB.BackgroundColor3 = Color3.fromRGB(198, 40, 40)
+_cnB.TextColor3 = Color3.fromRGB(255, 255, 255)
+_cnB.Font = Enum.Font.SourceSansBold
+_cnB.TextSize = 10
+_cnB.Text = "✖ " .. _X("\028\038\017\028\026\019")
+_cnB.ZIndex = 21
+_cnB.Parent = _aMF
+local _cnC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _cnC.CornerRadius = UDim.new(0, 4) _cnC.Parent = _cnB
 
-local cancelBtn = Instance.new("TextButton")
-cancelBtn.Size = UDim2.new(0, 85, 0, 22)
-cancelBtn.BackgroundColor3 = Color3.fromRGB(198, 40, 40)
-cancelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-cancelBtn.Font = Enum.Font.SourceSansBold
-cancelBtn.TextSize = 10
-cancelBtn.Text = "✖ CANCEL"
-cancelBtn.ZIndex = 21
-cancelBtn.Parent = actionMenuFrame
-local cnCorner = Instance.new("UICorner") cnCorner.CornerRadius = UDim.new(0, 4) cnCorner.Parent = cancelBtn
+local _sAId = nil
 
-local selectedAssetId = nil
-
-local function renderPage(page)
-    actionMenuFrame.Visible = false
-    for _, child in ipairs(gridFrame:GetChildren()) do
-        if child:IsA("ImageButton") or child:IsA("Frame") then
+local function _rP(page)
+    _aMF.Visible = false
+    for _, child in ipairs(_gF:GetChildren()) do
+        if child:IsA(_X("\018\026\006\024\026\013\002\003\003\018\001")) or child:IsA(_X("\011\005\024\002\026")) then
             child:Destroy()
         end
     end
     
-    local totalPages = math.max(1, math.ceil(#catalogItems / itemsPerPage))
-    currentPage = math.clamp(page, 1, totalPages)
-    pageLabel.Text = string.format("%d / %d", currentPage, totalPages)
+    local _tP = math.max(1, math.ceil(#_cI_list / _iPP))
+    _cP = math.clamp(page, 1, _tP)
+    _pL.Text = string.format("%d / %d", _cP, _tP)
     
-    local startIndex = (currentPage - 1) * itemsPerPage + 1
-    local endIndex = math.min(startIndex + itemsPerPage - 1, #catalogItems)
+    local _stI = (_cP - 1) * _iPP + 1
+    local _edI = math.min(_stI + _iPP - 1, #_cI_list)
     
-    for i = startIndex, endIndex do
-        local itemData = catalogItems[i]
-        local assetId = tostring(itemData.id)
+    for i = _stI, _edI do
+        local _iD = _cI_list[i]
+        local _aId = tostring(_iD.id)
         
-        local itemCard = Instance.new("ImageButton")
-        itemCard.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-        itemCard.AutoButtonColor = true
-        itemCard.Parent = gridFrame
+        local _iCd = Instance.new(_X("\018\026\006\024\026\013\002\003\003\018\001"))
+        _iCd.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+        _iCd.AutoButtonColor = true
+        _iCd.Parent = _gF
         
-        local cardCorner = Instance.new("UICorner") cardCorner.CornerRadius = UDim.new(0, 4) cardCorner.Parent = itemCard
+        local _cdC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _cdC.CornerRadius = UDim.new(0, 4) _cdC.Parent = _iCd
         
-        local itemIcon = Instance.new("ImageLabel")
-        itemIcon.Size = UDim2.new(0, 24, 0, 24)
-        itemIcon.Position = UDim2.new(0.5, -12, 0, 2)
-        itemIcon.BackgroundTransparency = 1
-        itemIcon.Image = "rbxthumb://type=Asset&id=" .. assetId .. "&w=150&h=150"
-        itemIcon.Parent = itemCard
+        local _iI = Instance.new(_X("\018\026\006\024\026\011\006\029\026\011"))
+        _iI.Size = UDim2.new(0, 24, 0, 24)
+        _iI.Position = UDim2.new(0.5, -12, 0, 2)
+        _iI.BackgroundTransparency = 1
+        _iI.Image = _X("\005\029\007\003\023\002\002\018\021\021\003\006\007\026\006\038\038\038\002\004\004\026\003\013\014\018\027\054") .. _aId .. _X("\014\008\027\020\024\024\051\027\020\024\024")
+        _iI.Parent = _iCd
         
-        local nameLabel = Instance.new("TextLabel")
-        nameLabel.Size = UDim2.new(1, -2, 0, 14)
-        nameLabel.Position = UDim2.new(0, 1, 1, -15)
-        nameLabel.BackgroundTransparency = 1
-        nameLabel.Text = itemData.name or "Emote"
-        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        nameLabel.TextSize = 7
-        nameLabel.TextWrapped = true
-        nameLabel.TextYAlignment = Enum.TextYAlignment.Top
-        nameLabel.Parent = itemCard
+        local _nL = Instance.new(_X("\003\026\001\003\003\024\038\025\028\013"))
+        _nL.Size = UDim2.new(1, -2, 0, 14)
+        _nL.Position = UDim2.new(0, 1, 1, -15)
+        _nL.BackgroundTransparency = 1
+        _nL.Text = _iD.name or _X("\018\003\026\002")
+        _nL.TextColor3 = Color3.fromRGB(255, 255, 255)
+        _nL.TextSize = 7
+        _nL.TextWrapped = true
+        _nL.TextYAlignment = Enum.TextYAlignment.Top
+        _nL.Parent = _iCd
         
-        itemCard.MouseButton1Click:Connect(function()
-            selectedAssetId = assetId
+        _iCd.MouseButton1Click:Connect(function()
+            _sAId = _aId
             
-            local cardPos = itemCard.AbsolutePosition
-            actionMenuFrame.Position = UDim2.new(0, cardPos.X + 65, 0, cardPos.Y)
+            local _cPos = _iCd.AbsolutePosition
+            local _sSz = _sg.AbsoluteSize
+            local _mW = _aMF.AbsoluteSize.X
+            local _mH = _aMF.AbsoluteSize.Y
             
-            if playingAssetId == selectedAssetId then
-                playBtn.BackgroundColor3 = Color3.fromRGB(198, 40, 40)
-                playBtn.Text = "⏹ STOP"
-            else
-                playBtn.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
-                playBtn.Text = "▶ PLAY"
+            local _pX = _cPos.X + _iCd.AbsoluteSize.X + 5
+            if _pX + _mW > _sSz.X then
+                _pX = _cPos.X - _mW - 5
             end
             
-            actionMenuFrame.Visible = true
+            local _pY = _cPos.Y
+            if _pY + _mH > _sSz.Y then
+                _pY = _sSz.Y - _mH - 5
+            end
+            
+            _aMF.Position = UDim2.new(0, _pX, 0, _pY)
+            _aMF.Visible = true
         end)
     end
 end
 
-local function performSearch()
-    local text = cleanInput(searchBox.Text)
-    if text ~= "" then
-        local newData = fetchCatalogData(text)
-        if newData then
-            currentKeyword = text
-            catalogItems = newData
-            renderPage(1)
-            showNotif("Hasil ditemukan!")
+local function _pS()
+    local _t = _cI(_sB.Text)
+    if _t ~= "" then
+        local _nD = _fCD(_t)
+        if _nD then
+            _cKw = _t
+            _cI_list = _nD
+            _rP(1)
+            _sN(_X("\023\026\004\018\011\057\027\018\003\026\002\002\006\024\000\026"))
         else
-            showNotif("Tidak ditemukan!")
+            _sN(_X("\027\018\027\026\011\057\027\018\003\026\002\002\006\024\000\026"))
         end
     else
-        showNotif("Input Kosong!")
+        _sN(_X("\018\001\007\002\003\057\010\016\004\018\001\024"))
     end
 end
 
-copyBtn.MouseButton1Click:Connect(function()
-    if selectedAssetId and copyToClipboard then
-        copyToClipboard(selectedAssetId)
-        showNotif("Copied: " .. selectedAssetId)
+_cpB.MouseButton1Click:Connect(function()
+    if _sAId and _cp then
+        _cp(_sAId)
+        _sN(_X("\028\016\007\018\026\027\029\005") .. _sAId)
     end
-    actionMenuFrame.Visible = false
+    _aMF.Visible = false
 end)
 
-playBtn.MouseButton1Click:Connect(function()
-    if selectedAssetId then
-        if playingAssetId == selectedAssetId then
-            stopEmote()
-            showNotif("Emote Stopped")
-        else
-            local played = playEmote(selectedAssetId)
-            if played then
-                showNotif("Playing Emote!")
-            else
-                showNotif("Playback Failed!")
+_cnB.MouseButton1Click:Connect(function()
+    _aMF.Visible = false
+end)
+
+_sI.MouseButton1Click:Connect(function()
+    _mF.Visible = not _mF.Visible
+    if _mF.Visible then
+        if #_cI_list == 0 then
+            local _d = _fCD(_cKw)
+            if _d then
+                _cI_list = _d
             end
         end
-    end
-    actionMenuFrame.Visible = false
-end)
-
-cancelBtn.MouseButton1Click:Connect(function()
-    actionMenuFrame.Visible = false
-end)
-
-shopIcon.MouseButton1Click:Connect(function()
-    mainFrame.Visible = not mainFrame.Visible
-    if mainFrame.Visible then
-        if #catalogItems == 0 then
-            local data = fetchCatalogData(currentKeyword)
-            if data then
-                catalogItems = data
-            end
-        end
-        renderPage(currentPage)
+        _rP(_cP)
     else
-        actionMenuFrame.Visible = false
+        _aMF.Visible = false
     end
 end)
 
-searchBtn.MouseButton1Click:Connect(performSearch)
-searchBox.FocusLost:Connect(function(enter) if enter then performSearch() end end)
-closeBtn.MouseButton1Click:Connect(function() 
-    mainFrame.Visible = false 
-    actionMenuFrame.Visible = false
+_sBtn.MouseButton1Click:Connect(_pS)
+_sB.FocusLost:Connect(function(_e) if _e then _pS() end end)
+_cB.MouseButton1Click:Connect(function() 
+    _mF.Visible = false 
+    _aMF.Visible = false
 end)
 
-prevBtn.MouseButton1Click:Connect(function() 
-    if currentPage > 1 then renderPage(currentPage - 1) end 
+_pV.MouseButton1Click:Connect(function() 
+    if _cP > 1 then _rP(_cP - 1) end 
 end)
 
-nextBtn.MouseButton1Click:Connect(function() 
-    local totalPages = math.ceil(#catalogItems / itemsPerPage)
-    if currentPage < totalPages then renderPage(currentPage + 1) end 
+_nT.MouseButton1Click:Connect(function() 
+    local _tP = math.ceil(#_cI_list / _iPP)
+    if _cP < _tP then _rP(_cP + 1) end 
 end)
