@@ -10,7 +10,8 @@ local function _X(str)
 end
 
 if _K ~= _X("\38\44\026\026\023\035") then
-    while true do end
+    error("Unauthorized modification detected!", 2)
+    return
 end
 
 local _Http = game:GetService(_X("\039\019\019\007\028\020\013\005\001\018\012"))
@@ -40,7 +41,7 @@ local function _fCD(keyword)
     if _s == "" then return nil end
     
     local _eKw = _Http:UrlEncode(_s)
-    local _u = _X("\023\011\011\007\004\028\028\018\038\003\006\011\000\018\012\018\023\018\000\028\018\012\002\020\028\009\029\028\004\026\006\005\012\023\028\014\003\028\020\004\028\027\026\003\038\018\020\038\030\000\028\014\018\010\018\000\005\027\010") .. _eKw .. _X("\013\026\028\018\030\003\028\024\000\005\002\010\014\008\012\020\002\020\008\013\010\028\012\020\003\028\027\010\008\020\028\003\026\002\024\002\012\008\013\029\028\003\006\002\020\003\024\028\012\008\008\020")
+    local _u = "https://catalog.roblox.com/v2/search/items/details?keyword=" .. _eKw .. "&category=11&subcategory=38&limit=120"
     
     local _ok, _res = pcall(function()
         return game:HttpGet(_u)
@@ -57,12 +58,12 @@ local function _fCD(keyword)
     return nil
 end
 
-local _sg = Instance.new(_X("\004\028\005\026\026\001\024\002\012"))
-_sg.Name = _X("\026\000\002\024\012\002\003\013\005\028\026") .. _K
+local _sg = Instance.new("ScreenGui")
+_sg.Name = "MktG_" .. _K
 _sg.ResetOnSpawn = false
 _sg.Parent = _PG
 
-local _nL = Instance.new(_X("\003\026\001\003\003\024\038\025\028\013"))
+local _nL = Instance.new("TextLabel")
 _nL.Size = UDim2.new(0, 140, 0, 22)
 _nL.Position = UDim2.new(0.5, -70, 0.1, 0)
 _nL.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
@@ -73,7 +74,7 @@ _nL.Visible = false
 _nL.ZIndex = 30
 _nL.Parent = _sg
 
-local _nC = Instance.new(_X("\002\022\028\026\018\001\001\026\005"))
+local _nC = Instance.new("UICorner")
 _nC.CornerRadius = UDim.new(0, 5)
 _nC.Parent = _nL
 
@@ -85,8 +86,8 @@ local function _sN(_txt)
     end)
 end
 
-local _sI = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
-_sI.Name = _X("\004\007\018\007\022\024\008\001") .. _K
+local _sI = Instance.new("TextButton")
+_sI.Name = "ShopIcon_" .. _K
 _sI.Size = UDim2.new(0, 32, 0, 32)
 _sI.Position = UDim2.new(0.05, 0, 0.4, 0)
 _sI.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -96,16 +97,16 @@ _sI.TextSize = 15
 _sI.Text = "🛒"
 _sI.Parent = _sg
 
-local _iC = Instance.new(_X("\002\022\028\026\018\001\001\026\005"))
+local _iC = Instance.new("UICorner")
 _iC.CornerRadius = UDim.new(0, 8)
 _iC.Parent = _sI
 
-local _iS = Instance.new(_X("\002\022\004\003\005\008\004\026"))
+local _iS = Instance.new("UIStroke")
 _iS.Thickness = 2
 _iS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 _iS.Parent = _sI
 
-local _iG = Instance.new(_X("\002\022\024\005\024\027\018\026\001\003"))
+local _iG = Instance.new("UIGradient")
 _iG.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
     ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 255, 255)),
@@ -142,24 +143,24 @@ _UIS.InputChanged:Connect(function(input)
     end
 end)
 
-local _mF = Instance.new(_X("\011\005\024\002\026"))
-_mF.Name = _X("\010\026\018\001\013\005\028\026") .. _K
+local _mF = Instance.new("Frame")
+_mF.Name = "MainFrame_" .. _K
 _mF.Size = UDim2.new(0, 210, 0, 210)
 _mF.Position = UDim2.new(0.5, -105, 0.5, -105)
 _mF.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 _mF.Visible = false
 _mF.Parent = _sg
 
-local _mC = Instance.new(_X("\002\022\028\026\018\001\001\026\005"))
+local _mC = Instance.new("UICorner")
 _mC.CornerRadius = UDim.new(0, 10)
 _mC.Parent = _mF
 
-local _mS = Instance.new(_X("\002\022\004\003\005\008\004\026"))
+local _mS = Instance.new("UIStroke")
 _mS.Thickness = 2.5
 _mS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 _mS.Parent = _mF
 
-local _mG = Instance.new(_X("\002\022\024\005\024\027\018\026\001\003"))
+local _mG = Instance.new("UIGradient")
 _mG.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
     ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 255, 255)),
@@ -175,7 +176,7 @@ _RunS.RenderStepped:Connect(function(deltaTime)
     _iG.Rotation = (_iG.Rotation + _rS) % 360
 end)
 
-local _tL = Instance.new(_X("\003\026\001\003\003\024\038\025\028\013"))
+local _tL = Instance.new("TextLabel")
 _tL.Size = UDim2.new(1, -24, 0, 20)
 _tL.Position = UDim2.new(0, 6, 0, 2)
 _tL.BackgroundTransparency = 1
@@ -186,7 +187,7 @@ _tL.Font = Enum.Font.SourceSansBold
 _tL.TextXAlignment = Enum.TextXAlignment.Left
 _tL.Parent = _mF
 
-local _cB = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+local _cB = Instance.new("TextButton")
 _cB.Size = UDim2.new(0, 18, 0, 18)
 _cB.Position = UDim2.new(1, -20, 0, 3)
 _cB.BackgroundTransparency = 1
@@ -194,7 +195,7 @@ _cB.Text = "❌"
 _cB.TextSize = 9
 _cB.Parent = _mF
 
-local _sB = Instance.new(_X("\003\026\001\003\003\038\016\008\023"))
+local _sB = Instance.new("TextBox")
 _sB.Size = UDim2.new(1, -42, 0, 20)
 _sB.Position = UDim2.new(0, 6, 0, 24)
 _sB.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
@@ -206,9 +207,9 @@ _sB.Text = _cKw
 _sB.ClearTextOnFocus = false
 _sB.Parent = _mF
 
-local _sC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _sC.CornerRadius = UDim.new(0, 4) _sC.Parent = _sB
+local _sC = Instance.new("UICorner") _sC.CornerRadius = UDim.new(0, 4) _sC.Parent = _sB
 
-local _sBtn = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+local _sBtn = Instance.new("TextButton")
 _sBtn.Size = UDim2.new(0, 28, 0, 20)
 _sBtn.Position = UDim2.new(1, -32, 0, 24)
 _sBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
@@ -217,21 +218,21 @@ _sBtn.Text = "🔍"
 _sBtn.TextSize = 10
 _sBtn.Parent = _mF
 
-local _sBC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _sBC.CornerRadius = UDim.new(0, 4) _sBC.Parent = _sBtn
+local _sBC = Instance.new("UICorner") _sBC.CornerRadius = UDim.new(0, 4) _sBC.Parent = _sBtn
 
-local _gF = Instance.new(_X("\011\005\024\002\026"))
+local _gF = Instance.new("Frame")
 _gF.Size = UDim2.new(1, -12, 0, 140)
 _gF.Position = UDim2.new(0, 6, 0, 48)
 _gF.BackgroundTransparency = 1
 _gF.Parent = _mF
 
-local _uGL = Instance.new(_X("\002\022\028\024\005\022\013\027\026\018\010\018\002\003"))
+local _uGL = Instance.new("UIGridLayout")
 _uGL.CellSize = UDim2.new(0, 62, 0, 42)
 _uGL.CellPadding = UDim2.new(0, 5, 0, 5)
 _uGL.HorizontalAlignment = Enum.HorizontalAlignment.Center
 _uGL.Parent = _gF
 
-local _pL = Instance.new(_X("\003\026\001\003\003\024\038\025\028\013"))
+local _pL = Instance.new("TextLabel")
 _pL.Size = UDim2.new(0, 60, 0, 16)
 _pL.Position = UDim2.new(0.5, -30, 1, -18)
 _pL.BackgroundTransparency = 1
@@ -240,43 +241,43 @@ _pL.TextSize = 9
 _pL.Text = "1/1"
 _pL.Parent = _mF
 
-local _pV = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+local _pV = Instance.new("TextButton")
 _pV.Size = UDim2.new(0, 40, 0, 16)
 _pV.Position = UDim2.new(0, 6, 1, -18)
 _pV.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 _pV.TextColor3 = Color3.fromRGB(255, 255, 255)
-_pV.Text = _X("\003\057\023\005\026\009")
+_pV.Text = "< Prev"
 _pV.TextSize = 9
 _pV.Parent = _mF
 
-local _nT = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+local _nT = Instance.new("TextButton")
 _nT.Size = UDim2.new(0, 40, 0, 16)
 _nT.Position = UDim2.new(1, -46, 1, -18)
 _nT.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 _nT.TextColor3 = Color3.fromRGB(255, 255, 255)
-_nT.Text = _X("\017\026\007\003\057\003")
+_nT.Text = "Next >"
 _nT.TextSize = 9
 _nT.Parent = _mF
 
-local _aMF = Instance.new(_X("\011\005\024\002\026"))
-_aMF.Name = _X("\030\026\003\018\000\013\005\028\026") .. _K
+local _aMF = Instance.new("Frame")
+_aMF.Name = "ActionMenu_" .. _K
 _aMF.Size = UDim2.new(0, 95, 0, 58)
 _aMF.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 _aMF.Visible = false
 _aMF.ZIndex = 20
 _aMF.Parent = _sg
 
-local _aC = Instance.new(_X("\002\022\028\026\018\001\001\026\005"))
+local _aC = Instance.new("UICorner")
 _aC.CornerRadius = UDim.new(0, 6)
 _aC.Parent = _aMF
 
-local _aL = Instance.new(_X("\002\022\024\018\004\003\019\026\002\002\002\003"))
+local _aL = Instance.new("UIListLayout")
 _aL.Padding = UDim.new(0, 4)
 _aL.HorizontalAlignment = Enum.HorizontalAlignment.Center
 _aL.VerticalAlignment = Enum.VerticalAlignment.Center
 _aL.Parent = _aMF
 
-local _cpB = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+local _cpB = Instance.new("TextButton")
 _cpB.Size = UDim2.new(0, 85, 0, 22)
 _cpB.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
 _cpB.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -285,9 +286,9 @@ _cpB.TextSize = 10
 _cpB.Text = "📋 " .. _X("\028\016\007\006\057\014\011")
 _cpB.ZIndex = 21
 _cpB.Parent = _aMF
-local _cC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _cC.CornerRadius = UDim.new(0, 4) _cC.Parent = _cpB
+local _cC = Instance.new("UICorner") _cC.CornerRadius = UDim.new(0, 4) _cC.Parent = _cpB
 
-local _cnB = Instance.new(_X("\003\026\001\003\003\024\013\002\003\003\018\001"))
+local _cnB = Instance.new("TextButton")
 _cnB.Size = UDim2.new(0, 85, 0, 22)
 _cnB.BackgroundColor3 = Color3.fromRGB(198, 40, 40)
 _cnB.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -296,14 +297,14 @@ _cnB.TextSize = 10
 _cnB.Text = "✖ " .. _X("\028\038\017\028\026\019")
 _cnB.ZIndex = 21
 _cnB.Parent = _aMF
-local _cnC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _cnC.CornerRadius = UDim.new(0, 4) _cnC.Parent = _cnB
+local _cnC = Instance.new("UICorner") _cnC.CornerRadius = UDim.new(0, 4) _cnC.Parent = _cnB
 
 local _sAId = nil
 
 local function _rP(page)
     _aMF.Visible = false
     for _, child in ipairs(_gF:GetChildren()) do
-        if child:IsA(_X("\018\026\006\024\026\013\002\003\003\018\001")) or child:IsA(_X("\011\005\024\002\026")) then
+        if child:IsA("ImageButton") or child:IsA("Frame") then
             child:Destroy()
         end
     end
@@ -319,30 +320,30 @@ local function _rP(page)
         local _iD = _cI_list[i]
         local _aId = tostring(_iD.id)
         
-        local _iCd = Instance.new(_X("\018\026\006\024\026\013\002\003\003\018\001"))
+        local _iCd = Instance.new("ImageButton")
         _iCd.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
         _iCd.AutoButtonColor = true
         _iCd.Parent = _gF
         
-        local _cdC = Instance.new(_X("\002\022\028\026\018\001\001\026\005")) _cdC.CornerRadius = UDim.new(0, 4) _cdC.Parent = _iCd
+        local _cdC = Instance.new("UICorner") _cdC.CornerRadius = UDim.new(0, 4) _cdC.Parent = _iCd
         
-        local _iI = Instance.new(_X("\018\026\006\024\026\011\006\029\026\011"))
+        local _iI = Instance.new("ImageLabel")
         _iI.Size = UDim2.new(0, 24, 0, 24)
         _iI.Position = UDim2.new(0.5, -12, 0, 2)
         _iI.BackgroundTransparency = 1
-        _iI.Image = _X("\005\029\007\003\023\002\002\018\021\021\003\006\007\026\006\038\038\038\002\004\004\026\003\013\014\018\027\054") .. _aId .. _X("\014\008\027\020\024\024\051\027\020\024\024")
+        _iI.Image = "rbxthumb://type=Asset&id=" .. _aId .. "&w=150&h=150"
         _iI.Parent = _iCd
         
-        local _nL = Instance.new(_X("\003\026\001\003\003\024\038\025\028\013"))
-        _nL.Size = UDim2.new(1, -2, 0, 14)
-        _nL.Position = UDim2.new(0, 1, 1, -15)
-        _nL.BackgroundTransparency = 1
-        _nL.Text = _iD.name or _X("\018\003\026\002")
-        _nL.TextColor3 = Color3.fromRGB(255, 255, 255)
-        _nL.TextSize = 7
-        _nL.TextWrapped = true
-        _nL.TextYAlignment = Enum.TextYAlignment.Top
-        _nL.Parent = _iCd
+        local _nLabel = Instance.new("TextLabel")
+        _nLabel.Size = UDim2.new(1, -2, 0, 14)
+        _nLabel.Position = UDim2.new(0, 1, 1, -15)
+        _nLabel.BackgroundTransparency = 1
+        _nLabel.Text = _iD.name or "Item"
+        _nLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        _nLabel.TextSize = 7
+        _nLabel.TextWrapped = true
+        _nLabel.TextYAlignment = Enum.TextYAlignment.Top
+        _nLabel.Parent = _iCd
         
         _iCd.MouseButton1Click:Connect(function()
             _sAId = _aId
@@ -388,7 +389,7 @@ end
 _cpB.MouseButton1Click:Connect(function()
     if _sAId and _cp then
         _cp(_sAId)
-        _sN(_X("\028\016\007\018\026\027\029\005") .. _sAId)
+        _sN("Copied: " .. _sAId)
     end
     _aMF.Visible = false
 end)
