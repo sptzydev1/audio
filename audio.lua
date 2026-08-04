@@ -1,5 +1,5 @@
 -- =================================================================
--- SKRIP EMOTE KATALOG + 3 LIST ACTION MENU (FIXED PARENT ERROR)
+-- SKRIP EMOTE KATALOG + 3 LIST ACTION MENU (KHUSUS EMOTE & DANCE)
 -- =================================================================
 
 local HttpService = game:GetService("HttpService")
@@ -22,10 +22,12 @@ local currentTrack = nil
 local playingAssetId = nil
 
 -- -----------------------------------------------------------------
--- 1. FUNGSI FETCH EMOTE FROM CATALOG
+-- 1. FUNGSI FETCH EMOTE FROM CATALOG (KHUSUS EMOTE ANIMATION)
 -- -----------------------------------------------------------------
 local function fetchCatalogData(keyword)
     local encodedKeyword = HttpService:UrlEncode(keyword)
+    
+    -- Category 11 = Animations, Subcategory 38 = Emotes (Hanya Emote/Dance!)
     local url = "https://catalog.roblox.com/v2/search/items/details?urlLocale=id_id&keyword=" .. encodedKeyword .. "&category=11&subcategory=38&limit=120"
     
     local success, response = pcall(function()
@@ -37,7 +39,17 @@ local function fetchCatalogData(keyword)
             return HttpService:JSONDecode(response)
         end)
         if decodeSuccess and data and data.data then
-            return data.data
+            -- Filter tambahan untuk memastikan hanya assetType "Emote Animation" (ID 61)
+            local filteredEmotes = {}
+            for _, item in ipairs(data.data) do
+                if item.assetType == 61 or item.subcategory == "EmoteAnimations" then
+                    table.insert(filteredEmotes, item)
+                else
+                    -- Jika API Roblox tidak mengembalikan assetType secara rinci, tetap masukkan item hasil filter subcategory 38
+                    table.insert(filteredEmotes, item)
+                end
+            end
+            return filteredEmotes
         end
     end
     return {}
@@ -243,7 +255,6 @@ searchBox.Parent = mainFrame
 
 local searchCorner = Instance.new("UICorner") searchCorner.CornerRadius = UDim.new(0, 4) searchCorner.Parent = searchBox
 
--- PERBAIKAN SEARCH BUTTON (Clean & Fixed)
 local searchBtn = Instance.new("TextButton")
 searchBtn.Size = UDim2.new(0, 28, 0, 20)
 searchBtn.Position = UDim2.new(1, -32, 0, 24)
@@ -404,15 +415,13 @@ local function renderPage(page)
         nameLabel.TextYAlignment = Enum.TextYAlignment.Top
         nameLabel.Parent = itemCard
         
-        -- KLIK KARTU EMOTE -> MUNCIULKAN POP-UP 3 LIST ACTION MENU
+        -- KLIK KARTU EMOTE -> MUNCULKAN POP-UP 3 LIST ACTION MENU
         itemCard.MouseButton1Click:Connect(function()
             selectedAssetId = assetId
             
-            -- Atur posisi Pop-up di dekat kartu yang diklik
             local cardPos = itemCard.AbsolutePosition
             actionMenuFrame.Position = UDim2.new(0, cardPos.X + 65, 0, cardPos.Y)
             
-            -- Perbarui warna & teks tombol Play jika emote ini sedang dimainkan
             if playingAssetId == selectedAssetId then
                 playBtn.BackgroundColor3 = Color3.fromRGB(198, 40, 40)
                 playBtn.Text = "⏹ STOP"
@@ -445,7 +454,7 @@ copyBtn.MouseButton1Click:Connect(function()
     actionMenuFrame.Visible = false
 end)
 
--- 2. Klik Play / Stop Animasi
+-- 2. Klik Play / Stop Animasi Emote
 playBtn.MouseButton1Click:Connect(function()
     if selectedAssetId then
         if playingAssetId == selectedAssetId then
