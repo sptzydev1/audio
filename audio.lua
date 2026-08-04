@@ -3,14 +3,6 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
-local function getRandomName()
-    local str = ""
-    for i = 1, 16 do
-        str = str .. string.char(math.random(97, 122))
-    end
-    return str
-end
-
 local function cleanInput(text)
     if not text then return "" end
     text = string.gsub(text, "^%s+", "")
@@ -37,7 +29,7 @@ local function fetchCatalogData(keyword)
     if sanitized == "" then return nil end
     
     local encodedKeyword = HttpService:UrlEncode(sanitized)
-    local url = "https://catalog.roblox.com/v1/search/items/details?Keyword=" .. encodedKeyword .. "&Limit=120"
+    local url = "https://catalog.roblox.com/v2/search/items/details?keyword=" .. encodedKeyword .. "&category=11&subcategory=38&limit=120"
     
     local success, response = pcall(function()
         return game:HttpGet(url)
@@ -87,14 +79,13 @@ local function playEmote(assetId)
 end
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = getRandomName()
+screenGui.Name = "EmoteTesterCatalogGui"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
 local notifLabel = Instance.new("TextLabel")
-notifLabel.Name = getRandomName()
-notifLabel.Size = UDim2.new(0, 150, 0, 22)
-notifLabel.Position = UDim2.new(0.5, -75, 0.1, 0)
+notifLabel.Size = UDim2.new(0, 140, 0, 22)
+notifLabel.Position = UDim2.new(0.5, -70, 0.1, 0)
 notifLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 notifLabel.TextColor3 = Color3.fromRGB(85, 255, 127)
 notifLabel.TextSize = 10
@@ -107,24 +98,23 @@ local notifCorner = Instance.new("UICorner")
 notifCorner.CornerRadius = UDim.new(0, 5)
 notifCorner.Parent = notifLabel
 
-local function showNotif(text, isError)
+local function showNotif(text)
     notifLabel.Text = text
-    notifLabel.TextColor3 = isError and Color3.fromRGB(255, 85, 85) or Color3.fromRGB(85, 255, 127)
     notifLabel.Visible = true
-    task.delay(1.5, function()
+    task.delay(1.2, function()
         notifLabel.Visible = false
     end)
 end
 
 local shopIcon = Instance.new("TextButton")
-shopIcon.Name = getRandomName()
+shopIcon.Name = "ShopIcon"
 shopIcon.Size = UDim2.new(0, 32, 0, 32)
 shopIcon.Position = UDim2.new(0.05, 0, 0.4, 0)
 shopIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 shopIcon.BackgroundTransparency = 0.6
 shopIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
 shopIcon.TextSize = 15
-shopIcon.Text = "🛒"
+shopIcon.Text = "🕺"
 shopIcon.Parent = screenGui
 
 local iconCorner = Instance.new("UICorner")
@@ -174,9 +164,9 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Name = getRandomName()
-mainFrame.Size = UDim2.new(0, 210, 0, 225)
-mainFrame.Position = UDim2.new(0.5, -105, 0.5, -112)
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 210, 0, 210)
+mainFrame.Position = UDim2.new(0.5, -105, 0.5, -105)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 mainFrame.Visible = false
 mainFrame.Parent = screenGui
@@ -207,11 +197,10 @@ RunService.RenderStepped:Connect(function(deltaTime)
 end)
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Name = getRandomName()
 titleLabel.Size = UDim2.new(1, -24, 0, 20)
 titleLabel.Position = UDim2.new(0, 6, 0, 2)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Marketplace"
+titleLabel.Text = "Emote Catalog"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextSize = 11
 titleLabel.Font = Enum.Font.SourceSansBold
@@ -219,7 +208,6 @@ titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = mainFrame
 
 local closeBtn = Instance.new("TextButton")
-closeBtn.Name = getRandomName()
 closeBtn.Size = UDim2.new(0, 18, 0, 18)
 closeBtn.Position = UDim2.new(1, -20, 0, 3)
 closeBtn.BackgroundTransparency = 1
@@ -228,12 +216,11 @@ closeBtn.TextSize = 9
 closeBtn.Parent = mainFrame
 
 local searchBox = Instance.new("TextBox")
-searchBox.Name = getRandomName()
 searchBox.Size = UDim2.new(1, -42, 0, 20)
 searchBox.Position = UDim2.new(0, 6, 0, 24)
 searchBox.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-searchBox.PlaceholderText = "Cari barang..."
+searchBox.PlaceholderText = "Cari emote..."
 searchBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 searchBox.TextSize = 10
 searchBox.Text = currentKeyword
@@ -243,7 +230,6 @@ searchBox.Parent = mainFrame
 local searchCorner = Instance.new("UICorner") searchCorner.CornerRadius = UDim.new(0, 4) searchCorner.Parent = searchBox
 
 local searchBtn = Instance.new("TextButton")
-searchBtn.Name = getRandomName()
 searchBtn.Size = UDim2.new(0, 28, 0, 20)
 searchBtn.Position = UDim2.new(1, -32, 0, 24)
 searchBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
@@ -255,7 +241,6 @@ searchBtn.Parent = mainFrame
 local searchBtnCorner = Instance.new("UICorner") searchBtnCorner.CornerRadius = UDim.new(0, 4) searchBtnCorner.Parent = searchBtn
 
 local gridFrame = Instance.new("Frame")
-gridFrame.Name = getRandomName()
 gridFrame.Size = UDim2.new(1, -12, 0, 140)
 gridFrame.Position = UDim2.new(0, 6, 0, 48)
 gridFrame.BackgroundTransparency = 1
@@ -268,9 +253,8 @@ uIGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 uIGridLayout.Parent = gridFrame
 
 local pageLabel = Instance.new("TextLabel")
-pageLabel.Name = getRandomName()
 pageLabel.Size = UDim2.new(0, 60, 0, 16)
-pageLabel.Position = UDim2.new(0.5, -30, 1, -30)
+pageLabel.Position = UDim2.new(0.5, -30, 1, -18)
 pageLabel.BackgroundTransparency = 1
 pageLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 pageLabel.TextSize = 9
@@ -278,9 +262,8 @@ pageLabel.Text = "1/1"
 pageLabel.Parent = mainFrame
 
 local prevBtn = Instance.new("TextButton")
-prevBtn.Name = getRandomName()
 prevBtn.Size = UDim2.new(0, 40, 0, 16)
-prevBtn.Position = UDim2.new(0, 6, 1, -30)
+prevBtn.Position = UDim2.new(0, 6, 1, -18)
 prevBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 prevBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 prevBtn.Text = "< Prev"
@@ -288,28 +271,16 @@ prevBtn.TextSize = 9
 prevBtn.Parent = mainFrame
 
 local nextBtn = Instance.new("TextButton")
-nextBtn.Name = getRandomName()
 nextBtn.Size = UDim2.new(0, 40, 0, 16)
-nextBtn.Position = UDim2.new(1, -46, 1, -30)
+nextBtn.Position = UDim2.new(1, -46, 1, -18)
 nextBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 nextBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 nextBtn.Text = "Next >"
 nextBtn.TextSize = 9
 nextBtn.Parent = mainFrame
 
-local copyrightLabel = Instance.new("TextLabel")
-copyrightLabel.Name = getRandomName()
-copyrightLabel.Size = UDim2.new(1, 0, 0, 12)
-copyrightLabel.Position = UDim2.new(0, 0, 1, -14)
-copyrightLabel.BackgroundTransparency = 1
-copyrightLabel.Text = "© IkyyXD"
-copyrightLabel.TextColor3 = Color3.fromRGB(120, 120, 140)
-copyrightLabel.TextSize = 8
-copyrightLabel.Font = Enum.Font.SourceSansItalic
-copyrightLabel.Parent = mainFrame
-
 local actionMenuFrame = Instance.new("Frame")
-actionMenuFrame.Name = getRandomName()
+actionMenuFrame.Name = "ActionMenuFrame"
 actionMenuFrame.Size = UDim2.new(0, 95, 0, 85)
 actionMenuFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 actionMenuFrame.Visible = false
@@ -327,7 +298,6 @@ actionLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 actionLayout.Parent = actionMenuFrame
 
 local copyBtn = Instance.new("TextButton")
-copyBtn.Name = getRandomName()
 copyBtn.Size = UDim2.new(0, 85, 0, 22)
 copyBtn.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
 copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -339,7 +309,6 @@ copyBtn.Parent = actionMenuFrame
 local cCorner = Instance.new("UICorner") cCorner.CornerRadius = UDim.new(0, 4) cCorner.Parent = copyBtn
 
 local playBtn = Instance.new("TextButton")
-playBtn.Name = getRandomName()
 playBtn.Size = UDim2.new(0, 85, 0, 22)
 playBtn.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
 playBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -351,7 +320,6 @@ playBtn.Parent = actionMenuFrame
 local pCorner = Instance.new("UICorner") pCorner.CornerRadius = UDim.new(0, 4) pCorner.Parent = playBtn
 
 local cancelBtn = Instance.new("TextButton")
-cancelBtn.Name = getRandomName()
 cancelBtn.Size = UDim2.new(0, 85, 0, 22)
 cancelBtn.BackgroundColor3 = Color3.fromRGB(198, 40, 40)
 cancelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -384,7 +352,6 @@ local function renderPage(page)
         local assetId = tostring(itemData.id)
         
         local itemCard = Instance.new("ImageButton")
-        itemCard.Name = getRandomName()
         itemCard.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
         itemCard.AutoButtonColor = true
         itemCard.Parent = gridFrame
@@ -392,7 +359,6 @@ local function renderPage(page)
         local cardCorner = Instance.new("UICorner") cardCorner.CornerRadius = UDim.new(0, 4) cardCorner.Parent = itemCard
         
         local itemIcon = Instance.new("ImageLabel")
-        itemIcon.Name = getRandomName()
         itemIcon.Size = UDim2.new(0, 24, 0, 24)
         itemIcon.Position = UDim2.new(0.5, -12, 0, 2)
         itemIcon.BackgroundTransparency = 1
@@ -400,11 +366,10 @@ local function renderPage(page)
         itemIcon.Parent = itemCard
         
         local nameLabel = Instance.new("TextLabel")
-        nameLabel.Name = getRandomName()
         nameLabel.Size = UDim2.new(1, -2, 0, 14)
         nameLabel.Position = UDim2.new(0, 1, 1, -15)
         nameLabel.BackgroundTransparency = 1
-        nameLabel.Text = itemData.name or "Item"
+        nameLabel.Text = itemData.name or "Emote"
         nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
         nameLabel.TextSize = 7
         nameLabel.TextWrapped = true
@@ -438,19 +403,19 @@ local function performSearch()
             currentKeyword = text
             catalogItems = newData
             renderPage(1)
-            showNotif("Found " .. #catalogItems .. " items", false)
+            showNotif("Hasil ditemukan!")
         else
-            showNotif("Tidak ditemukan!", true)
+            showNotif("Tidak ditemukan!")
         end
     else
-        showNotif("Input Kosong!", true)
+        showNotif("Input Kosong!")
     end
 end
 
 copyBtn.MouseButton1Click:Connect(function()
     if selectedAssetId and copyToClipboard then
         copyToClipboard(selectedAssetId)
-        showNotif("Copied: " .. selectedAssetId, false)
+        showNotif("Copied: " .. selectedAssetId)
     end
     actionMenuFrame.Visible = false
 end)
@@ -459,13 +424,13 @@ playBtn.MouseButton1Click:Connect(function()
     if selectedAssetId then
         if playingAssetId == selectedAssetId then
             stopEmote()
-            showNotif("Stopped", false)
+            showNotif("Emote Stopped")
         else
             local played = playEmote(selectedAssetId)
             if played then
-                showNotif("Playing!", false)
+                showNotif("Playing Emote!")
             else
-                showNotif("Failed!", true)
+                showNotif("Playback Failed!")
             end
         end
     end
