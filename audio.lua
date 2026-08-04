@@ -1,18 +1,25 @@
+-- =================================================================
+-- SKRIP KATALOG EXECUTOR ROBLOX (FITUR LENGKAP)
+-- =================================================================
+
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Detect fungsi Copy Clipboard dari Executor
+-- Deteksi Fungsi Copy Clipboard dari Berbagai Executor
 local copyToClipboard = setclipboard or toclipboard or set_clipboard or (syn and syn.write_clipboard)
 
+-- Variabel Data Utama
 local catalogItems = {}
 local currentPage = 1
 local itemsPerPage = 9 -- Format Grid 3x3
 local currentKeyword = "Taxi"
 
--- 1. FUNGSI AMBIL DATA KATALOG
+-- -----------------------------------------------------------------
+-- 1. FUNGSI AMBIL DATA KATALOG PUBLIC
+-- -----------------------------------------------------------------
 local function fetchCatalogData(keyword)
     local encodedKeyword = HttpService:UrlEncode(keyword)
     local url = "https://catalog.roblox.com/v2/search/items/details?urlLocale=id_id&keyword=" .. encodedKeyword .. "&taxonomy=ioNxAT977DFP2hMnAJbsbF&salesTypeFilter=1&limit=120"
@@ -32,14 +39,17 @@ local function fetchCatalogData(keyword)
     return {}
 end
 
--- 2. MEMBUAT GUI UTAMA (UKURAN DIPERKECIL: 270 x 360)
+-- -----------------------------------------------------------------
+-- 2. MEMBUAT GUI UTAMA
+-- -----------------------------------------------------------------
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MiniCatalogShopGui"
+screenGui.Name = "CompleteCatalogShopGui"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
--- Notification Label (Pesan Pop-up saat ID di-copy)
+-- Pop-Up Notifikasi
 local notifLabel = Instance.new("TextLabel")
+notifLabel.Name = "NotifLabel"
 notifLabel.Size = UDim2.new(0, 160, 0, 24)
 notifLabel.Position = UDim2.new(0.5, -80, 0.12, 0)
 notifLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -62,7 +72,7 @@ local function showNotif(text)
     end)
 end
 
--- Tombol Icon Toko (Bisa Digeser / Draggable)
+-- Tombol Icon Toko (Draggable)
 local shopIcon = Instance.new("TextButton")
 shopIcon.Name = "ShopIcon"
 shopIcon.Size = UDim2.new(0, 42, 0, 42)
@@ -77,7 +87,7 @@ local iconCorner = Instance.new("UICorner")
 iconCorner.CornerRadius = UDim.new(0, 10)
 iconCorner.Parent = shopIcon
 
--- Fitur Dragging Icon Toko
+-- Logic Dragging Icon Toko (Touch & Mouse)
 local dragging, dragInput, dragStart, startPos
 shopIcon.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -105,7 +115,7 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Main Frame (Kecil di Tengah Screen)
+-- Main Frame Modal (Ukuran Ringkas: 270 x 360)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 270, 0, 360)
@@ -118,7 +128,7 @@ local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 8)
 mainCorner.Parent = mainFrame
 
--- Title Bar & Close Button
+-- Title & Close Button
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(1, -30, 0, 30)
 titleLabel.Position = UDim2.new(0, 8, 0, 0)
@@ -138,7 +148,7 @@ closeBtn.Text = "❌"
 closeBtn.TextSize = 11
 closeBtn.Parent = mainFrame
 
--- FITUR SEARCH INPUT BAR
+-- Input Box Pencarian
 local searchBox = Instance.new("TextBox")
 searchBox.Size = UDim2.new(1, -55, 0, 24)
 searchBox.Position = UDim2.new(0, 8, 0, 32)
@@ -147,7 +157,7 @@ searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 searchBox.PlaceholderText = "Cari item..."
 searchBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 searchBox.TextSize = 12
-searchBox.Text = "Taxi"
+searchBox.Text = currentKeyword
 searchBox.ClearTextOnFocus = false
 searchBox.Parent = mainFrame
 
@@ -168,7 +178,7 @@ local searchBtnCorner = Instance.new("UICorner")
 searchBtnCorner.CornerRadius = UDim.new(0, 5)
 searchBtnCorner.Parent = searchBtn
 
--- Container Item (Grid 3x3)
+-- Grid Container (3x3 Items)
 local gridFrame = Instance.new("Frame")
 gridFrame.Size = UDim2.new(1, -16, 0, 255)
 gridFrame.Position = UDim2.new(0, 8, 0, 62)
@@ -181,7 +191,7 @@ uIGridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
 uIGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 uIGridLayout.Parent = gridFrame
 
--- Navigasi Halaman (Bottom Bar)
+-- Navigasi Halaman
 local pageLabel = Instance.new("TextLabel")
 pageLabel.Size = UDim2.new(0, 80, 0, 25)
 pageLabel.Position = UDim2.new(0.5, -40, 1, -30)
@@ -209,8 +219,11 @@ nextBtn.Text = "Next >"
 nextBtn.TextSize = 11
 nextBtn.Parent = mainFrame
 
--- 3. FUNGSI RENDER HALAMAN
+-- -----------------------------------------------------------------
+-- 3. LOGIKA RENDER & PENCARIAN
+-- -----------------------------------------------------------------
 local function renderPage(page)
+    -- Clean up kartu item sebelumnya
     for _, child in ipairs(gridFrame:GetChildren()) do
         if child:IsA("ImageButton") or child:IsA("Frame") then
             child:Destroy()
@@ -228,6 +241,7 @@ local function renderPage(page)
         local itemData = catalogItems[i]
         local assetId = tostring(itemData.id)
         
+        -- Frame Kartu Item (Sebagai Button)
         local itemCard = Instance.new("ImageButton")
         itemCard.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
         itemCard.AutoButtonColor = true
@@ -257,7 +271,7 @@ local function renderPage(page)
         nameLabel.TextYAlignment = Enum.TextYAlignment.Top
         nameLabel.Parent = itemCard
         
-        -- CLICK EVENT: COPY ID
+        -- EVENT KLIK: Auto Copy ID
         itemCard.MouseButton1Click:Connect(function()
             if copyToClipboard then
                 copyToClipboard(assetId)
@@ -269,7 +283,6 @@ local function renderPage(page)
     end
 end
 
--- FUNGSI UNTUK MELAKUKAN PENCARIAN
 local function performSearch()
     local text = searchBox.Text
     if text and text ~= "" then
@@ -279,7 +292,9 @@ local function performSearch()
     end
 end
 
+-- -----------------------------------------------------------------
 -- 4. EVENT LISTENERS
+-- -----------------------------------------------------------------
 searchBtn.MouseButton1Click:Connect(performSearch)
 searchBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
