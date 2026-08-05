@@ -6,8 +6,18 @@
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local MarketplaceService = game:GetService("MarketplaceService")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
+
+-- Mendapatkan Nama Game
+local gameName = "Unknown Game"
+pcall(function()
+	local info = MarketplaceService:GetProductInfo(game.PlaceId)
+	if info and info.Name then
+		gameName = info.Name
+	end
+end)
 
 -- Hapus GUI lama jika ada
 local oldGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("IkyyCopyToolMini")
@@ -105,7 +115,7 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KIRI: PROFILE MINI
+-- 3. PAGE KIRI: LIST FITUR MINI
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
 PageKiri.Name = "PageKiri"
@@ -122,90 +132,22 @@ local TitleKiri = Instance.new("TextLabel")
 TitleKiri.Size = UDim2.new(1, 0, 0, 18)
 TitleKiri.Position = UDim2.new(0, 0, 0, 2)
 TitleKiri.BackgroundTransparency = 1
-TitleKiri.Text = "PROFILE AKUN"
+TitleKiri.Text = "LIST FITUR"
 TitleKiri.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKiri.TextSize = 10
 TitleKiri.Font = Enum.Font.SourceSansBold
 TitleKiri.Parent = PageKiri
 
--- Avatar Mini
-local AvatarImg = Instance.new("ImageLabel")
-AvatarImg.Size = UDim2.new(0, 32, 0, 32)
-AvatarImg.Position = UDim2.new(0, 6, 0, 22)
-AvatarImg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-AvatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
-AvatarImg.Parent = PageKiri
-
-local UICornerAvatar = Instance.new("UICorner")
-UICornerAvatar.CornerRadius = UDim.new(1, 0)
-UICornerAvatar.Parent = AvatarImg
-
-local ProfileDetails = Instance.new("TextLabel")
-ProfileDetails.Size = UDim2.new(1, -44, 0, 32)
-ProfileDetails.Position = UDim2.new(0, 42, 0, 22)
-ProfileDetails.BackgroundTransparency = 1
-ProfileDetails.TextXAlignment = Enum.TextXAlignment.Left
-ProfileDetails.TextYAlignment = Enum.TextYAlignment.Center
-ProfileDetails.Text = "👤 " .. LocalPlayer.DisplayName .. "\n🗓️ " .. LocalPlayer.AccountAge .. " Hari"
-ProfileDetails.TextColor3 = Color3.fromRGB(220, 220, 220)
-ProfileDetails.TextSize = 9
-ProfileDetails.Font = Enum.Font.SourceSans
-ProfileDetails.Parent = PageKiri
-
-local InfoList = Instance.new("TextLabel")
-InfoList.Size = UDim2.new(1, -12, 0, 115)
-InfoList.Position = UDim2.new(0, 6, 0, 60)
-InfoList.BackgroundTransparency = 1
-InfoList.TextXAlignment = Enum.TextXAlignment.Left
-InfoList.TextYAlignment = Enum.TextYAlignment.Top
-InfoList.TextColor3 = Color3.fromRGB(180, 180, 180)
-InfoList.TextSize = 9
-InfoList.Font = Enum.Font.SourceSans
-InfoList.Text = "👥 Friends: Loading...\n⭐ Followers: Loading...\n📌 Following: Loading..."
-InfoList.Parent = PageKiri
-
-task.spawn(function()
-	local friendsCount, followersCount, followingCount = "0", "0", "0"
-	pcall(function() friendsCount = tostring(#Players:GetFriendsAsync(LocalPlayer.UserId):GetCurrentPage()) end)
-	pcall(function() followersCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followers/count")).count) end)
-	pcall(function() followingCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followings/count")).count) end)
-	InfoList.Text = "👥 Friends: " .. friendsCount .. "\n⭐ Followers: " .. followersCount .. "\n📌 Following: " .. followingCount
-end)
-
---------------------------------------------------
--- 4. PAGE TENGAH: LIST FITUR MINI
---------------------------------------------------
-local PageTengah = Instance.new("Frame")
-PageTengah.Name = "PageTengah"
-PageTengah.Size = UDim2.new(0, 142, 1, -22)
-PageTengah.Position = UDim2.new(0, 154, 0, 6)
-PageTengah.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-PageTengah.Parent = MainFrame
-
-local UICornerTengah = Instance.new("UICorner")
-UICornerTengah.CornerRadius = UDim.new(0, 6)
-UICornerTengah.Parent = PageTengah
-
-local TitleTengah = Instance.new("TextLabel")
-TitleTengah.Size = UDim2.new(1, 0, 0, 18)
-TitleTengah.Position = UDim2.new(0, 0, 0, 2)
-TitleTengah.BackgroundTransparency = 1
-TitleTengah.Text = "LIST FITUR"
-TitleTengah.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleTengah.TextSize = 10
-TitleTengah.Font = Enum.Font.SourceSansBold
-TitleTengah.Parent = PageTengah
-
 local ListContainer = Instance.new("Frame")
 ListContainer.Size = UDim2.new(1, -12, 1, -26)
 ListContainer.Position = UDim2.new(0, 6, 0, 22)
 ListContainer.BackgroundTransparency = 1
-ListContainer.Parent = PageTengah
+ListContainer.Parent = PageKiri
 
-local UIListTengah = Instance.new("UIListLayout")
-UIListTengah.SortOrder = Enum.SortOrder.LayoutOrder
-UIListTengah.Padding = UDim.new(0, 3)
-UIListTengah.Parent = ListContainer
+local UIListKiri = Instance.new("UIListLayout")
+UIListKiri.SortOrder = Enum.SortOrder.LayoutOrder
+UIListKiri.Padding = UDim.new(0, 3)
+UIListKiri.Parent = ListContainer
 
 local function createFeatureLabel(text, order)
 	local lbl = Instance.new("TextLabel")
@@ -226,12 +168,79 @@ end
 
 createFeatureLabel("• Multi-Select Click", 1)
 createFeatureLabel("• Copy Data (JSON)", 2)
-createFeatureLabel("• Clipboard Sync", 3)
+createFeatureLabel("• Save File JSON", 3)
 createFeatureLabel("• Realtime Paste", 4)
 createFeatureLabel("• Anti-Lag Mini GUI", 5)
 
 --------------------------------------------------
--- 5. PAGE KANAN: KONTROL & CONSOLE MINI
+-- 4. PAGE TENGAH: PROFILE MINI
+--------------------------------------------------
+local PageTengah = Instance.new("Frame")
+PageTengah.Name = "PageTengah"
+PageTengah.Size = UDim2.new(0, 142, 1, -22)
+PageTengah.Position = UDim2.new(0, 154, 0, 6)
+PageTengah.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+PageTengah.Parent = MainFrame
+
+local UICornerTengah = Instance.new("UICorner")
+UICornerTengah.CornerRadius = UDim.new(0, 6)
+UICornerTengah.Parent = PageTengah
+
+local TitleTengah = Instance.new("TextLabel")
+TitleTengah.Size = UDim2.new(1, 0, 0, 18)
+TitleTengah.Position = UDim2.new(0, 0, 0, 2)
+TitleTengah.BackgroundTransparency = 1
+TitleTengah.Text = "PROFILE AKUN"
+TitleTengah.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleTengah.TextSize = 10
+TitleTengah.Font = Enum.Font.SourceSansBold
+TitleTengah.Parent = PageTengah
+
+local AvatarImg = Instance.new("ImageLabel")
+AvatarImg.Size = UDim2.new(0, 32, 0, 32)
+AvatarImg.Position = UDim2.new(0, 6, 0, 22)
+AvatarImg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+AvatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
+AvatarImg.Parent = PageTengah
+
+local UICornerAvatar = Instance.new("UICorner")
+UICornerAvatar.CornerRadius = UDim.new(1, 0)
+UICornerAvatar.Parent = AvatarImg
+
+local ProfileDetails = Instance.new("TextLabel")
+ProfileDetails.Size = UDim2.new(1, -44, 0, 32)
+ProfileDetails.Position = UDim2.new(0, 42, 0, 22)
+ProfileDetails.BackgroundTransparency = 1
+ProfileDetails.TextXAlignment = Enum.TextXAlignment.Left
+ProfileDetails.TextYAlignment = Enum.TextYAlignment.Center
+ProfileDetails.Text = "👤 " .. LocalPlayer.DisplayName .. "\n🗓️ " .. LocalPlayer.AccountAge .. " Hari"
+ProfileDetails.TextColor3 = Color3.fromRGB(220, 220, 220)
+ProfileDetails.TextSize = 9
+ProfileDetails.Font = Enum.Font.SourceSans
+ProfileDetails.Parent = PageTengah
+
+local InfoList = Instance.new("TextLabel")
+InfoList.Size = UDim2.new(1, -12, 0, 115)
+InfoList.Position = UDim2.new(0, 6, 0, 60)
+InfoList.BackgroundTransparency = 1
+InfoList.TextXAlignment = Enum.TextXAlignment.Left
+InfoList.TextYAlignment = Enum.TextYAlignment.Top
+InfoList.TextColor3 = Color3.fromRGB(180, 180, 180)
+InfoList.TextSize = 9
+InfoList.Font = Enum.Font.SourceSans
+InfoList.Text = "👥 Friends: Loading...\n⭐ Followers: Loading...\n📌 Following: Loading..."
+InfoList.Parent = PageTengah
+
+task.spawn(function()
+	local friendsCount, followersCount, followingCount = "0", "0", "0"
+	pcall(function() friendsCount = tostring(#Players:GetFriendsAsync(LocalPlayer.UserId):GetCurrentPage()) end)
+	pcall(function() followersCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followers/count")).count) end)
+	pcall(function() followingCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followings/count")).count) end)
+	InfoList.Text = "👥 Friends: " .. friendsCount .. "\n⭐ Followers: " .. followersCount .. "\n📌 Following: " .. followingCount
+end)
+
+--------------------------------------------------
+-- 5. PAGE KANAN: KONTROL, CONSOLE, & LIST HASIL
 --------------------------------------------------
 local PageKanan = Instance.new("Frame")
 PageKanan.Name = "PageKanan"
@@ -248,28 +257,27 @@ local TitleKanan = Instance.new("TextLabel")
 TitleKanan.Size = UDim2.new(1, 0, 0, 18)
 TitleKanan.Position = UDim2.new(0, 0, 0, 2)
 TitleKanan.BackgroundTransparency = 1
-TitleKanan.Text = "KONTROL & LOG"
+TitleKanan.Text = "KONTROL & RESULT"
 TitleKanan.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKanan.TextSize = 10
 TitleKanan.Font = Enum.Font.SourceSansBold
 TitleKanan.Parent = PageKanan
 
--- Container Button Mini
 local BtnContainer = Instance.new("Frame")
-BtnContainer.Size = UDim2.new(1, -12, 0, 95)
-BtnContainer.Position = UDim2.new(0, 6, 0, 22)
+BtnContainer.Size = UDim2.new(1, -12, 0, 85)
+BtnContainer.Position = UDim2.new(0, 6, 0, 20)
 BtnContainer.BackgroundTransparency = 1
 BtnContainer.Parent = PageKanan
 
 local UIListKanan = Instance.new("UIListLayout")
 UIListKanan.SortOrder = Enum.SortOrder.LayoutOrder
-UIListKanan.Padding = UDim.new(0, 3)
+UIListKanan.Padding = UDim.new(0, 2)
 UIListKanan.Parent = BtnContainer
 
 local function createActionButton(name, text, order)
 	local btn = Instance.new("TextButton")
 	btn.Name = name
-	btn.Size = UDim2.new(1, 0, 0, 16)
+	btn.Size = UDim2.new(1, 0, 0, 15)
 	btn.LayoutOrder = order
 	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	btn.Text = text
@@ -287,14 +295,14 @@ end
 local ToggleCopyBtn    = createActionButton("ToggleCopyBtn", "Copy Feature: OFF", 1)
 local SelectModeBtn    = createActionButton("SelectModeBtn", "Mouse Mode: OFF", 2)
 local ClearBtn         = createActionButton("ClearBtn", "Reset Selection", 3)
-local SaveClipboardBtn = createActionButton("SaveClipboardBtn", "Copy to Clipboard", 4)
+local SaveClipboardBtn = createActionButton("SaveClipboardBtn", "Save JSON File", 4)
 local PasteBtn         = createActionButton("PasteBtn", "Paste Part", 5)
 
--- Console Mini Frame (Ukuran Super Ringkas)
+-- Console & List Hasil Area
 local ConsoleFrame = Instance.new("ScrollingFrame")
 ConsoleFrame.Name = "ConsoleFrame"
-ConsoleFrame.Size = UDim2.new(1, -12, 0, 60)
-ConsoleFrame.Position = UDim2.new(0, 6, 0, 120)
+ConsoleFrame.Size = UDim2.new(1, -12, 0, 75)
+ConsoleFrame.Position = UDim2.new(0, 6, 0, 108)
 ConsoleFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 ConsoleFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ConsoleFrame.ScrollBarThickness = 2
@@ -309,7 +317,6 @@ ConsoleList.SortOrder = Enum.SortOrder.LayoutOrder
 ConsoleList.Padding = UDim.new(0, 1)
 ConsoleList.Parent = ConsoleFrame
 
--- Logger Console Realtime
 local logOrder = 0
 local function writeConsole(msg, isError)
 	logOrder = logOrder + 1
@@ -337,7 +344,7 @@ end
 writeConsole("Console ready.", false)
 
 --------------------------------------------------
--- 6. LOGIKA MULTI SELECT & PASTE SYSTEM
+-- 6. LOGIKA MULTI SELECT & PASTE SYSTEM (FILE JSON)
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
@@ -435,6 +442,7 @@ local function serializeParts()
 	return data
 end
 
+-- SAVE LOGIC: Menyimpan ke file JSON dan menampilkan nama game di List
 SaveClipboardBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then return end
 	local data = serializeParts()
@@ -444,26 +452,35 @@ SaveClipboardBtn.MouseButton1Click:Connect(function()
 	end
 	
 	local jsonStr = HttpService:JSONEncode(data)
+	local fileName = "copied_parts.json"
+	
+	if writefile then
+		writefile(fileName, jsonStr)
+		writeConsole("Saved to file JSON!")
+	end
+	
 	if setclipboard then
 		setclipboard(jsonStr)
-		writeConsole("Disalin: " .. #data .. " Part")
-	else
-		writeConsole("No clipboard support", true)
 	end
+	
+	-- Menampilkan Nama Game di List Kanan
+	writeConsole("[SAVE]: " .. gameName .. " (" .. #data .. " Parts)")
 end)
 
+-- PASTE LOGIC: Membaca dari file JSON dan menampilkan nama game di List
 PasteBtn.MouseButton1Click:Connect(function()
 	local jsonStr = nil
+	local fileName = "copied_parts.json"
 	
-	if readfile and pcall(function() jsonStr = readfile("copied_parts.json") end) then
-		writeConsole("Membaca File...")
+	if readfile and pcall(function() jsonStr = readfile(fileName) end) then
+		writeConsole("Reading JSON file...")
 	elseif getclipboard then
 		jsonStr = getclipboard()
-		writeConsole("Membaca Clipboard...")
+		writeConsole("Reading Clipboard...")
 	end
 	
 	if not jsonStr or jsonStr == "" then
-		writeConsole("JSON Kosong!", true)
+		writeConsole("JSON File Empty!", true)
 		return
 	end
 	
@@ -472,12 +489,13 @@ PasteBtn.MouseButton1Click:Connect(function()
 	end)
 	
 	if not success or type(data) ~= "table" then
-		writeConsole("JSON Error!", true)
+		writeConsole("JSON Corrupted!", true)
 		return
 	end
 	
+	local folderName = "Pasted_" .. math.random(100, 999)
 	local folder = Instance.new("Folder")
-	folder.Name = "PastedParts_" .. math.random(100, 999)
+	folder.Name = folderName
 	folder.Parent = workspace
 	
 	local count = 0
@@ -496,6 +514,8 @@ PasteBtn.MouseButton1Click:Connect(function()
 	end
 	
 	writeConsole("Sukses Tempel " .. count .. " Part!")
+	-- Menampilkan Nama Game di List Kanan
+	writeConsole("[PASTE]: " .. gameName .. " (" .. count .. " Parts)")
 end)
 
 writeConsole("Mini GUI loaded by IkyyXD")
