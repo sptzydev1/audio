@@ -11,7 +11,7 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
 -- Mendapatkan Nama Game
-local gameName = "Unknown Game"
+local gameName = "Map Item"
 pcall(function()
 	local info = MarketplaceService:GetProductInfo(game.PlaceId)
 	if info and info.Name then
@@ -166,11 +166,11 @@ local function createFeatureLabel(text, order)
 	return lbl
 end
 
-createFeatureLabel("• Multi-Select Click", 1)
-createFeatureLabel("• Copy Data (JSON)", 2)
-createFeatureLabel("• Save File JSON", 3)
-createFeatureLabel("• Realtime Paste", 4)
-createFeatureLabel("• Anti-Lag Mini GUI", 5)
+createFeatureLabel("• Multi-Select Object", 1)
+createFeatureLabel("• Auto Save Storage", 2)
+createFeatureLabel("• Quick Load & Paste", 3)
+createFeatureLabel("• Precise Position", 4)
+createFeatureLabel("• Anti-Lag System", 5)
 
 --------------------------------------------------
 -- 4. PAGE TENGAH: PROFILE MINI
@@ -240,7 +240,7 @@ task.spawn(function()
 end)
 
 --------------------------------------------------
--- 5. PAGE KANAN: KONTROL, CONSOLE, & LIST HASIL
+-- 5. PAGE KANAN: KONTROL, LIST & DROPDOWN MENU
 --------------------------------------------------
 local PageKanan = Instance.new("Frame")
 PageKanan.Name = "PageKanan"
@@ -254,14 +254,29 @@ UICornerKanan.CornerRadius = UDim.new(0, 6)
 UICornerKanan.Parent = PageKanan
 
 local TitleKanan = Instance.new("TextLabel")
-TitleKanan.Size = UDim2.new(1, 0, 0, 18)
+TitleKanan.Size = UDim2.new(1, -24, 0, 18)
 TitleKanan.Position = UDim2.new(0, 0, 0, 2)
 TitleKanan.BackgroundTransparency = 1
-TitleKanan.Text = "KONTROL & RESULT"
+TitleKanan.Text = "DATA SAVED"
 TitleKanan.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKanan.TextSize = 10
 TitleKanan.Font = Enum.Font.SourceSansBold
 TitleKanan.Parent = PageKanan
+
+-- Tombol Titik 3 Header (Select All / Multi Delete)
+local HeaderMenuBtn = Instance.new("TextButton")
+HeaderMenuBtn.Size = UDim2.new(0, 16, 0, 16)
+HeaderMenuBtn.Position = UDim2.new(1, -20, 0, 3)
+HeaderMenuBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+HeaderMenuBtn.Text = "⋮"
+HeaderMenuBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+HeaderMenuBtn.TextSize = 10
+HeaderMenuBtn.Font = Enum.Font.SourceSansBold
+HeaderMenuBtn.Parent = PageKanan
+
+local UICornerHeaderBtn = Instance.new("UICorner")
+UICornerHeaderBtn.CornerRadius = UDim.new(0, 3)
+UICornerHeaderBtn.Parent = HeaderMenuBtn
 
 local BtnContainer = Instance.new("Frame")
 BtnContainer.Size = UDim2.new(1, -12, 0, 85)
@@ -292,96 +307,90 @@ local function createActionButton(name, text, order)
 	return btn
 end
 
-local ToggleCopyBtn    = createActionButton("ToggleCopyBtn", "Copy Feature: OFF", 1)
-local SelectModeBtn    = createActionButton("SelectModeBtn", "Mouse Mode: OFF", 2)
-local ClearBtn         = createActionButton("ClearBtn", "Reset Selection", 3)
-local SaveClipboardBtn = createActionButton("SaveClipboardBtn", "Save JSON File", 4)
-local PasteBtn         = createActionButton("PasteBtn", "Paste Part", 5)
+local ToggleCopyBtn = createActionButton("ToggleCopyBtn", "Copy Mode: OFF", 1)
+local SelectModeBtn = createActionButton("SelectModeBtn", "Mouse Click: OFF", 2)
+local ClearBtn      = createActionButton("ClearBtn", "Reset Selection", 3)
+local SaveBtn       = createActionButton("SaveBtn", "Save Data", 4)
+local PasteBtn      = createActionButton("PasteBtn", "Paste Selected", 5)
 
--- Console & List Hasil Area
-local ConsoleFrame = Instance.new("ScrollingFrame")
-ConsoleFrame.Name = "ConsoleFrame"
-ConsoleFrame.Size = UDim2.new(1, -12, 0, 75)
-ConsoleFrame.Position = UDim2.new(0, 6, 0, 108)
-ConsoleFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-ConsoleFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-ConsoleFrame.ScrollBarThickness = 2
-ConsoleFrame.Parent = PageKanan
+-- Scroll Container
+local ResultFrame = Instance.new("ScrollingFrame")
+ResultFrame.Name = "ResultFrame"
+ResultFrame.Size = UDim2.new(1, -12, 0, 75)
+ResultFrame.Position = UDim2.new(0, 6, 0, 108)
+ResultFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+ResultFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ResultFrame.ScrollBarThickness = 2
+ResultFrame.Parent = PageKanan
 
-local UICornerConsole = Instance.new("UICorner")
-UICornerConsole.CornerRadius = UDim.new(0, 4)
-UICornerConsole.Parent = ConsoleFrame
+local UICornerResult = Instance.new("UICorner")
+UICornerResult.CornerRadius = UDim.new(0, 4)
+UICornerResult.Parent = ResultFrame
 
-local ConsoleList = Instance.new("UIListLayout")
-ConsoleList.SortOrder = Enum.SortOrder.LayoutOrder
-ConsoleList.Padding = UDim.new(0, 1)
-ConsoleList.Parent = ConsoleFrame
+local ResultListLayout = Instance.new("UIListLayout")
+ResultListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ResultListLayout.Padding = UDim.new(0, 2)
+ResultListLayout.Parent = ResultFrame
 
-local logOrder = 0
-local function writeConsole(msg, isError)
-	logOrder = logOrder + 1
-	local logLabel = Instance.new("TextLabel")
-	logLabel.Size = UDim2.new(1, -4, 0, 11)
-	logLabel.LayoutOrder = logOrder
-	logLabel.BackgroundTransparency = 1
-	logLabel.TextXAlignment = Enum.TextXAlignment.Left
-	logLabel.Text = "> " .. tostring(msg)
-	logLabel.TextColor3 = isError and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(180, 255, 180)
-	logLabel.TextSize = 8
-	logLabel.Font = Enum.Font.Code
-	logLabel.Parent = ConsoleFrame
-	
-	ConsoleFrame.CanvasSize = UDim2.new(0, 0, 0, ConsoleList.AbsoluteContentSize.Y)
-	ConsoleFrame.CanvasPosition = Vector2.new(0, ConsoleFrame.CanvasSize.Y.Offset)
-	
-	if isError then
-		warn("[IkyyXD Log] " .. msg)
-	else
-		print("[IkyyXD Log] " .. msg)
+-- Overlay Frame Global untuk Dropdown Menu
+local DropdownOverlay = Instance.new("Frame")
+DropdownOverlay.Name = "DropdownOverlay"
+DropdownOverlay.Size = UDim2.new(1, 0, 1, 0)
+DropdownOverlay.BackgroundTransparency = 1
+DropdownOverlay.Visible = false
+DropdownOverlay.ZIndex = 10
+DropdownOverlay.Parent = PageKanan
+
+local function closeAllDropdowns()
+	DropdownOverlay.Visible = false
+	for _, child in ipairs(DropdownOverlay:GetChildren()) do
+		child:Destroy()
 	end
 end
 
-writeConsole("Console ready.", false)
-
 --------------------------------------------------
--- 6. LOGIKA MULTI SELECT & PASTE SYSTEM (FILE JSON)
+-- 6. LOGIKA SYSTEM (SELEKSI, DROPDOWN & HAPUS)
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
 local selectedParts = {}
 local highlights = {}
+local savedStorage = {}
+local selectedListIndex = nil
+local multiSelectedMap = {}
+local listButtons = {}
+
+local function saveStorageToFile()
+	if writefile then
+		pcall(function()
+			writefile("saved_build_data.dat", HttpService:JSONEncode(savedStorage))
+		end)
+	end
+end
 
 ToggleCopyBtn.MouseButton1Click:Connect(function()
 	isCopyEnabled = not isCopyEnabled
 	if isCopyEnabled then
-		ToggleCopyBtn.Text = "Copy Feature: ON"
+		ToggleCopyBtn.Text = "Copy Mode: ON"
 		ToggleCopyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		writeConsole("Fitur Copy ON.")
 	else
 		isSelecting = false
-		SelectModeBtn.Text = "Mouse Mode: OFF"
+		SelectModeBtn.Text = "Mouse Click: OFF"
 		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		ToggleCopyBtn.Text = "Copy Feature: OFF"
+		ToggleCopyBtn.Text = "Copy Mode: OFF"
 		ToggleCopyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		writeConsole("Fitur Copy OFF.")
 	end
 end)
 
 SelectModeBtn.MouseButton1Click:Connect(function()
-	if not isCopyEnabled then
-		writeConsole("Aktifkan Copy Dulu!", true)
-		return
-	end
-	
+	if not isCopyEnabled then return end
 	isSelecting = not isSelecting
 	if isSelecting then
-		SelectModeBtn.Text = "Mouse Mode: ON"
+		SelectModeBtn.Text = "Mouse Click: ON"
 		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(50, 80, 120)
-		writeConsole("Mode Mouse ON.")
 	else
-		SelectModeBtn.Text = "Mouse Mode: OFF"
+		SelectModeBtn.Text = "Mouse Click: OFF"
 		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		writeConsole("Mode Mouse OFF.")
 	end
 end)
 
@@ -396,10 +405,8 @@ Mouse.Button1Down:Connect(function()
 				highlights[target]:Destroy()
 				highlights[target] = nil
 			end
-			writeConsole("Batal: " .. target.Name)
 		else
 			selectedParts[target] = true
-			
 			local hl = Instance.new("Highlight")
 			hl.Adornee = target
 			hl.FillColor = Color3.fromRGB(255, 255, 255)
@@ -407,8 +414,6 @@ Mouse.Button1Down:Connect(function()
 			hl.OutlineColor = Color3.fromRGB(0, 0, 0)
 			hl.Parent = target
 			highlights[target] = hl
-			
-			writeConsole("Dipilih: " .. target.Name)
 		end
 	end
 end)
@@ -419,7 +424,6 @@ ClearBtn.MouseButton1Click:Connect(function()
 	end
 	selectedParts = {}
 	highlights = {}
-	writeConsole("Reset pilihan.")
 end)
 
 local function serializeParts()
@@ -433,7 +437,7 @@ local function serializeParts()
 				Color = {part.Color.R, part.Color.G, part.Color.B},
 				Material = part.Material.Name,
 				Transparency = part.Transparency,
-				Anchored = true,
+				Anchored = part.Anchored,
 				CanCollide = part.CanCollide,
 				CFrame = {part.CFrame:GetComponents()}
 			})
@@ -442,64 +446,204 @@ local function serializeParts()
 	return data
 end
 
--- SAVE LOGIC: Menyimpan ke file JSON dan menampilkan nama game di List
-SaveClipboardBtn.MouseButton1Click:Connect(function()
-	if not isCopyEnabled then return end
-	local data = serializeParts()
-	if #data == 0 then
-		writeConsole("Part Kosong!", true)
+-- Refresh UI List Hasil
+local function refreshResultList()
+	closeAllDropdowns()
+	for _, btn in ipairs(listButtons) do
+		btn:Destroy()
+	end
+	listButtons = {}
+
+	for idx, itemData in ipairs(savedStorage) do
+		local isMultiSelected = multiSelectedMap[idx]
+		local isSingleSelected = (selectedListIndex == idx)
+
+		local itemFrame = Instance.new("Frame")
+		itemFrame.Size = UDim2.new(1, -4, 0, 16)
+		itemFrame.LayoutOrder = idx
+		itemFrame.BackgroundColor3 = isMultiSelected and Color3.fromRGB(80, 50, 50) 
+			or (isSingleSelected and Color3.fromRGB(60, 90, 130) or Color3.fromRGB(25, 25, 25))
+		itemFrame.Parent = ResultFrame
+
+		local cornerFrame = Instance.new("UICorner")
+		cornerFrame.CornerRadius = UDim.new(0, 3)
+		cornerFrame.Parent = itemFrame
+
+		-- Tombol Titik 3 di Sudut Kiri/Kanan Item
+		local itemMenuBtn = Instance.new("TextButton")
+		itemMenuBtn.Size = UDim2.new(0, 14, 1, 0)
+		itemMenuBtn.Position = UDim2.new(0, 2, 0, 0)
+		itemMenuBtn.BackgroundTransparency = 1
+		itemMenuBtn.Text = "⋮"
+		itemMenuBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+		itemMenuBtn.TextSize = 10
+		itemMenuBtn.Font = Enum.Font.SourceSansBold
+		itemMenuBtn.ZIndex = 2
+		itemMenuBtn.Parent = itemFrame
+
+		-- Tombol Utama Item
+		local itemBtn = Instance.new("TextButton")
+		itemBtn.Size = UDim2.new(1, -18, 1, 0)
+		itemBtn.Position = UDim2.new(0, 18, 0, 0)
+		itemBtn.BackgroundTransparency = 1
+		itemBtn.Text = idx .. ". " .. itemData.Title .. " (" .. #itemData.Parts .. ")"
+		itemBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+		itemBtn.TextXAlignment = Enum.TextXAlignment.Left
+		itemBtn.TextSize = 8
+		itemBtn.Font = Enum.Font.SourceSans
+		itemBtn.Parent = itemFrame
+
+		-- Klik Item untuk Memilih
+		itemBtn.MouseButton1Click:Connect(function()
+			if next(multiSelectedMap) then
+				multiSelectedMap[idx] = not multiSelectedMap[idx] or nil
+			else
+				selectedListIndex = idx
+			end
+			refreshResultList()
+		end)
+
+		-- Popup Dropdown Menu untuk 1 Item (Hapus)
+		itemMenuBtn.MouseButton1Click:Connect(function()
+			closeAllDropdowns()
+			DropdownOverlay.Visible = true
+
+			local popMenu = Instance.new("Frame")
+			popMenu.Size = UDim2.new(0, 60, 0, 18)
+			popMenu.Position = UDim2.new(0, 20, 0, math.clamp(itemFrame.AbsolutePosition.Y - ResultFrame.AbsolutePosition.Y + 110, 10, 180))
+			popMenu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+			popMenu.ZIndex = 11
+			popMenu.Parent = DropdownOverlay
+
+			local popCorner = Instance.new("UICorner")
+			popCorner.CornerRadius = UDim.new(0, 3)
+			popCorner.Parent = popMenu
+
+			local delBtn = Instance.new("TextButton")
+			delBtn.Size = UDim2.new(1, 0, 1, 0)
+			delBtn.BackgroundTransparency = 1
+			delBtn.Text = "🗑️ Hapus"
+			delBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+			delBtn.TextSize = 8
+			delBtn.Font = Enum.Font.SourceSansBold
+			delBtn.ZIndex = 12
+			delBtn.Parent = popMenu
+
+			delBtn.MouseButton1Click:Connect(function()
+				table.remove(savedStorage, idx)
+				if selectedListIndex == idx then selectedListIndex = nil end
+				multiSelectedMap[idx] = nil
+				saveStorageToFile()
+				refreshResultList()
+			end)
+		end)
+
+		table.insert(listButtons, itemFrame)
+	end
+
+	ResultFrame.CanvasSize = UDim2.new(0, 0, 0, ResultListLayout.AbsoluteContentSize.Y)
+end
+
+-- Popup Header Dropdown Menu (Select All / Multi Delete)
+HeaderMenuBtn.MouseButton1Click:Connect(function()
+	if DropdownOverlay.Visible then
+		closeAllDropdowns()
 		return
 	end
-	
-	local jsonStr = HttpService:JSONEncode(data)
-	local fileName = "copied_parts.json"
-	
-	if writefile then
-		writefile(fileName, jsonStr)
-		writeConsole("Saved to file JSON!")
-	end
-	
-	if setclipboard then
-		setclipboard(jsonStr)
-	end
-	
-	-- Menampilkan Nama Game di List Kanan
-	writeConsole("[SAVE]: " .. gameName .. " (" .. #data .. " Parts)")
+	closeAllDropdowns()
+	DropdownOverlay.Visible = true
+
+	local menuFrame = Instance.new("Frame")
+	menuFrame.Size = UDim2.new(0, 85, 0, 38)
+	menuFrame.Position = UDim2.new(1, -90, 0, 20)
+	menuFrame.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+	menuFrame.ZIndex = 11
+	menuFrame.Parent = DropdownOverlay
+
+	local menuCorner = Instance.new("UICorner")
+	menuCorner.CornerRadius = UDim.new(0, 4)
+	menuCorner.Parent = menuFrame
+
+	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 1)
+	layout.Parent = menuFrame
+
+	local selectAllBtn = Instance.new("TextButton")
+	selectAllBtn.Size = UDim2.new(1, 0, 0, 18)
+	selectAllBtn.BackgroundTransparency = 1
+	selectAllBtn.Text = "☑️ Select All"
+	selectAllBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+	selectAllBtn.TextSize = 8
+	selectAllBtn.Font = Enum.Font.SourceSans
+	selectAllBtn.ZIndex = 12
+	selectAllBtn.Parent = menuFrame
+
+	local deleteSelectedBtn = Instance.new("TextButton")
+	deleteSelectedBtn.Size = UDim2.new(1, 0, 0, 18)
+	deleteSelectedBtn.BackgroundTransparency = 1
+	deleteSelectedBtn.Text = "🗑️ Hapus Terpilih"
+	deleteSelectedBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+	deleteSelectedBtn.TextSize = 8
+	deleteSelectedBtn.Font = Enum.Font.SourceSansBold
+	deleteSelectedBtn.ZIndex = 12
+	deleteSelectedBtn.Parent = menuFrame
+
+	selectAllBtn.MouseButton1Click:Connect(function()
+		for i = 1, #savedStorage do
+			multiSelectedMap[i] = true
+		end
+		refreshResultList()
+	end)
+
+	deleteSelectedBtn.MouseButton1Click:Connect(function()
+		local newStorage = {}
+		for i, data in ipairs(savedStorage) do
+			if not multiSelectedMap[i] then
+				table.insert(newStorage, data)
+			end
+		end
+		savedStorage = newStorage
+		multiSelectedMap = {}
+		selectedListIndex = nil
+		saveStorageToFile()
+		refreshResultList()
+	end)
 end)
 
--- PASTE LOGIC: Membaca dari file JSON dan menampilkan nama game di List
-PasteBtn.MouseButton1Click:Connect(function()
-	local jsonStr = nil
-	local fileName = "copied_parts.json"
-	
-	if readfile and pcall(function() jsonStr = readfile(fileName) end) then
-		writeConsole("Reading JSON file...")
-	elseif getclipboard then
-		jsonStr = getclipboard()
-		writeConsole("Reading Clipboard...")
+-- Menutupi Dropdown jika Area Lain Diklik
+DropdownOverlay.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		closeAllDropdowns()
 	end
-	
-	if not jsonStr or jsonStr == "" then
-		writeConsole("JSON File Empty!", true)
-		return
-	end
-	
-	local success, data = pcall(function()
-		return HttpService:JSONDecode(jsonStr)
-	end)
-	
-	if not success or type(data) ~= "table" then
-		writeConsole("JSON Corrupted!", true)
-		return
-	end
-	
-	local folderName = "Pasted_" .. math.random(100, 999)
+end)
+
+-- Save Data
+SaveBtn.MouseButton1Click:Connect(function()
+	if not isCopyEnabled then return end
+	local partsData = serializeParts()
+	if #partsData == 0 then return end
+
+	local payload = {
+		Title = gameName,
+		Parts = partsData
+	}
+
+	table.insert(savedStorage, payload)
+	selectedListIndex = #savedStorage
+	saveStorageToFile()
+	refreshResultList()
+end)
+
+-- Paste Data
+local function executePaste(dataList)
+	if not dataList or #dataList == 0 then return end
+
 	local folder = Instance.new("Folder")
-	folder.Name = folderName
+	folder.Name = "Pasted_" .. math.random(100, 999)
 	folder.Parent = workspace
-	
-	local count = 0
-	for _, item in ipairs(data) do
+
+	for _, item in ipairs(dataList) do
 		local newPart = Instance.new(item.ClassName or "Part")
 		newPart.Name = item.Name or "PastedPart"
 		newPart.Size = Vector3.new(unpack(item.Size))
@@ -510,12 +654,23 @@ PasteBtn.MouseButton1Click:Connect(function()
 		newPart.CanCollide = item.CanCollide
 		newPart.CFrame = CFrame.new(unpack(item.CFrame))
 		newPart.Parent = folder
-		count = count + 1
 	end
-	
-	writeConsole("Sukses Tempel " .. count .. " Part!")
-	-- Menampilkan Nama Game di List Kanan
-	writeConsole("[PASTE]: " .. gameName .. " (" .. count .. " Parts)")
+end
+
+PasteBtn.MouseButton1Click:Connect(function()
+	if selectedListIndex and savedStorage[selectedListIndex] then
+		executePaste(savedStorage[selectedListIndex].Parts)
+	end
 end)
 
-writeConsole("Mini GUI loaded by IkyyXD")
+-- Auto Load File Data
+if readfile and isfile and isfile("saved_build_data.dat") then
+	pcall(function()
+		local content = readfile("saved_build_data.dat")
+		local decoded = HttpService:JSONDecode(content)
+		if type(decoded) == "table" then
+			savedStorage = decoded
+			refreshResultList()
+		end
+	end)
+end
