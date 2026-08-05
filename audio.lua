@@ -53,11 +53,11 @@ UIStrokeIcon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStrokeIcon.Thickness = 1.5
 UIStrokeIcon.Parent = ToggleButton
 
--- Main Frame UKURAN MINI (Lebar: 460px, Tinggi: 210px)
+-- Main Frame UKURAN MINI (Lebar: 460px, Tinggi: 220px)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 460, 0, 210)
-MainFrame.Position = UDim2.new(0.5, -230, 0.5, -105)
+MainFrame.Size = UDim2.new(0, 460, 0, 220)
+MainFrame.Position = UDim2.new(0.5, -230, 0.5, -110)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -168,9 +168,9 @@ end
 
 createFeatureLabel("• Multi-Select Object", 1)
 createFeatureLabel("• Auto Save Storage", 2)
-createFeatureLabel("• Quick Load & Paste", 3)
+createFeatureLabel("• Direct Click Paste", 3)
 createFeatureLabel("• Precise Position", 4)
-createFeatureLabel("• Anti-Lag System", 5)
+createFeatureLabel("• Console Live Log", 5)
 
 --------------------------------------------------
 -- 4. PAGE TENGAH: PROFILE MINI
@@ -240,7 +240,7 @@ task.spawn(function()
 end)
 
 --------------------------------------------------
--- 5. PAGE KANAN: KONTROL, LIST & DROPDOWN MENU
+-- 5. PAGE KANAN: KONTROL, LIST & CONSOLE LOG
 --------------------------------------------------
 local PageKanan = Instance.new("Frame")
 PageKanan.Name = "PageKanan"
@@ -263,7 +263,7 @@ TitleKanan.TextSize = 10
 TitleKanan.Font = Enum.Font.SourceSansBold
 TitleKanan.Parent = PageKanan
 
--- Tombol Titik 3 Header (Select All / Multi Delete)
+-- Tombol Titik 3 Header
 local HeaderMenuBtn = Instance.new("TextButton")
 HeaderMenuBtn.Size = UDim2.new(0, 16, 0, 16)
 HeaderMenuBtn.Position = UDim2.new(1, -20, 0, 3)
@@ -279,7 +279,7 @@ UICornerHeaderBtn.CornerRadius = UDim.new(0, 3)
 UICornerHeaderBtn.Parent = HeaderMenuBtn
 
 local BtnContainer = Instance.new("Frame")
-BtnContainer.Size = UDim2.new(1, -12, 0, 85)
+BtnContainer.Size = UDim2.new(1, -12, 0, 68)
 BtnContainer.Position = UDim2.new(0, 6, 0, 20)
 BtnContainer.BackgroundTransparency = 1
 BtnContainer.Parent = PageKanan
@@ -311,13 +311,12 @@ local ToggleCopyBtn = createActionButton("ToggleCopyBtn", "Copy Mode: OFF", 1)
 local SelectModeBtn = createActionButton("SelectModeBtn", "Mouse Click: OFF", 2)
 local ClearBtn      = createActionButton("ClearBtn", "Reset Selection", 3)
 local SaveBtn       = createActionButton("SaveBtn", "Save Data", 4)
-local PasteBtn      = createActionButton("PasteBtn", "Paste Selected", 5)
 
--- Scroll Container
+-- Scroll Container List Hasil
 local ResultFrame = Instance.new("ScrollingFrame")
 ResultFrame.Name = "ResultFrame"
-ResultFrame.Size = UDim2.new(1, -12, 0, 75)
-ResultFrame.Position = UDim2.new(0, 6, 0, 108)
+ResultFrame.Size = UDim2.new(1, -12, 0, 60)
+ResultFrame.Position = UDim2.new(0, 6, 0, 90)
 ResultFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 ResultFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ResultFrame.ScrollBarThickness = 2
@@ -331,6 +330,25 @@ local ResultListLayout = Instance.new("UIListLayout")
 ResultListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ResultListLayout.Padding = UDim.new(0, 2)
 ResultListLayout.Parent = ResultFrame
+
+-- Console Log Box (Menampilkan status copy/paste)
+local ConsoleLog = Instance.new("TextLabel")
+ConsoleLog.Name = "ConsoleLog"
+ConsoleLog.Size = UDim2.new(1, -12, 0, 32)
+ConsoleLog.Position = UDim2.new(0, 6, 0, 154)
+ConsoleLog.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
+ConsoleLog.Text = "> System Ready..."
+ConsoleLog.TextColor3 = Color3.fromRGB(150, 255, 150)
+ConsoleLog.TextSize = 8
+ConsoleLog.Font = Enum.Font.Code
+ConsoleLog.TextXAlignment = Enum.TextXAlignment.Left
+ConsoleLog.TextYAlignment = Enum.TextYAlignment.Top
+ConsoleLog.TextWrapped = true
+ConsoleLog.Parent = PageKanan
+
+local UICornerConsole = Instance.new("UICorner")
+UICornerConsole.CornerRadius = UDim.new(0, 4)
+UICornerConsole.Parent = ConsoleLog
 
 -- Overlay Frame Global untuk Dropdown Menu
 local DropdownOverlay = Instance.new("Frame")
@@ -349,14 +367,13 @@ local function closeAllDropdowns()
 end
 
 --------------------------------------------------
--- 6. LOGIKA SYSTEM (SELEKSI, DROPDOWN & HAPUS)
+-- 6. LOGIKA SYSTEM (SELEKSI, LOADING & LOGGING)
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
 local selectedParts = {}
 local highlights = {}
 local savedStorage = {}
-local selectedListIndex = nil
 local multiSelectedMap = {}
 local listButtons = {}
 
@@ -368,17 +385,24 @@ local function saveStorageToFile()
 	end
 end
 
+local function setConsoleMessage(text, color)
+	ConsoleLog.Text = "> " .. text
+	ConsoleLog.TextColor3 = color or Color3.fromRGB(150, 255, 150)
+end
+
 ToggleCopyBtn.MouseButton1Click:Connect(function()
 	isCopyEnabled = not isCopyEnabled
 	if isCopyEnabled then
 		ToggleCopyBtn.Text = "Copy Mode: ON"
 		ToggleCopyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+		setConsoleMessage("Copy Mode Active")
 	else
 		isSelecting = false
 		SelectModeBtn.Text = "Mouse Click: OFF"
 		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		ToggleCopyBtn.Text = "Copy Mode: OFF"
 		ToggleCopyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		setConsoleMessage("Copy Mode Standby")
 	end
 end)
 
@@ -388,34 +412,54 @@ SelectModeBtn.MouseButton1Click:Connect(function()
 	if isSelecting then
 		SelectModeBtn.Text = "Mouse Click: ON"
 		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(50, 80, 120)
+		setConsoleMessage("Click object to select")
 	else
 		SelectModeBtn.Text = "Mouse Click: OFF"
 		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	end
 end)
 
+-- Penyeleksian Lengkap
 Mouse.Button1Down:Connect(function()
 	if not isCopyEnabled or not isSelecting then return end
 	local target = Mouse.Target
-	
-	if target and target:IsA("BasePart") then
-		if selectedParts[target] then
-			selectedParts[target] = nil
-			if highlights[target] then
-				highlights[target]:Destroy()
-				highlights[target] = nil
+	if not target then return end
+
+	local ancestorModel = target:FindFirstAncestorOfClass("Model")
+	local partsToSelect = {}
+
+	if ancestorModel and ancestorModel ~= workspace then
+		for _, descendant in ipairs(ancestorModel:GetDescendants()) do
+			if descendant:IsA("BasePart") then
+				table.insert(partsToSelect, descendant)
+			end
+		end
+	elseif target:IsA("BasePart") then
+		table.insert(partsToSelect, target)
+	end
+
+	for _, part in ipairs(partsToSelect) do
+		if selectedParts[part] then
+			selectedParts[part] = nil
+			if highlights[part] then
+				highlights[part]:Destroy()
+				highlights[part] = nil
 			end
 		else
-			selectedParts[target] = true
+			selectedParts[part] = true
 			local hl = Instance.new("Highlight")
-			hl.Adornee = target
+			hl.Adornee = part
 			hl.FillColor = Color3.fromRGB(255, 255, 255)
 			hl.FillTransparency = 0.4
 			hl.OutlineColor = Color3.fromRGB(0, 0, 0)
-			hl.Parent = target
-			highlights[target] = hl
+			hl.Parent = part
+			highlights[part] = hl
 		end
 	end
+	
+	local count = 0
+	for _ in pairs(selectedParts) do count = count + 1 end
+	setConsoleMessage("Selected: " .. count .. " items")
 end)
 
 ClearBtn.MouseButton1Click:Connect(function()
@@ -424,26 +468,70 @@ ClearBtn.MouseButton1Click:Connect(function()
 	end
 	selectedParts = {}
 	highlights = {}
+	setConsoleMessage("Selection cleared")
 end)
 
+-- Progress Copy dengan Nama Asli
 local function serializeParts()
 	local data = {}
+	local partList = {}
 	for part in pairs(selectedParts) do
-		if part then
-			table.insert(data, {
-				Name = part.Name,
-				ClassName = part.ClassName,
-				Size = {part.Size.X, part.Size.Y, part.Size.Z},
-				Color = {part.Color.R, part.Color.G, part.Color.B},
-				Material = part.Material.Name,
-				Transparency = part.Transparency,
-				Anchored = part.Anchored,
-				CanCollide = part.CanCollide,
-				CFrame = {part.CFrame:GetComponents()}
-			})
-		end
+		if part then table.insert(partList, part) end
+	end
+
+	local total = #partList
+	for i, part in ipairs(partList) do
+		table.insert(data, {
+			Name = part.Name,
+			ClassName = part.ClassName,
+			Size = {part.Size.X, part.Size.Y, part.Size.Z},
+			Color = {part.Color.R, part.Color.G, part.Color.B},
+			Material = part.Material.Name,
+			Transparency = part.Transparency,
+			Anchored = part.Anchored,
+			CanCollide = part.CanCollide,
+			CFrame = {part.CFrame:GetComponents()}
+		})
+
+		-- Update Log Progress Copy Sesuai Nama Asli Item
+		setConsoleMessage(string.format("[COPY %d/%d]\n%s", i, total, part.Name), Color3.fromRGB(255, 220, 100))
+		if i % 10 == 0 then task.wait() end
 	end
 	return data
+end
+
+-- Progress Paste dengan Nama Asli
+local function executePaste(dataList)
+	if not dataList or #dataList == 0 then return end
+
+	local folder = Instance.new("Folder")
+	folder.Name = "Pasted_" .. math.random(100, 999)
+	folder.Parent = workspace
+	local total = #dataList
+
+	task.spawn(function()
+		for i, item in ipairs(dataList) do
+			local newPart = Instance.new(item.ClassName or "Part")
+			newPart.Name = item.Name or "PastedPart"
+			newPart.Size = Vector3.new(unpack(item.Size))
+			newPart.Color = Color3.new(unpack(item.Color))
+			newPart.Material = Enum.Material[item.Material] or Enum.Material.Plastic
+			newPart.Transparency = item.Transparency or 0
+			newPart.Anchored = item.Anchored
+			newPart.CanCollide = item.CanCollide
+			newPart.CFrame = CFrame.new(unpack(item.CFrame))
+			newPart.Parent = folder
+
+			-- Update Log Progress Paste
+			local percent = math.floor((i / total) * 100)
+			setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)\n%s", i, total, percent, newPart.Name), Color3.fromRGB(100, 200, 255))
+
+			if i % 50 == 0 then
+				task.wait()
+			end
+		end
+		setConsoleMessage("Successfully Pasted " .. total .. " items!", Color3.fromRGB(150, 255, 150))
+	end)
 end
 
 -- Refresh UI List Hasil
@@ -456,20 +544,17 @@ local function refreshResultList()
 
 	for idx, itemData in ipairs(savedStorage) do
 		local isMultiSelected = multiSelectedMap[idx]
-		local isSingleSelected = (selectedListIndex == idx)
 
 		local itemFrame = Instance.new("Frame")
 		itemFrame.Size = UDim2.new(1, -4, 0, 16)
 		itemFrame.LayoutOrder = idx
-		itemFrame.BackgroundColor3 = isMultiSelected and Color3.fromRGB(80, 50, 50) 
-			or (isSingleSelected and Color3.fromRGB(60, 90, 130) or Color3.fromRGB(25, 25, 25))
+		itemFrame.BackgroundColor3 = isMultiSelected and Color3.fromRGB(80, 50, 50) or Color3.fromRGB(25, 25, 25)
 		itemFrame.Parent = ResultFrame
 
 		local cornerFrame = Instance.new("UICorner")
 		cornerFrame.CornerRadius = UDim.new(0, 3)
 		cornerFrame.Parent = itemFrame
 
-		-- Tombol Titik 3 di Sudut Kiri/Kanan Item
 		local itemMenuBtn = Instance.new("TextButton")
 		itemMenuBtn.Size = UDim2.new(0, 14, 1, 0)
 		itemMenuBtn.Position = UDim2.new(0, 2, 0, 0)
@@ -481,7 +566,6 @@ local function refreshResultList()
 		itemMenuBtn.ZIndex = 2
 		itemMenuBtn.Parent = itemFrame
 
-		-- Tombol Utama Item
 		local itemBtn = Instance.new("TextButton")
 		itemBtn.Size = UDim2.new(1, -18, 1, 0)
 		itemBtn.Position = UDim2.new(0, 18, 0, 0)
@@ -493,24 +577,24 @@ local function refreshResultList()
 		itemBtn.Font = Enum.Font.SourceSans
 		itemBtn.Parent = itemFrame
 
-		-- Klik Item untuk Memilih
+		-- Klik Item -> Langsung Paste + Loading Log
 		itemBtn.MouseButton1Click:Connect(function()
 			if next(multiSelectedMap) then
 				multiSelectedMap[idx] = not multiSelectedMap[idx] or nil
+				refreshResultList()
 			else
-				selectedListIndex = idx
+				executePaste(itemData.Parts)
 			end
-			refreshResultList()
 		end)
 
-		-- Popup Dropdown Menu untuk 1 Item (Hapus)
+		-- Popup Menu Dropdown Hapus
 		itemMenuBtn.MouseButton1Click:Connect(function()
 			closeAllDropdowns()
 			DropdownOverlay.Visible = true
 
 			local popMenu = Instance.new("Frame")
 			popMenu.Size = UDim2.new(0, 60, 0, 18)
-			popMenu.Position = UDim2.new(0, 20, 0, math.clamp(itemFrame.AbsolutePosition.Y - ResultFrame.AbsolutePosition.Y + 110, 10, 180))
+			popMenu.Position = UDim2.new(0, 20, 0, math.clamp(itemFrame.AbsolutePosition.Y - ResultFrame.AbsolutePosition.Y + 90, 10, 180))
 			popMenu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 			popMenu.ZIndex = 11
 			popMenu.Parent = DropdownOverlay
@@ -531,10 +615,10 @@ local function refreshResultList()
 
 			delBtn.MouseButton1Click:Connect(function()
 				table.remove(savedStorage, idx)
-				if selectedListIndex == idx then selectedListIndex = nil end
 				multiSelectedMap[idx] = nil
 				saveStorageToFile()
 				refreshResultList()
+				setConsoleMessage("Item deleted from storage")
 			end)
 		end)
 
@@ -544,7 +628,7 @@ local function refreshResultList()
 	ResultFrame.CanvasSize = UDim2.new(0, 0, 0, ResultListLayout.AbsoluteContentSize.Y)
 end
 
--- Popup Header Dropdown Menu (Select All / Multi Delete)
+-- Header Dropdown Menu
 HeaderMenuBtn.MouseButton1Click:Connect(function()
 	if DropdownOverlay.Visible then
 		closeAllDropdowns()
@@ -605,65 +689,41 @@ HeaderMenuBtn.MouseButton1Click:Connect(function()
 		end
 		savedStorage = newStorage
 		multiSelectedMap = {}
-		selectedListIndex = nil
 		saveStorageToFile()
 		refreshResultList()
+		setConsoleMessage("Selected items deleted")
 	end)
 end)
 
--- Menutupi Dropdown jika Area Lain Diklik
 DropdownOverlay.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		closeAllDropdowns()
 	end
 end)
 
--- Save Data
+-- Save Logika
 SaveBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then return end
-	local partsData = serializeParts()
-	if #partsData == 0 then return end
+	task.spawn(function()
+		local partsData = serializeParts()
+		if #partsData == 0 then 
+			setConsoleMessage("No parts selected!", Color3.fromRGB(255, 100, 100))
+			return 
+		end
 
-	local payload = {
-		Title = gameName,
-		Parts = partsData
-	}
+		local payload = {
+			Title = gameName,
+			Parts = partsData
+		}
 
-	table.insert(savedStorage, payload)
-	selectedListIndex = #savedStorage
-	saveStorageToFile()
-	refreshResultList()
+		table.insert(savedStorage, payload)
+		saveStorageToFile()
+		refreshResultList()
+		setConsoleMessage("Saved " .. #partsData .. " items!", Color3.fromRGB(150, 255, 150))
+	end)
 end)
 
--- Paste Data
-local function executePaste(dataList)
-	if not dataList or #dataList == 0 then return end
-
-	local folder = Instance.new("Folder")
-	folder.Name = "Pasted_" .. math.random(100, 999)
-	folder.Parent = workspace
-
-	for _, item in ipairs(dataList) do
-		local newPart = Instance.new(item.ClassName or "Part")
-		newPart.Name = item.Name or "PastedPart"
-		newPart.Size = Vector3.new(unpack(item.Size))
-		newPart.Color = Color3.new(unpack(item.Color))
-		newPart.Material = Enum.Material[item.Material] or Enum.Material.Plastic
-		newPart.Transparency = item.Transparency or 0
-		newPart.Anchored = item.Anchored
-		newPart.CanCollide = item.CanCollide
-		newPart.CFrame = CFrame.new(unpack(item.CFrame))
-		newPart.Parent = folder
-	end
-end
-
-PasteBtn.MouseButton1Click:Connect(function()
-	if selectedListIndex and savedStorage[selectedListIndex] then
-		executePaste(savedStorage[selectedListIndex].Parts)
-	end
-end)
-
--- Auto Load File Data
+-- Auto Load Storage
 if readfile and isfile and isfile("saved_build_data.dat") then
 	pcall(function()
 		local content = readfile("saved_build_data.dat")
@@ -671,6 +731,7 @@ if readfile and isfile and isfile("saved_build_data.dat") then
 		if type(decoded) == "table" then
 			savedStorage = decoded
 			refreshResultList()
+			setConsoleMessage("Loaded saved data")
 		end
 	end)
 end
