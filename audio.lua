@@ -115,133 +115,13 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KIRI: LIST FITUR MINI
+-- 3. PAGE KANAN & SYSTEM DECLARATION (DIMAJUKAN KARENA DIBUTUHKAN PAGE KIRI)
 --------------------------------------------------
-local PageKiri = Instance.new("Frame")
-PageKiri.Name = "PageKiri"
-PageKiri.Size = UDim2.new(0, 142, 1, -22)
-PageKiri.Position = UDim2.new(0, 6, 0, 6)
-PageKiri.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-PageKiri.Parent = MainFrame
+local savedStorage = {}
+local multiSelectedMap = {}
+local listButtons = {}
+local refreshResultList
 
-local UICornerKiri = Instance.new("UICorner")
-UICornerKiri.CornerRadius = UDim.new(0, 6)
-UICornerKiri.Parent = PageKiri
-
-local TitleKiri = Instance.new("TextLabel")
-TitleKiri.Size = UDim2.new(1, 0, 0, 18)
-TitleKiri.Position = UDim2.new(0, 0, 0, 2)
-TitleKiri.BackgroundTransparency = 1
-TitleKiri.Text = "LIST FITUR"
-TitleKiri.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleKiri.TextSize = 10
-TitleKiri.Font = Enum.Font.SourceSansBold
-TitleKiri.Parent = PageKiri
-
-local ListContainer = Instance.new("Frame")
-ListContainer.Size = UDim2.new(1, -12, 1, -26)
-ListContainer.Position = UDim2.new(0, 6, 0, 22)
-ListContainer.BackgroundTransparency = 1
-ListContainer.Parent = PageKiri
-
-local UIListKiri = Instance.new("UIListLayout")
-UIListKiri.SortOrder = Enum.SortOrder.LayoutOrder
-UIListKiri.Padding = UDim.new(0, 3)
-UIListKiri.Parent = ListContainer
-
-local function createFeatureLabel(text, order)
-	local lbl = Instance.new("TextLabel")
-	lbl.Size = UDim2.new(1, 0, 0, 22)
-	lbl.LayoutOrder = order
-	lbl.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-	lbl.Text = text
-	lbl.TextColor3 = Color3.fromRGB(220, 220, 220)
-	lbl.TextSize = 9
-	lbl.Font = Enum.Font.SourceSans
-	lbl.Parent = ListContainer
-	
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 4)
-	corner.Parent = lbl
-	return lbl
-end
-
-createFeatureLabel("• Full Anchor & Collision", 1)
-createFeatureLabel("• Auto Save Storage", 2)
-createFeatureLabel("• Direct Click Paste", 3)
-createFeatureLabel("• Decal/Mesh Support", 4)
-createFeatureLabel("• Console Live Log", 5)
-
---------------------------------------------------
--- 4. PAGE TENGAH: PROFILE MINI
---------------------------------------------------
-local PageTengah = Instance.new("Frame")
-PageTengah.Name = "PageTengah"
-PageTengah.Size = UDim2.new(0, 142, 1, -22)
-PageTengah.Position = UDim2.new(0, 154, 0, 6)
-PageTengah.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-PageTengah.Parent = MainFrame
-
-local UICornerTengah = Instance.new("UICorner")
-UICornerTengah.CornerRadius = UDim.new(0, 6)
-UICornerTengah.Parent = PageTengah
-
-local TitleTengah = Instance.new("TextLabel")
-TitleTengah.Size = UDim2.new(1, 0, 0, 18)
-TitleTengah.Position = UDim2.new(0, 0, 0, 2)
-TitleTengah.BackgroundTransparency = 1
-TitleTengah.Text = "PROFILE AKUN"
-TitleTengah.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleTengah.TextSize = 10
-TitleTengah.Font = Enum.Font.SourceSansBold
-TitleTengah.Parent = PageTengah
-
-local AvatarImg = Instance.new("ImageLabel")
-AvatarImg.Size = UDim2.new(0, 32, 0, 32)
-AvatarImg.Position = UDim2.new(0, 6, 0, 22)
-AvatarImg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-AvatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
-AvatarImg.Parent = PageTengah
-
-local UICornerAvatar = Instance.new("UICorner")
-UICornerAvatar.CornerRadius = UDim.new(1, 0)
-UICornerAvatar.Parent = AvatarImg
-
-local ProfileDetails = Instance.new("TextLabel")
-ProfileDetails.Size = UDim2.new(1, -44, 0, 32)
-ProfileDetails.Position = UDim2.new(0, 42, 0, 22)
-ProfileDetails.BackgroundTransparency = 1
-ProfileDetails.TextXAlignment = Enum.TextXAlignment.Left
-ProfileDetails.TextYAlignment = Enum.TextYAlignment.Center
-ProfileDetails.Text = "👤 " .. LocalPlayer.DisplayName .. "\n🗓️ " .. LocalPlayer.AccountAge .. " Hari"
-ProfileDetails.TextColor3 = Color3.fromRGB(220, 220, 220)
-ProfileDetails.TextSize = 9
-ProfileDetails.Font = Enum.Font.SourceSans
-ProfileDetails.Parent = PageTengah
-
-local InfoList = Instance.new("TextLabel")
-InfoList.Size = UDim2.new(1, -12, 0, 115)
-InfoList.Position = UDim2.new(0, 6, 0, 60)
-InfoList.BackgroundTransparency = 1
-InfoList.TextXAlignment = Enum.TextXAlignment.Left
-InfoList.TextYAlignment = Enum.TextYAlignment.Top
-InfoList.TextColor3 = Color3.fromRGB(180, 180, 180)
-InfoList.TextSize = 9
-InfoList.Font = Enum.Font.SourceSans
-InfoList.Text = "👥 Friends: Loading...\n⭐ Followers: Loading...\n📌 Following: Loading..."
-InfoList.Parent = PageTengah
-
-task.spawn(function()
-	local friendsCount, followersCount, followingCount = "0", "0", "0"
-	pcall(function() friendsCount = tostring(#Players:GetFriendsAsync(LocalPlayer.UserId):GetCurrentPage()) end)
-	pcall(function() followersCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followers/count")).count) end)
-	pcall(function() followingCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followings/count")).count) end)
-	InfoList.Text = "👥 Friends: " .. friendsCount .. "\n⭐ Followers: " .. followersCount .. "\n📌 Following: " .. followingCount
-end)
-
---------------------------------------------------
--- 5. PAGE KANAN: KONTROL, LIST & CONSOLE LOG
---------------------------------------------------
 local PageKanan = Instance.new("Frame")
 PageKanan.Name = "PageKanan"
 PageKanan.Size = UDim2.new(0, 150, 1, -22)
@@ -362,17 +242,6 @@ local function closeAllDropdowns()
 	end
 end
 
---------------------------------------------------
--- 6. LOGIKA SYSTEM (PENANGANAN ANCHOR & COLLISION)
---------------------------------------------------
-local isCopyEnabled = false
-local isSelecting = false
-local selectedParts = {}
-local highlights = {}
-local savedStorage = {}
-local multiSelectedMap = {}
-local listButtons = {}
-
 local function saveStorageToFile()
 	if writefile then
 		pcall(function()
@@ -385,6 +254,288 @@ local function setConsoleMessage(text, color)
 	ConsoleLog.Text = "> " .. text
 	ConsoleLog.TextColor3 = color or Color3.fromRGB(150, 255, 150)
 end
+
+--------------------------------------------------
+-- SERIALISASI & FUNGSI UTAMA COPY
+--------------------------------------------------
+local function serializeChildren(part)
+	local childrenData = {}
+	for _, child in ipairs(part:GetChildren()) do
+		if not child:IsA("Highlight") then
+			local item = {
+				ClassName = child.ClassName,
+				Name = child.Name,
+				Props = {}
+			}
+			if child:IsA("Decal") or child:IsA("Texture") then
+				item.Props.Texture = child.Texture
+				item.Props.Face = child.Face.Name
+				item.Props.Transparency = child.Transparency
+			elseif child:IsA("SpecialMesh") then
+				item.Props.MeshId = child.MeshId
+				item.Props.TextureId = child.TextureId
+				item.Props.Scale = {child.Scale.X, child.Scale.Y, child.Scale.Z}
+			end
+			table.insert(childrenData, item)
+		end
+	end
+	return childrenData
+end
+
+local function copyPartListDirect(partList, labelTitle)
+	if #partList == 0 then
+		setConsoleMessage("No parts found to copy!", Color3.fromRGB(255, 100, 100))
+		return
+	end
+
+	local data = {}
+	local total = #partList
+
+	for i, part in ipairs(partList) do
+		local pData = {
+			Name = part.Name,
+			ClassName = part.ClassName,
+			Size = {part.Size.X, part.Size.Y, part.Size.Z},
+			Color = {part.Color.R, part.Color.G, part.Color.B},
+			Material = part.Material.Name,
+			Transparency = part.Transparency,
+			Reflectance = part.Reflectance,
+			
+			-- PROPERTI FISIKA & ANCHOR
+			Anchored = part.Anchored,
+			CanCollide = part.CanCollide,
+			CanTouch = part.CanTouch,
+			CanQuery = part.CanQuery,
+			
+			CFrame = {part.CFrame:GetComponents()},
+			Children = serializeChildren(part)
+		}
+
+		table.insert(data, pData)
+		setConsoleMessage(string.format("[AUTO COPY %d/%d]\n%s", i, total, part.Name), Color3.fromRGB(255, 220, 100))
+		if i % 20 == 0 then task.wait() end
+	end
+
+	local payload = {
+		Title = labelTitle or gameName,
+		Parts = data
+	}
+
+	table.insert(savedStorage, payload)
+	saveStorageToFile()
+	if refreshResultList then refreshResultList() end
+	setConsoleMessage("Saved " .. #data .. " parts to Storage!", Color3.fromRGB(150, 255, 150))
+end
+
+--------------------------------------------------
+-- 4. PAGE KIRI: FITUR COPY OTOMATIS (TANPA MOUSE CLICK)
+--------------------------------------------------
+local PageKiri = Instance.new("Frame")
+PageKiri.Name = "PageKiri"
+PageKiri.Size = UDim2.new(0, 142, 1, -22)
+PageKiri.Position = UDim2.new(0, 6, 0, 6)
+PageKiri.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+PageKiri.Parent = MainFrame
+
+local UICornerKiri = Instance.new("UICorner")
+UICornerKiri.CornerRadius = UDim.new(0, 6)
+UICornerKiri.Parent = PageKiri
+
+local TitleKiri = Instance.new("TextLabel")
+TitleKiri.Size = UDim2.new(1, 0, 0, 18)
+TitleKiri.Position = UDim2.new(0, 0, 0, 2)
+TitleKiri.BackgroundTransparency = 1
+TitleKiri.Text = "AUTO COPY TOOLS"
+TitleKiri.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleKiri.TextSize = 10
+TitleKiri.Font = Enum.Font.SourceSansBold
+TitleKiri.Parent = PageKiri
+
+local ListContainer = Instance.new("Frame")
+ListContainer.Size = UDim2.new(1, -12, 1, -26)
+ListContainer.Position = UDim2.new(0, 6, 0, 22)
+ListContainer.BackgroundTransparency = 1
+ListContainer.Parent = PageKiri
+
+local UIListKiri = Instance.new("UIListLayout")
+UIListKiri.SortOrder = Enum.SortOrder.LayoutOrder
+UIListKiri.Padding = UDim.new(0, 3)
+UIListKiri.Parent = ListContainer
+
+local function createFeatureButton(text, order, callback)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 22)
+	btn.LayoutOrder = order
+	btn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+	btn.Text = text
+	btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+	btn.TextSize = 9
+	btn.Font = Enum.Font.SourceSansBold
+	btn.Parent = ListContainer
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 4)
+	corner.Parent = btn
+
+	btn.MouseButton1Click:Connect(callback)
+	return btn
+end
+
+-- Tombol 1: Copy Seluruh Workspace
+createFeatureButton("⚡ Copy Workspace", 1, function()
+	task.spawn(function()
+		local parts = {}
+		for _, descendant in ipairs(workspace:GetDescendants()) do
+			if descendant:IsA("BasePart") and not descendant:IsDescendantOf(LocalPlayer.Character) then
+				table.insert(parts, descendant)
+			end
+		end
+		copyPartListDirect(parts, "Full Workspace")
+	end)
+end)
+
+-- Tombol 2: Copy Semua Model Terdekat (Radius 50 Studs)
+createFeatureButton("🎯 Copy Radius 50 Studs", 2, function()
+	task.spawn(function()
+		local char = LocalPlayer.Character
+		if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+		local rootPos = char.HumanoidRootPart.Position
+		local parts = {}
+
+		for _, descendant in ipairs(workspace:GetDescendants()) do
+			if descendant:IsA("BasePart") and not descendant:IsDescendantOf(char) then
+				if (descendant.Position - rootPos).Magnitude <= 50 then
+					table.insert(parts, descendant)
+				end
+			end
+		end
+		copyPartListDirect(parts, "Radius 50m")
+	end)
+end)
+
+-- Tombol 3: Copy Semua Unanchored Parts (Objek Fisika)
+createFeatureButton("📦 Copy Physics/Unanchored", 3, function()
+	task.spawn(function()
+		local parts = {}
+		for _, descendant in ipairs(workspace:GetDescendants()) do
+			if descendant:IsA("BasePart") and not descendant.Anchored and not descendant:IsDescendantOf(LocalPlayer.Character) then
+				table.insert(parts, descendant)
+			end
+		end
+		copyPartListDirect(parts, "Unanchored Parts")
+	end)
+end)
+
+-- Tombol 4: Copy Objek Bertipe Mesh/SpecialMesh
+createFeatureButton("🎨 Copy Meshes Only", 4, function()
+	task.spawn(function()
+		local parts = {}
+		for _, descendant in ipairs(workspace:GetDescendants()) do
+			if descendant:IsA("MeshPart") or (descendant:IsA("BasePart") and descendant:FindFirstChildOfClass("SpecialMesh")) then
+				if not descendant:IsDescendantOf(LocalPlayer.Character) then
+					table.insert(parts, descendant)
+				end
+			end
+		end
+		copyPartListDirect(parts, "Mesh Objects")
+	end)
+end)
+
+-- Tombol 5: Copy Semua Model yang Di-hover
+createFeatureButton("🔍 Copy Target Mouse Direct", 5, function()
+	task.spawn(function()
+		local target = Mouse.Target
+		if not target then return end
+		local parts = {}
+		local parentModel = target:FindFirstAncestorOfClass("Model") or target
+
+		if parentModel:IsA("Model") then
+			for _, descendant in ipairs(parentModel:GetDescendants()) do
+				if descendant:IsA("BasePart") then
+					table.insert(parts, descendant)
+				end
+			end
+		elseif parentModel:IsA("BasePart") then
+			table.insert(parts, parentModel)
+		end
+		copyPartListDirect(parts, parentModel.Name)
+	end)
+end)
+
+--------------------------------------------------
+-- 5. PAGE TENGAH: PROFILE MINI
+--------------------------------------------------
+local PageTengah = Instance.new("Frame")
+PageTengah.Name = "PageTengah"
+PageTengah.Size = UDim2.new(0, 142, 1, -22)
+PageTengah.Position = UDim2.new(0, 154, 0, 6)
+PageTengah.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+PageTengah.Parent = MainFrame
+
+local UICornerTengah = Instance.new("UICorner")
+UICornerTengah.CornerRadius = UDim.new(0, 6)
+UICornerTengah.Parent = PageTengah
+
+local TitleTengah = Instance.new("TextLabel")
+TitleTengah.Size = UDim2.new(1, 0, 0, 18)
+TitleTengah.Position = UDim2.new(0, 0, 0, 2)
+TitleTengah.BackgroundTransparency = 1
+TitleTengah.Text = "PROFILE AKUN"
+TitleTengah.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleTengah.TextSize = 10
+TitleTengah.Font = Enum.Font.SourceSansBold
+TitleTengah.Parent = PageTengah
+
+local AvatarImg = Instance.new("ImageLabel")
+AvatarImg.Size = UDim2.new(0, 32, 0, 32)
+AvatarImg.Position = UDim2.new(0, 6, 0, 22)
+AvatarImg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+AvatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
+AvatarImg.Parent = PageTengah
+
+local UICornerAvatar = Instance.new("UICorner")
+UICornerAvatar.CornerRadius = UDim.new(1, 0)
+UICornerAvatar.Parent = AvatarImg
+
+local ProfileDetails = Instance.new("TextLabel")
+ProfileDetails.Size = UDim2.new(1, -44, 0, 32)
+ProfileDetails.Position = UDim2.new(0, 42, 0, 22)
+ProfileDetails.BackgroundTransparency = 1
+ProfileDetails.TextXAlignment = Enum.TextXAlignment.Left
+ProfileDetails.TextYAlignment = Enum.TextYAlignment.Center
+ProfileDetails.Text = "👤 " .. LocalPlayer.DisplayName .. "\n🗓️ " .. LocalPlayer.AccountAge .. " Hari"
+ProfileDetails.TextColor3 = Color3.fromRGB(220, 220, 220)
+ProfileDetails.TextSize = 9
+ProfileDetails.Font = Enum.Font.SourceSans
+ProfileDetails.Parent = PageTengah
+
+local InfoList = Instance.new("TextLabel")
+InfoList.Size = UDim2.new(1, -12, 0, 115)
+InfoList.Position = UDim2.new(0, 6, 0, 60)
+InfoList.BackgroundTransparency = 1
+InfoList.TextXAlignment = Enum.TextXAlignment.Left
+InfoList.TextYAlignment = Enum.TextYAlignment.Top
+InfoList.TextColor3 = Color3.fromRGB(180, 180, 180)
+InfoList.TextSize = 9
+InfoList.Font = Enum.Font.SourceSans
+InfoList.Text = "👥 Friends: Loading...\n⭐ Followers: Loading...\n📌 Following: Loading..."
+InfoList.Parent = PageTengah
+
+task.spawn(function()
+	local friendsCount, followersCount, followingCount = "0", "0", "0"
+	pcall(function() friendsCount = tostring(#Players:GetFriendsAsync(LocalPlayer.UserId):GetCurrentPage()) end)
+	pcall(function() followersCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followers/count")).count) end)
+	pcall(function() followingCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followings/count")).count) end)
+	InfoList.Text = "👥 Friends: " .. friendsCount .. "\n⭐ Followers: " .. followersCount .. "\n📌 Following: " .. followingCount
+end)
+
+--------------------------------------------------
+-- 6. LOGIKA PENANGANAN PASTE & EVENT SELECTION
+--------------------------------------------------
+local isCopyEnabled = false
+local isSelecting = false
+local selectedParts = {}
+local highlights = {}
 
 ToggleCopyBtn.MouseButton1Click:Connect(function()
 	isCopyEnabled = not isCopyEnabled
@@ -466,68 +617,7 @@ ClearBtn.MouseButton1Click:Connect(function()
 	setConsoleMessage("Selection cleared")
 end)
 
--- Serialisasi Children (Decal, Light, dll.)
-local function serializeChildren(part)
-	local childrenData = {}
-	for _, child in ipairs(part:GetChildren()) do
-		if not child:IsA("Highlight") then
-			local item = {
-				ClassName = child.ClassName,
-				Name = child.Name,
-				Props = {}
-			}
-			if child:IsA("Decal") or child:IsA("Texture") then
-				item.Props.Texture = child.Texture
-				item.Props.Face = child.Face.Name
-				item.Props.Transparency = child.Transparency
-			elseif child:IsA("SpecialMesh") then
-				item.Props.MeshId = child.MeshId
-				item.Props.TextureId = child.TextureId
-				item.Props.Scale = {child.Scale.X, child.Scale.Y, child.Scale.Z}
-			end
-			table.insert(childrenData, item)
-		end
-	end
-	return childrenData
-end
-
--- Progress Copy (Mencatat Anchored & Collision State)
-local function serializeParts()
-	local data = {}
-	local partList = {}
-	for part in pairs(selectedParts) do
-		if part then table.insert(partList, part) end
-	end
-
-	local total = #partList
-	for i, part in ipairs(partList) do
-		local pData = {
-			Name = part.Name,
-			ClassName = part.ClassName,
-			Size = {part.Size.X, part.Size.Y, part.Size.Z},
-			Color = {part.Color.R, part.Color.G, part.Color.B},
-			Material = part.Material.Name,
-			Transparency = part.Transparency,
-			Reflectance = part.Reflectance,
-			
-			-- BACA SETTINGAN TABRAKAN DAN ANCHOR
-			Anchored = part.Anchored,
-			CanCollide = part.CanCollide,
-			CanTouch = part.CanTouch,
-			CanQuery = part.CanQuery,
-			
-			CFrame = {part.CFrame:GetComponents()},
-			Children = serializeChildren(part)
-		}
-
-		table.insert(data, pData)
-		setConsoleMessage(string.format("[COPY %d/%d]\n%s", i, total, part.Name), Color3.fromRGB(255, 220, 100))
-		if i % 10 == 0 then task.wait() end
-	end
-	return data
-end
-
--- Progress Paste (Menerapkan Anchored & Collision State secara tepat)
+-- Eksekusi Paste
 local function executePaste(dataList)
 	if not dataList or #dataList == 0 then return end
 
@@ -595,7 +685,7 @@ local function executePaste(dataList)
 end
 
 -- Refresh UI List Hasil
-local function refreshResultList()
+refreshResultList = function()
 	closeAllDropdowns()
 	for _, btn in ipairs(listButtons) do
 		btn:Destroy()
@@ -759,25 +849,21 @@ DropdownOverlay.InputBegan:Connect(function(input)
 	end
 end)
 
--- Save Logika
+-- Manual Save Logika (Page Kanan)
 SaveBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then return end
 	task.spawn(function()
-		local partsData = serializeParts()
-		if #partsData == 0 then 
+		local partList = {}
+		for part in pairs(selectedParts) do
+			if part then table.insert(partList, part) end
+		end
+		
+		if #partList == 0 then 
 			setConsoleMessage("No parts selected!", Color3.fromRGB(255, 100, 100))
 			return 
 		end
 
-		local payload = {
-			Title = gameName,
-			Parts = partsData
-		}
-
-		table.insert(savedStorage, payload)
-		saveStorageToFile()
-		refreshResultList()
-		setConsoleMessage("Saved " .. #partsData .. " items!", Color3.fromRGB(150, 255, 150))
+		copyPartListDirect(partList, "Manual Selection")
 	end)
 end)
 
