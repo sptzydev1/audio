@@ -115,7 +115,7 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KANAN & SYSTEM DECLARATION
+-- 3. PAGE KANAN & SYSTEM DECLARATION (DIMAJUKAN KARENA DIBUTUHKAN PAGE KIRI)
 --------------------------------------------------
 local savedStorage = {}
 local multiSelectedMap = {}
@@ -328,7 +328,7 @@ local function copyPartListDirect(partList, labelTitle)
 end
 
 --------------------------------------------------
--- 4. PAGE KIRI: FITUR COPY OTOMATIS
+-- 4. PAGE KIRI: FITUR COPY OTOMATIS (TANPA MOUSE CLICK)
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
 PageKiri.Name = "PageKiri"
@@ -381,7 +381,7 @@ local function createFeatureButton(text, order, callback)
 	return btn
 end
 
--- Tombol Copy Tools
+-- Tombol 1: Copy Seluruh Workspace
 createFeatureButton("⚡ Copy Workspace", 1, function()
 	task.spawn(function()
 		local parts = {}
@@ -394,6 +394,7 @@ createFeatureButton("⚡ Copy Workspace", 1, function()
 	end)
 end)
 
+-- Tombol 2: Copy Semua Model Terdekat (Radius 50 Studs)
 createFeatureButton("🎯 Copy Radius 50 Studs", 2, function()
 	task.spawn(function()
 		local char = LocalPlayer.Character
@@ -412,6 +413,7 @@ createFeatureButton("🎯 Copy Radius 50 Studs", 2, function()
 	end)
 end)
 
+-- Tombol 3: Copy Semua Unanchored Parts (Objek Fisika)
 createFeatureButton("📦 Copy Physics/Unanchored", 3, function()
 	task.spawn(function()
 		local parts = {}
@@ -424,6 +426,7 @@ createFeatureButton("📦 Copy Physics/Unanchored", 3, function()
 	end)
 end)
 
+-- Tombol 4: Copy Objek Bertipe Mesh/SpecialMesh
 createFeatureButton("🎨 Copy Meshes Only", 4, function()
 	task.spawn(function()
 		local parts = {}
@@ -438,6 +441,7 @@ createFeatureButton("🎨 Copy Meshes Only", 4, function()
 	end)
 end)
 
+-- Tombol 5: Copy Semua Model yang Di-hover
 createFeatureButton("🔍 Copy Target Mouse Direct", 5, function()
 	task.spawn(function()
 		local target = Mouse.Target
@@ -459,7 +463,7 @@ createFeatureButton("🔍 Copy Target Mouse Direct", 5, function()
 end)
 
 --------------------------------------------------
--- 5. PAGE TENGAH: RBXM IMPORTER (BARU & DIPERBARUI)
+-- 5. PAGE TENGAH: PROFILE MINI
 --------------------------------------------------
 local PageTengah = Instance.new("Frame")
 PageTengah.Name = "PageTengah"
@@ -476,218 +480,53 @@ local TitleTengah = Instance.new("TextLabel")
 TitleTengah.Size = UDim2.new(1, 0, 0, 18)
 TitleTengah.Position = UDim2.new(0, 0, 0, 2)
 TitleTengah.BackgroundTransparency = 1
-TitleTengah.Text = "RBXM IMPORTER"
+TitleTengah.Text = "PROFILE AKUN"
 TitleTengah.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleTengah.TextSize = 10
 TitleTengah.Font = Enum.Font.SourceSansBold
 TitleTengah.Parent = PageTengah
 
--- Tombol SCAN FILES
-local ScanBtn = Instance.new("TextButton")
-ScanBtn.Name = "ScanBtn"
-ScanBtn.Size = UDim2.new(1, -12, 0, 20)
-ScanBtn.Position = UDim2.new(0, 6, 0, 22)
-ScanBtn.BackgroundColor3 = Color3.fromRGB(40, 160, 60)
-ScanBtn.Text = "🔍 SCAN FILES"
-ScanBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ScanBtn.TextSize = 9
-ScanBtn.Font = Enum.Font.SourceSansBold
-ScanBtn.Parent = PageTengah
+local AvatarImg = Instance.new("ImageLabel")
+AvatarImg.Size = UDim2.new(0, 32, 0, 32)
+AvatarImg.Position = UDim2.new(0, 6, 0, 22)
+AvatarImg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+AvatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
+AvatarImg.Parent = PageTengah
 
-local UICornerScan = Instance.new("UICorner")
-UICornerScan.CornerRadius = UDim.new(0, 4)
-UICornerScan.Parent = ScanBtn
+local UICornerAvatar = Instance.new("UICorner")
+UICornerAvatar.CornerRadius = UDim.new(1, 0)
+UICornerAvatar.Parent = AvatarImg
 
--- TextBox Input Cari File / Enter
-local SearchBox = Instance.new("TextBox")
-SearchBox.Name = "SearchBox"
-SearchBox.Size = UDim2.new(1, -12, 0, 18)
-SearchBox.Position = UDim2.new(0, 6, 0, 46)
-SearchBox.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-SearchBox.PlaceholderText = "Cari / Ketik Nama File..."
-SearchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
-SearchBox.Text = ""
-SearchBox.TextColor3 = Color3.fromRGB(220, 220, 220)
-SearchBox.TextSize = 8
-SearchBox.Font = Enum.Font.SourceSans
-SearchBox.ClearTextOnFocus = false
-SearchBox.Parent = PageTengah
+local ProfileDetails = Instance.new("TextLabel")
+ProfileDetails.Size = UDim2.new(1, -44, 0, 32)
+ProfileDetails.Position = UDim2.new(0, 42, 0, 22)
+ProfileDetails.BackgroundTransparency = 1
+ProfileDetails.TextXAlignment = Enum.TextXAlignment.Left
+ProfileDetails.TextYAlignment = Enum.TextYAlignment.Center
+ProfileDetails.Text = "👤 " .. LocalPlayer.DisplayName .. "\n🗓️ " .. LocalPlayer.AccountAge .. " Hari"
+ProfileDetails.TextColor3 = Color3.fromRGB(220, 220, 220)
+ProfileDetails.TextSize = 9
+ProfileDetails.Font = Enum.Font.SourceSans
+ProfileDetails.Parent = PageTengah
 
-local UICornerSearch = Instance.new("UICorner")
-UICornerSearch.CornerRadius = UDim.new(0, 3)
-UICornerSearch.Parent = SearchBox
+local InfoList = Instance.new("TextLabel")
+InfoList.Size = UDim2.new(1, -12, 0, 115)
+InfoList.Position = UDim2.new(0, 6, 0, 60)
+InfoList.BackgroundTransparency = 1
+InfoList.TextXAlignment = Enum.TextXAlignment.Left
+InfoList.TextYAlignment = Enum.TextYAlignment.Top
+InfoList.TextColor3 = Color3.fromRGB(180, 180, 180)
+InfoList.TextSize = 9
+InfoList.Font = Enum.Font.SourceSans
+InfoList.Text = "👥 Friends: Loading...\n⭐ Followers: Loading...\n📌 Following: Loading..."
+InfoList.Parent = PageTengah
 
--- Scrolling Frame untuk List File RBXM
-local RbxmScroll = Instance.new("ScrollingFrame")
-RbxmScroll.Name = "RbxmScroll"
-RbxmScroll.Size = UDim2.new(1, -12, 0, 104)
-RbxmScroll.Position = UDim2.new(0, 6, 0, 68)
-RbxmScroll.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-RbxmScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-RbxmScroll.ScrollBarThickness = 2
-RbxmScroll.Parent = PageTengah
-
-local UICornerRbxm = Instance.new("UICorner")
-UICornerRbxm.CornerRadius = UDim.new(0, 4)
-UICornerRbxm.Parent = RbxmScroll
-
-local RbxmListLayout = Instance.new("UIListLayout")
-RbxmListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-RbxmListLayout.Padding = UDim.new(0, 3)
-RbxmListLayout.Parent = RbxmScroll
-
--- Status Footer Info
-local StatusText = Instance.new("TextLabel")
-StatusText.Size = UDim2.new(1, -12, 0, 14)
-StatusText.Position = UDim2.new(0, 6, 0, 176)
-StatusText.BackgroundTransparency = 1
-StatusText.Text = "Status: Ready"
-StatusText.TextColor3 = Color3.fromRGB(140, 140, 140)
-StatusText.TextSize = 8
-StatusText.Font = Enum.Font.SourceSans
-StatusText.TextXAlignment = Enum.TextXAlignment.Left
-StatusText.Parent = PageTengah
-
--- Fungsi Insert Single RBXM
-local function insertRbxmFile(filePath, fileName)
-	if not (isfile and getcustomasset) then
-		setConsoleMessage("Executor tidak support getcustomasset!", Color3.fromRGB(255, 100, 100))
-		return
-	end
-
-	if not isfile(filePath) then
-		setConsoleMessage("File " .. fileName .. " tidak ada!", Color3.fromRGB(255, 100, 100))
-		return
-	end
-
-	setConsoleMessage("Inserting " .. fileName .. "...", Color3.fromRGB(255, 220, 100))
-
-	task.spawn(function()
-		local success, err = pcall(function()
-			local assetId = getcustomasset(filePath)
-			local objects = game:GetObjects(assetId)
-			
-			for _, obj in ipairs(objects) do
-				obj.Parent = workspace
-			end
-		end)
-
-		if success then
-			setConsoleMessage("Berhasil Insert: " .. fileName, Color3.fromRGB(150, 255, 150))
-		else
-			setConsoleMessage("Gagal Insert! Coba format .rbxmx", Color3.fromRGB(255, 100, 100))
-		end
-	end)
-end
-
--- Function Membaca & Menampilkan List File
-local cachedRbxmFiles = {}
-
-local function renderRbxmList(filterText)
-	for _, child in ipairs(RbxmScroll:GetChildren()) do
-		if child:IsA("Frame") then
-			child:Destroy()
-		end
-	end
-
-	filterText = (filterText or ""):lower()
-	local count = 0
-
-	for idx, fileData in ipairs(cachedRbxmFiles) do
-		if filterText == "" or fileData.shortName:lower():find(filterText, 1, true) then
-			count = count + 1
-
-			local itemFrame = Instance.new("Frame")
-			itemFrame.Size = UDim2.new(1, -4, 0, 22)
-			itemFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-			itemFrame.Parent = RbxmScroll
-
-			local cornerItem = Instance.new("UICorner")
-			cornerItem.CornerRadius = UDim.new(0, 3)
-			cornerItem.Parent = itemFrame
-
-			local nameLabel = Instance.new("TextLabel")
-			nameLabel.Size = UDim2.new(1, -40, 1, 0)
-			nameLabel.Position = UDim2.new(0, 4, 0, 0)
-			nameLabel.BackgroundTransparency = 1
-			nameLabel.Text = "📦 " .. fileData.shortName
-			nameLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-			nameLabel.TextSize = 8
-			nameLabel.Font = Enum.Font.SourceSansBold
-			nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-			nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
-			nameLabel.Parent = itemFrame
-
-			local insertBtn = Instance.new("TextButton")
-			insertBtn.Size = UDim2.new(0, 32, 0, 16)
-			insertBtn.Position = UDim2.new(1, -34, 0.5, -8)
-			insertBtn.BackgroundColor3 = Color3.fromRGB(35, 120, 50)
-			insertBtn.Text = "INSERT"
-			insertBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-			insertBtn.TextSize = 7
-			insertBtn.Font = Enum.Font.SourceSansBold
-			insertBtn.Parent = itemFrame
-
-			local cornerBtn = Instance.new("UICorner")
-			cornerBtn.CornerRadius = UDim.new(0, 3)
-			cornerBtn.Parent = insertBtn
-
-			insertBtn.MouseButton1Click:Connect(function()
-				insertRbxmFile(fileData.fullName, fileData.shortName)
-			end)
-		end
-	end
-
-	RbxmScroll.CanvasSize = UDim2.new(0, 0, 0, RbxmListLayout.AbsoluteContentSize.Y)
-	StatusText.Text = "Status: Ready | Files: " .. #cachedRbxmFiles
-end
-
-local function scanWorkspaceFiles()
-	cachedRbxmFiles = {}
-
-	if not listfiles then
-		setConsoleMessage("Executor tidak mendukung listfiles!", Color3.fromRGB(255, 100, 100))
-		return
-	end
-
-	local files = {}
-	pcall(function() files = listfiles("") or {} end)
-
-	for _, path in ipairs(files) do
-		local cleanName = path:match("^.+/(.+)$") or path:match("^.+\\(.+)$") or path
-		local ext = cleanName:sub(-5):lower()
-		local ext2 = cleanName:sub(-6):lower()
-
-		if ext == ".rbxm" or ext2 == ".rbxmx" then
-			table.insert(cachedRbxmFiles, {
-				fullName = path,
-				shortName = cleanName
-			})
-		end
-	end
-
-	renderRbxmList(SearchBox.Text)
-	setConsoleMessage("Scan Selesai: " .. #cachedRbxmFiles .. " file rbxm", Color3.fromRGB(150, 255, 150))
-end
-
-ScanBtn.MouseButton1Click:Connect(function()
-	scanWorkspaceFiles()
-end)
-
-SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
-	renderRbxmList(SearchBox.Text)
-end)
-
-SearchBox.FocusLost:Connect(function(enterPressed)
-	if enterPressed and SearchBox.Text ~= "" then
-		local exactText = SearchBox.Text:lower()
-		for _, fileData in ipairs(cachedRbxmFiles) do
-			if fileData.shortName:lower() == exactText or fileData.shortName:lower() == exactText .. ".rbxm" then
-				insertRbxmFile(fileData.fullName, fileData.shortName)
-				return
-			end
-		end
-	end
+task.spawn(function()
+	local friendsCount, followersCount, followingCount = "0", "0", "0"
+	pcall(function() friendsCount = tostring(#Players:GetFriendsAsync(LocalPlayer.UserId):GetCurrentPage()) end)
+	pcall(function() followersCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followers/count")).count) end)
+	pcall(function() followingCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followings/count")).count) end)
+	InfoList.Text = "👥 Friends: " .. friendsCount .. "\n⭐ Followers: " .. followersCount .. "\n📌 Following: " .. followingCount
 end)
 
 --------------------------------------------------
@@ -1028,7 +867,7 @@ SaveBtn.MouseButton1Click:Connect(function()
 	end)
 end)
 
--- Auto Load Storage & Initial Scan
+-- Auto Load Storage
 if readfile and isfile and isfile("saved_build_data.dat") then
 	pcall(function()
 		local content = readfile("saved_build_data.dat")
@@ -1040,6 +879,3 @@ if readfile and isfile and isfile("saved_build_data.dat") then
 		end
 	end)
 end
-
--- Jalankan Scan Awal saat Script Di-load
-task.defer(scanWorkspaceFiles)
