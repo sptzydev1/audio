@@ -1,5 +1,5 @@
 -- ======================================================
--- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE)
+-- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE) - ALL MODELS SUPPORTED
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -115,7 +115,7 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KANAN & SYSTEM DECLARATION (DIMAJUKAN KARENA DIBUTUHKAN PAGE KIRI)
+-- 3. PAGE KANAN & SYSTEM DECLARATION
 --------------------------------------------------
 local savedStorage = {}
 local multiSelectedMap = {}
@@ -256,35 +256,67 @@ local function setConsoleMessage(text, color)
 end
 
 --------------------------------------------------
--- SERIALISASI & FUNGSI UTAMA COPY
+-- SERIALISASI & FUNGSI UNIVERSAL (SEMUA MODEL & CLASS)
 --------------------------------------------------
-local function serializeChildren(part)
-	local childrenData = {}
-	for _, child in ipairs(part:GetChildren()) do
-		if not child:IsA("Highlight") then
-			local item = {
-				ClassName = child.ClassName,
-				Name = child.Name,
-				Props = {}
-			}
-			if child:IsA("Decal") or child:IsA("Texture") then
-				item.Props.Texture = child.Texture
-				item.Props.Face = child.Face.Name
-				item.Props.Transparency = child.Transparency
-			elseif child:IsA("SpecialMesh") then
-				item.Props.MeshId = child.MeshId
-				item.Props.TextureId = child.TextureId
-				item.Props.Scale = {child.Scale.X, child.Scale.Y, child.Scale.Z}
-			end
-			table.insert(childrenData, item)
+local function serializeObject(instance)
+	if instance:IsA("Highlight") then return nil end
+
+	local item = {
+		ClassName = instance.ClassName,
+		Name = instance.Name,
+		Props = {},
+		Children = {}
+	}
+
+	-- Serialisasi Properti Spesifik berdasarkan jenis Class
+	if instance:IsA("BasePart") then
+		item.Props.Size = {instance.Size.X, instance.Size.Y, instance.Size.Z}
+		item.Props.Color = {instance.Color.R, instance.Color.G, instance.Color.B}
+		item.Props.Material = instance.Material.Name
+		item.Props.Transparency = instance.Transparency
+		item.Props.Reflectance = instance.Reflectance
+		item.Props.Anchored = instance.Anchored
+		item.Props.CanCollide = instance.CanCollide
+		item.Props.CanTouch = instance.CanTouch
+		item.Props.CanQuery = instance.CanQuery
+		item.Props.CFrame = {instance.CFrame:GetComponents()}
+
+		if instance:IsA("MeshPart") then
+			item.Props.MeshId = instance.MeshId
+			item.Props.TextureID = instance.TextureID
+		end
+	elseif instance:IsA("Decal") or instance:IsA("Texture") then
+		item.Props.Texture = instance.Texture
+		item.Props.Face = instance.Face.Name
+		item.Props.Transparency = instance.Transparency
+	elseif instance:IsA("SpecialMesh") then
+		item.Props.MeshId = instance.MeshId
+		item.Props.TextureId = instance.TextureId
+		item.Props.Scale = {instance.Scale.X, instance.Scale.Y, instance.Scale.Z}
+		item.Props.MeshType = instance.MeshType.Name
+	elseif instance:IsA("SurfaceAppearance") then
+		item.Props.ColorMap = instance.ColorMap
+		item.Props.NormalMap = instance.NormalMap
+		item.Props.RoughnessMap = instance.RoughnessMap
+		item.Props.MetalnessMap = instance.MetalnessMap
+	elseif instance:IsA("Attachment") then
+		item.Props.CFrame = {instance.CFrame:GetComponents()}
+	end
+
+	-- Rekursif untuk seluruh Anak (Children & Hierarchy Kompleks)
+	for _, child in ipairs(instance:GetChildren()) do
+		local serializedChild = serializeObject(child)
+		if serializedChild then
+			table.insert(item.Children, serializedChild)
 		end
 	end
-	return childrenData
+
+	return item
 end
 
 local function copyPartListDirect(partList, labelTitle)
 	if #partList == 0 then
-		setConsoleMessage("No parts found to copy!", Color3.fromRGB(255, 100, 100))
+		setConsoleMessage("No parts/models found to copy!", Color3.fromRGB(255, 100, 100))
 		return
 	end
 
@@ -292,26 +324,10 @@ local function copyPartListDirect(partList, labelTitle)
 	local total = #partList
 
 	for i, part in ipairs(partList) do
-		local pData = {
-			Name = part.Name,
-			ClassName = part.ClassName,
-			Size = {part.Size.X, part.Size.Y, part.Size.Z},
-			Color = {part.Color.R, part.Color.G, part.Color.B},
-			Material = part.Material.Name,
-			Transparency = part.Transparency,
-			Reflectance = part.Reflectance,
-			
-			-- PROPERTI FISIKA & ANCHOR
-			Anchored = part.Anchored,
-			CanCollide = part.CanCollide,
-			CanTouch = part.CanTouch,
-			CanQuery = part.CanQuery,
-			
-			CFrame = {part.CFrame:GetComponents()},
-			Children = serializeChildren(part)
-		}
-
-		table.insert(data, pData)
+		local serializedData = serializeObject(part)
+		if serializedData then
+			table.insert(data, serializedData)
+		end
 		setConsoleMessage(string.format("[AUTO COPY %d/%d]\n%s", i, total, part.Name), Color3.fromRGB(255, 220, 100))
 		if i % 20 == 0 then task.wait() end
 	end
@@ -324,11 +340,11 @@ local function copyPartListDirect(partList, labelTitle)
 	table.insert(savedStorage, payload)
 	saveStorageToFile()
 	if refreshResultList then refreshResultList() end
-	setConsoleMessage("Saved " .. #data .. " parts to Storage!", Color3.fromRGB(150, 255, 150))
+	setConsoleMessage("Saved " .. #data .. " models to Storage!", Color3.fromRGB(150, 255, 150))
 end
 
 --------------------------------------------------
--- 4. PAGE KIRI: FITUR COPY OTOMATIS (TANPA MOUSE CLICK)
+-- 4. PAGE KIRI: FITUR COPY OTOMATIS
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
 PageKiri.Name = "PageKiri"
@@ -385,8 +401,8 @@ end
 createFeatureButton("⚡ Copy Workspace", 1, function()
 	task.spawn(function()
 		local parts = {}
-		for _, descendant in ipairs(workspace:GetDescendants()) do
-			if descendant:IsA("BasePart") and not descendant:IsDescendantOf(LocalPlayer.Character) then
+		for _, descendant in ipairs(workspace:GetChildren()) do
+			if descendant ~= LocalPlayer.Character and not descendant:IsA("Camera") and not descendant:IsA("Terrain") then
 				table.insert(parts, descendant)
 			end
 		end
@@ -394,7 +410,7 @@ createFeatureButton("⚡ Copy Workspace", 1, function()
 	end)
 end)
 
--- Tombol 2: Copy Semua Model Terdekat (Radius 50 Studs)
+-- Tombol 2: Copy Radius 50 Studs (Model / Part)
 createFeatureButton("🎯 Copy Radius 50 Studs", 2, function()
 	task.spawn(function()
 		local char = LocalPlayer.Character
@@ -402,10 +418,13 @@ createFeatureButton("🎯 Copy Radius 50 Studs", 2, function()
 		local rootPos = char.HumanoidRootPart.Position
 		local parts = {}
 
-		for _, descendant in ipairs(workspace:GetDescendants()) do
-			if descendant:IsA("BasePart") and not descendant:IsDescendantOf(char) then
-				if (descendant.Position - rootPos).Magnitude <= 50 then
-					table.insert(parts, descendant)
+		for _, descendant in ipairs(workspace:GetChildren()) do
+			if descendant ~= char and not descendant:IsA("Camera") and not descendant:IsA("Terrain") then
+				local primaryPart = descendant:IsA("Model") and (descendant.PrimaryPart or descendant:FindFirstChildOfClass("BasePart")) or descendant
+				if primaryPart and primaryPart:IsA("BasePart") then
+					if (primaryPart.Position - rootPos).Magnitude <= 50 then
+						table.insert(parts, descendant)
+					end
 				end
 			end
 		end
@@ -413,7 +432,7 @@ createFeatureButton("🎯 Copy Radius 50 Studs", 2, function()
 	end)
 end)
 
--- Tombol 3: Copy Semua Unanchored Parts (Objek Fisika)
+-- Tombol 3: Copy Semua Unanchored Parts/Models
 createFeatureButton("📦 Copy Physics/Unanchored", 3, function()
 	task.spawn(function()
 		local parts = {}
@@ -426,7 +445,7 @@ createFeatureButton("📦 Copy Physics/Unanchored", 3, function()
 	end)
 end)
 
--- Tombol 4: Copy Objek Bertipe Mesh/SpecialMesh
+-- Tombol 4: Copy Meshes & MeshParts
 createFeatureButton("🎨 Copy Meshes Only", 4, function()
 	task.spawn(function()
 		local parts = {}
@@ -441,24 +460,13 @@ createFeatureButton("🎨 Copy Meshes Only", 4, function()
 	end)
 end)
 
--- Tombol 5: Copy Semua Model yang Di-hover
+-- Tombol 5: Copy Target Mouse (Satu Model Utuh)
 createFeatureButton("🔍 Copy Target Mouse Direct", 5, function()
 	task.spawn(function()
 		local target = Mouse.Target
 		if not target then return end
-		local parts = {}
-		local parentModel = target:FindFirstAncestorOfClass("Model") or target
-
-		if parentModel:IsA("Model") then
-			for _, descendant in ipairs(parentModel:GetDescendants()) do
-				if descendant:IsA("BasePart") then
-					table.insert(parts, descendant)
-				end
-			end
-		elseif parentModel:IsA("BasePart") then
-			table.insert(parts, parentModel)
-		end
-		copyPartListDirect(parts, parentModel.Name)
+		local targetToCopy = target:FindFirstAncestorOfClass("Model") or target
+		copyPartListDirect({targetToCopy}, targetToCopy.Name)
 	end)
 end)
 
@@ -530,7 +538,7 @@ task.spawn(function()
 end)
 
 --------------------------------------------------
--- 6. LOGIKA PENANGANAN PASTE & EVENT SELECTION
+-- 6. LOGIKA REKURSIF UNTUK PASTE SEMUA MODEL
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
@@ -571,36 +579,23 @@ Mouse.Button1Down:Connect(function()
 	local target = Mouse.Target
 	if not target then return end
 
-	local ancestorModel = target:FindFirstAncestorOfClass("Model")
-	local partsToSelect = {}
+	local targetToSelect = target:FindFirstAncestorOfClass("Model") or target
 
-	if ancestorModel and ancestorModel ~= workspace then
-		for _, descendant in ipairs(ancestorModel:GetDescendants()) do
-			if descendant:IsA("BasePart") then
-				table.insert(partsToSelect, descendant)
-			end
+	if selectedParts[targetToSelect] then
+		selectedParts[targetToSelect] = nil
+		if highlights[targetToSelect] then
+			highlights[targetToSelect]:Destroy()
+			highlights[targetToSelect] = nil
 		end
-	elseif target:IsA("BasePart") then
-		table.insert(partsToSelect, target)
-	end
-
-	for _, part in ipairs(partsToSelect) do
-		if selectedParts[part] then
-			selectedParts[part] = nil
-			if highlights[part] then
-				highlights[part]:Destroy()
-				highlights[part] = nil
-			end
-		else
-			selectedParts[part] = true
-			local hl = Instance.new("Highlight")
-			hl.Adornee = part
-			hl.FillColor = Color3.fromRGB(255, 255, 255)
-			hl.FillTransparency = 0.4
-			hl.OutlineColor = Color3.fromRGB(0, 0, 0)
-			hl.Parent = part
-			highlights[part] = hl
-		end
+	else
+		selectedParts[targetToSelect] = true
+		local hl = Instance.new("Highlight")
+		hl.Adornee = targetToSelect
+		hl.FillColor = Color3.fromRGB(255, 255, 255)
+		hl.FillTransparency = 0.4
+		hl.OutlineColor = Color3.fromRGB(0, 0, 0)
+		hl.Parent = targetToSelect
+		highlights[targetToSelect] = hl
 	end
 	
 	local count = 0
@@ -617,7 +612,53 @@ ClearBtn.MouseButton1Click:Connect(function()
 	setConsoleMessage("Selection cleared")
 end)
 
--- Eksekusi Paste
+-- Fungsi Pembangun Instance Rekursif
+local function reconstructInstance(data, parent)
+	local success, newObj = pcall(function()
+		return Instance.new(data.ClassName)
+	end)
+
+	if not success or not newObj then return nil end
+
+	newObj.Name = data.Name or "PastedObject"
+
+	-- Set Properti
+	if data.Props then
+		for prop, val in pairs(data.Props) do
+			pcall(function()
+				if prop == "Size" then
+					newObj.Size = Vector3.new(unpack(val))
+				elseif prop == "Color" then
+					newObj.Color = Color3.new(unpack(val))
+				elseif prop == "Material" then
+					newObj.Material = Enum.Material[val] or Enum.Material.Plastic
+				elseif prop == "Face" then
+					newObj.Face = Enum.NormalId[val]
+				elseif prop == "MeshType" then
+					newObj.MeshType = Enum.MeshType[val]
+				elseif prop == "CFrame" then
+					newObj.CFrame = CFrame.new(unpack(val))
+				elseif prop == "Scale" then
+					newObj.Scale = Vector3.new(unpack(val))
+				else
+					newObj[prop] = val
+				end
+			end)
+		end
+	end
+
+	-- Rekursif untuk Anak Objek
+	if data.Children then
+		for _, childData in ipairs(data.Children) do
+			reconstructInstance(childData, newObj)
+		end
+	end
+
+	newObj.Parent = parent
+	return newObj
+end
+
+-- Eksekusi Paste All Models
 local function executePaste(dataList)
 	if not dataList or #dataList == 0 then return end
 
@@ -627,60 +668,19 @@ local function executePaste(dataList)
 	local total = #dataList
 
 	task.spawn(function()
-		for i, item in ipairs(dataList) do
-			local success, newPart = pcall(function()
-				return Instance.new(item.ClassName or "Part")
-			end)
-			
-			if not success or not newPart then
-				newPart = Instance.new("Part")
-			end
-
-			newPart.Name = item.Name or "PastedPart"
-			newPart.Size = Vector3.new(unpack(item.Size))
-			newPart.Color = Color3.new(unpack(item.Color))
-			newPart.Material = Enum.Material[item.Material] or Enum.Material.Plastic
-			newPart.Transparency = item.Transparency or 0
-			newPart.Reflectance = item.Reflectance or 0
-			
-			-- PENERAPAN FISIKA DAN TABRAKAN
-			newPart.Anchored = item.Anchored
-			newPart.CanCollide = item.CanCollide
-			if item.CanTouch ~= nil then newPart.CanTouch = item.CanTouch end
-			if item.CanQuery ~= nil then newPart.CanQuery = item.CanQuery end
-
-			newPart.CFrame = CFrame.new(unpack(item.CFrame))
-
-			-- Paste Children
-			if item.Children then
-				for _, childData in ipairs(item.Children) do
-					pcall(function()
-						local ch = Instance.new(childData.ClassName)
-						ch.Name = childData.Name
-						for pName, pVal in pairs(childData.Props) do
-							if pName == "Face" then
-								ch.Face = Enum.NormalId[pVal]
-							elseif type(pVal) == "table" then
-								ch[pName] = Vector3.new(unpack(pVal))
-							else
-								ch[pName] = pVal
-							end
-						end
-						ch.Parent = newPart
-					end)
-				end
-			end
-
-			newPart.Parent = folder
-
+		for i, itemData in ipairs(dataList) do
+			local createdObj = reconstructInstance(itemData, folder)
 			local percent = math.floor((i / total) * 100)
-			setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)\n%s", i, total, percent, newPart.Name), Color3.fromRGB(100, 200, 255))
+			
+			if createdObj then
+				setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)\n%s", i, total, percent, createdObj.Name), Color3.fromRGB(100, 200, 255))
+			end
 
-			if i % 50 == 0 then
+			if i % 20 == 0 then
 				task.wait()
 			end
 		end
-		setConsoleMessage("Successfully Pasted " .. total .. " items!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Successfully Pasted " .. total .. " models!", Color3.fromRGB(150, 255, 150))
 	end)
 end
 
@@ -859,7 +859,7 @@ SaveBtn.MouseButton1Click:Connect(function()
 		end
 		
 		if #partList == 0 then 
-			setConsoleMessage("No parts selected!", Color3.fromRGB(255, 100, 100))
+			setConsoleMessage("No parts/models selected!", Color3.fromRGB(255, 100, 100))
 			return 
 		end
 
