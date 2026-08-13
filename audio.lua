@@ -1,5 +1,5 @@
 -- ======================================================
--- PAGE KANAN TERRAIN COPIER & PASTER (DARK WHITE)
+-- PAGE KANAN AUTO-SCAN TERRAIN & PRECISE PASTE
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -38,7 +38,7 @@ ToggleButton.Name = "ToggleButton"
 ToggleButton.Size = UDim2.new(0, 32, 0, 32)
 ToggleButton.Position = UDim2.new(0, 10, 0.5, -16)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-ToggleButton.Text = "⛏️"
+ToggleButton.Text = "⚡"
 ToggleButton.TextSize = 14
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Active = true
@@ -116,12 +116,12 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KANAN ONLY (TERRAIN MANAGER)
+-- 3. PAGE KANAN (AUTO-SCAN & PRECISE PASTE)
 --------------------------------------------------
 local savedStorage = {}
 local multiSelectedMap = {}
 local listButtons = {}
-local selectedTerrainVoxels = {}
+local scannedVoxelsBuffer = {}
 local refreshResultList
 
 local PageKanan = Instance.new("Frame")
@@ -139,7 +139,7 @@ local TitleKanan = Instance.new("TextLabel")
 TitleKanan.Size = UDim2.new(1, -24, 0, 18)
 TitleKanan.Position = UDim2.new(0, 0, 0, 2)
 TitleKanan.BackgroundTransparency = 1
-TitleKanan.Text = "TERRAIN SAVED"
+TitleKanan.Text = "AUTO COPIER"
 TitleKanan.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKanan.TextSize = 10
 TitleKanan.Font = Enum.Font.SourceSansBold
@@ -188,10 +188,10 @@ local function createActionButton(name, text, order)
 	return btn
 end
 
-local ToggleCopyBtn = createActionButton("ToggleCopyBtn", "Copy Mode: OFF", 1)
-local SelectModeBtn = createActionButton("SelectModeBtn", "Mouse Click: OFF", 2)
-local ClearBtn      = createActionButton("ClearBtn", "Reset Selection", 3)
-local SaveBtn       = createActionButton("SaveBtn", "Save Terrain", 4)
+local AutoScanBtn = createActionButton("AutoScanBtn", "🔍 Auto Scan Nearby", 1)
+local QuickCopyBtn = createActionButton("QuickCopyBtn", "⚡ Scan & Save Now", 2)
+local ClearBtn     = createActionButton("ClearBtn", "Reset Storage", 3)
+local SaveBtn      = createActionButton("SaveBtn", "Save to File", 4)
 
 local ResultFrame = Instance.new("ScrollingFrame")
 ResultFrame.Name = "ResultFrame"
@@ -216,7 +216,7 @@ ConsoleLog.Name = "ConsoleLog"
 ConsoleLog.Size = UDim2.new(1, -12, 0, 32)
 ConsoleLog.Position = UDim2.new(0, 6, 0, 154)
 ConsoleLog.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
-ConsoleLog.Text = "> System Ready..."
+ConsoleLog.Text = "> Auto Copier Ready..."
 ConsoleLog.TextColor3 = Color3.fromRGB(150, 255, 150)
 ConsoleLog.TextSize = 8
 ConsoleLog.Font = Enum.Font.Code
@@ -236,20 +236,6 @@ DropdownOverlay.BackgroundTransparency = 1
 DropdownOverlay.Visible = false
 DropdownOverlay.ZIndex = 10
 DropdownOverlay.Parent = PageKanan
-
--- VISUAL SELECTION HIGHLIGHT
-local selectionBox = Instance.new("SelectionBox")
-selectionBox.Color3 = Color3.fromRGB(255, 255, 255)
-selectionBox.LineThickness = 0.05
-selectionBox.Parent = workspace
-
-local selPart = Instance.new("Part")
-selPart.Anchored = true
-selPart.CanCollide = false
-selPart.Transparency = 1
-selPart.Size = Vector3.new(0, 0, 0)
-selPart.Parent = workspace
-selectionBox.Adornee = selPart
 
 local function closeAllDropdowns()
 	DropdownOverlay.Visible = false
@@ -272,21 +258,25 @@ local function setConsoleMessage(text, color)
 end
 
 --------------------------------------------------
--- FUNGSI MEMBACA & MENYIMPAN TERRAIN (RUMPUT, BATU, PASIR)
+-- FUNGSI SCAN AUTOMATIS TERRAIN & PRECISE OFFSET
 --------------------------------------------------
-local function selectTerrainAt(pos)
-	local regionSize = Vector3.new(12, 12, 12) -- Ukuran Bounding Box Seleksi
-	local minPoint = pos - (regionSize / 2)
-	local maxPoint = pos + (regionSize / 2)
+local function autoScanTerrain()
+	local char = LocalPlayer.Character
+	if not char or not char:FindFirstChild("HumanoidRootPart") then
+		setConsoleMessage("Character not found!", Color3.fromRGB(255, 100, 100))
+		return {}
+	end
 
-	selPart.Position = pos
-	selPart.Size = regionSize
+	local centerPos = char.HumanoidRootPart.Position
+	local scanRadius = Vector3.new(24, 16, 24) -- Bounding Box Otomatis
+	local minPoint = centerPos - (scanRadius / 2)
+	local maxPoint = centerPos + (scanRadius / 2)
 
 	local region = Region3.new(minPoint, maxPoint):ExpandToGrid(4)
 	local materials, occupancy = Terrain:ReadVoxels(region, 4)
 	local size = materials.Size
 
-	selectedTerrainVoxels = {}
+	local voxels = {}
 	local validMaterials = {
 		[Enum.Material.Grass] = true,
 		[Enum.Material.Rock]  = true,
@@ -300,10 +290,12 @@ local function selectTerrainAt(pos)
 				local mat = materials[x][y][z]
 				local occ = occupancy[x][y][z]
 				if occ > 0 and validMaterials[mat] then
+					-- Hitung posisi spesifik voxel relatif terhadap titik tengah scan
 					local voxelWorldPos = region.CFrame.Position - (region.Size/2) + Vector3.new(x*4 - 2, y*4 - 2, z*4 - 2)
-					local relPos = voxelWorldPos - pos
-					table.insert(selectedTerrainVoxels, {
-						RelPos = {relPos.X, relPos.Y, relPos.Z},
+					local relPos = voxelWorldPos - centerPos
+
+					table.insert(voxels, {
+						RelPos = {math.round(relPos.X), math.round(relPos.Y), math.round(relPos.Z)},
 						Material = mat.Name
 					})
 					count = count + 1
@@ -311,87 +303,83 @@ local function selectTerrainAt(pos)
 			end
 		end
 	end
-	setConsoleMessage("Selected: " .. count .. " Voxels (Grass/Rock/Sand)", Color3.fromRGB(255, 220, 100))
+
+	setConsoleMessage("Auto Scanned " .. count .. " Voxels!", Color3.fromRGB(100, 255, 200))
+	return voxels
 end
 
---------------------------------------------------
--- LOGIKA PENANGANAN SELECTION & PASTE
---------------------------------------------------
-local isCopyEnabled = false
-local isSelecting = false
-
-ToggleCopyBtn.MouseButton1Click:Connect(function()
-	isCopyEnabled = not isCopyEnabled
-	if isCopyEnabled then
-		ToggleCopyBtn.Text = "Copy Mode: ON"
-		ToggleCopyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		setConsoleMessage("Copy Mode Active")
-	else
-		isSelecting = false
-		SelectModeBtn.Text = "Mouse Click: OFF"
-		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		ToggleCopyBtn.Text = "Copy Mode: OFF"
-		ToggleCopyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		setConsoleMessage("Copy Mode Standby")
-	end
-end)
-
-SelectModeBtn.MouseButton1Click:Connect(function()
-	if not isCopyEnabled then return end
-	isSelecting = not isSelecting
-	if isSelecting then
-		SelectModeBtn.Text = "Mouse Click: ON"
-		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(50, 80, 120)
-		setConsoleMessage("Click terrain to select voxels")
-	else
-		SelectModeBtn.Text = "Mouse Click: OFF"
-		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	end
-end)
-
-Mouse.Button1Down:Connect(function()
-	if not isCopyEnabled or not isSelecting then return end
-	if Mouse.Target then
-		selectTerrainAt(Mouse.Hit.Position)
-	end
-end)
-
-ClearBtn.MouseButton1Click:Connect(function()
-	selectedTerrainVoxels = {}
-	selPart.Size = Vector3.new(0, 0, 0)
-	setConsoleMessage("Terrain Selection Cleared")
-end)
-
--- Eksekusi Paste Terrain
-local function executePasteTerrain(voxelList)
+-- Eksekusi Paste dengan Rapi Presisi Sesuai Titik Kursor Mouse
+local function executePrecisePaste(voxelList)
 	if not voxelList or #voxelList == 0 then return end
 	if not Mouse.Target then
-		setConsoleMessage("Hover mouse to terrain to paste!", Color3.fromRGB(255, 100, 100))
+		setConsoleMessage("Target Mouse hit position missing!", Color3.fromRGB(255, 100, 100))
 		return
 	end
 
 	local hitPos = Mouse.Hit.Position
+	-- Pembulatan Grid (4 stud) agar hasil tempel rapi teratur
+	local gridTargetPos = Vector3.new(
+		math.floor(hitPos.X / 4 + 0.5) * 4,
+		math.floor(hitPos.Y / 4 + 0.5) * 4,
+		math.floor(hitPos.Z / 4 + 0.5) * 4
+	)
+
 	local total = #voxelList
 
 	task.spawn(function()
 		for i, item in ipairs(voxelList) do
 			local relVec = Vector3.new(unpack(item.RelPos))
-			local spawnPos = hitPos + relVec
+			local spawnPos = gridTargetPos + relVec
 			local matEnum = Enum.Material[item.Material] or Enum.Material.Grass
 
+			-- Tempel Voxel dengan Presisi Ukuran Grid Roblox
 			Terrain:FillBlock(CFrame.new(spawnPos), Vector3.new(4, 4, 4), matEnum)
 
-			if i % 20 == 0 then
+			if i % 25 == 0 then
 				local percent = math.floor((i / total) * 100)
-				setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)", i, total, percent), Color3.fromRGB(100, 200, 255))
+				setConsoleMessage(string.format("[PASTING %d/%d] (%d%%)", i, total, percent), Color3.fromRGB(100, 200, 255))
 				task.wait()
 			end
 		end
-		setConsoleMessage("Successfully Pasted " .. total .. " Voxels!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Pasted " .. total .. " Voxels Perfectly!", Color3.fromRGB(150, 255, 150))
 	end)
 end
 
--- Refresh UI List Hasil
+--------------------------------------------------
+-- TOMBOL AKSI & HANDLER
+--------------------------------------------------
+AutoScanBtn.MouseButton1Click:Connect(function()
+	scannedVoxelsBuffer = autoScanTerrain()
+end)
+
+QuickCopyBtn.MouseButton1Click:Connect(function()
+	local voxels = autoScanTerrain()
+	if #voxels == 0 then return end
+
+	local payload = {
+		Title = "Scan " .. (#savedStorage + 1),
+		Voxels = voxels
+	}
+	table.insert(savedStorage, payload)
+	saveStorageToFile()
+	refreshResultList()
+	setConsoleMessage("Auto Scanned & Saved (" .. #voxels .. " voxels)", Color3.fromRGB(150, 255, 150))
+end)
+
+ClearBtn.MouseButton1Click:Connect(function()
+	savedStorage = {}
+	multiSelectedMap = {}
+	saveStorageToFile()
+	refreshResultList()
+	setConsoleMessage("Storage cleared!")
+end)
+
+SaveBtn.MouseButton1Click:Connect(function()
+	saveStorageToFile()
+	setConsoleMessage("Saved data to file successfully")
+end)
+
+-- Refresh List
 refreshResultList = function()
 	closeAllDropdowns()
 	for _, btn in ipairs(listButtons) do
@@ -434,13 +422,9 @@ refreshResultList = function()
 		itemBtn.Font = Enum.Font.SourceSans
 		itemBtn.Parent = itemFrame
 
+		-- Klik Item untuk Langsung Paste Presisi
 		itemBtn.MouseButton1Click:Connect(function()
-			if next(multiSelectedMap) then
-				multiSelectedMap[idx] = not multiSelectedMap[idx] or nil
-				refreshResultList()
-			else
-				executePasteTerrain(itemData.Voxels)
-			end
+			executePrecisePaste(itemData.Voxels)
 		end)
 
 		itemMenuBtn.MouseButton1Click:Connect(function()
@@ -470,10 +454,9 @@ refreshResultList = function()
 
 			delBtn.MouseButton1Click:Connect(function()
 				table.remove(savedStorage, idx)
-				multiSelectedMap[idx] = nil
 				saveStorageToFile()
 				refreshResultList()
-				setConsoleMessage("Terrain deleted from storage")
+				setConsoleMessage("Item deleted from storage")
 			end)
 		end)
 
@@ -554,28 +537,6 @@ DropdownOverlay.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		closeAllDropdowns()
 	end
-end)
-
--- Save Button Action
-SaveBtn.MouseButton1Click:Connect(function()
-	if not isCopyEnabled then return end
-	if #selectedTerrainVoxels == 0 then 
-		setConsoleMessage("No terrain voxels selected!", Color3.fromRGB(255, 100, 100))
-		return 
-	end
-
-	local payload = {
-		Title = "Terrain " .. (#savedStorage + 1),
-		Voxels = selectedTerrainVoxels
-	}
-
-	table.insert(savedStorage, payload)
-	saveStorageToFile()
-	refreshResultList()
-	
-	selectedTerrainVoxels = {}
-	selPart.Size = Vector3.new(0, 0, 0)
-	setConsoleMessage("Saved " .. #payload.Voxels .. " voxels to Storage!", Color3.fromRGB(150, 255, 150))
 end)
 
 -- Auto Load Storage
