@@ -57,8 +57,8 @@ UIStrokeIcon.Parent = ToggleButton
 -- Main Frame Disesuaikan Khusus Page Kanan
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 162, 0, 220)
-MainFrame.Position = UDim2.new(0.5, -81, 0.5, -110)
+MainFrame.Size = UDim2.new(0, 162, 0, 235)
+MainFrame.Position = UDim2.new(0.5, -81, 0.5, -117)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -160,7 +160,7 @@ UICornerHeaderBtn.CornerRadius = UDim.new(0, 3)
 UICornerHeaderBtn.Parent = HeaderMenuBtn
 
 local BtnContainer = Instance.new("Frame")
-BtnContainer.Size = UDim2.new(1, -12, 0, 68)
+BtnContainer.Size = UDim2.new(1, -12, 0, 84)
 BtnContainer.Position = UDim2.new(0, 6, 0, 20)
 BtnContainer.BackgroundTransparency = 1
 BtnContainer.Parent = PageKanan
@@ -188,15 +188,16 @@ local function createActionButton(name, text, order)
 	return btn
 end
 
-local AutoScanBtn = createActionButton("AutoScanBtn", "🔍 Auto Scan Nearby", 1)
-local QuickCopyBtn = createActionButton("QuickCopyBtn", "⚡ Scan & Save Now", 2)
-local ClearBtn     = createActionButton("ClearBtn", "Reset Storage", 3)
-local SaveBtn      = createActionButton("SaveBtn", "Save to File", 4)
+local AutoScanBtn    = createActionButton("AutoScanBtn", "🔍 Auto Scan Nearby", 1)
+local QuickCopyBtn   = createActionButton("QuickCopyBtn", "⚡ Scan & Save Now", 2)
+local GenConsoleBtn  = createActionButton("GenConsoleBtn", "📜 Gen Code Console", 3)
+local ClearBtn       = createActionButton("ClearBtn", "Reset Storage", 4)
+local SaveBtn        = createActionButton("SaveBtn", "Save to File", 5)
 
 local ResultFrame = Instance.new("ScrollingFrame")
 ResultFrame.Name = "ResultFrame"
-ResultFrame.Size = UDim2.new(1, -12, 0, 60)
-ResultFrame.Position = UDim2.new(0, 6, 0, 90)
+ResultFrame.Size = UDim2.new(1, -12, 0, 50)
+ResultFrame.Position = UDim2.new(0, 6, 0, 108)
 ResultFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 ResultFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ResultFrame.ScrollBarThickness = 2
@@ -214,7 +215,7 @@ ResultListLayout.Parent = ResultFrame
 local ConsoleLog = Instance.new("TextLabel")
 ConsoleLog.Name = "ConsoleLog"
 ConsoleLog.Size = UDim2.new(1, -12, 0, 32)
-ConsoleLog.Position = UDim2.new(0, 6, 0, 154)
+ConsoleLog.Position = UDim2.new(0, 6, 0, 162)
 ConsoleLog.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
 ConsoleLog.Text = "> Auto Copier Ready..."
 ConsoleLog.TextColor3 = Color3.fromRGB(150, 255, 150)
@@ -346,6 +347,75 @@ local function executePrecisePaste(voxelList)
 end
 
 --------------------------------------------------
+-- GENERATOR KODE UNTUK DEV CONSOLE (F9)
+--------------------------------------------------
+local function generateConsoleCode(voxelList)
+	if not voxelList or #voxelList == 0 then
+		setConsoleMessage("No Voxels to Generate!", Color3.fromRGB(255, 100, 100))
+		return
+	end
+
+	local jsonVoxels = HttpService:JSONEncode(voxelList)
+	local standaloneScript = string.format([[
+-- ======================================================
+-- GENERATED TERRAIN PASTE SCRIPT BY @IkyyXD
+-- TOTAL VOXELS: %d
+-- ======================================================
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local Terrain = workspace.Terrain
+local Mouse = Players.LocalPlayer:GetMouse()
+
+local rawData = %q
+local voxels = HttpService:JSONDecode(rawData)
+
+if not Mouse.Target then
+    warn("[IkyyCopier] Arahkan kursor mouse ke permukaan objek/terrain terlebih dahulu!")
+    return
+end
+
+local hitPos = Mouse.Hit.Position
+local gridTargetPos = Vector3.new(
+    math.floor(hitPos.X / 4 + 0.5) * 4,
+    math.floor(hitPos.Y / 4 + 0.5) * 4,
+    math.floor(hitPos.Z / 4 + 0.5) * 4
+)
+
+print("[IkyyCopier] Memulai Menempel " .. #voxels .. " Voxels...")
+
+task.spawn(function()
+    for i, item in ipairs(voxels) do
+        local relVec = Vector3.new(unpack(item.RelPos))
+        local spawnPos = gridTargetPos + relVec
+        local matEnum = Enum.Material[item.Material] or Enum.Material.Grass
+
+        Terrain:FillBlock(CFrame.new(spawnPos), Vector3.new(4, 4, 4), matEnum)
+
+        if i %% 25 == 0 then
+            task.wait()
+        end
+    end
+    print("[IkyyCopier] Terrain Berhasil Ditempel Secara Presisi!")
+end)
+]], #voxelList, jsonVoxels)
+
+	-- Print ke Console F9 dengan format bersih
+	print("\n\n" .. string.rep("=", 50))
+	print("--- BEGIN GENERATED CODE (" .. #voxelList .. " VOXELS) ---")
+	print(standaloneScript)
+	print("--- END GENERATED CODE ---")
+	print(string.rep("=", 50) .. "\n\n")
+
+	-- Copy ke Clipboard Executor (Jika didukung)
+	if setclipboard then
+		setclipboard(standaloneScript)
+		setConsoleMessage("Code printed to F9 & Copied to Clipboard!", Color3.fromRGB(100, 255, 150))
+	else
+		setConsoleMessage("Code printed to Console (F9)!", Color3.fromRGB(255, 220, 100))
+	end
+end
+
+--------------------------------------------------
 -- TOMBOL AKSI & HANDLER
 --------------------------------------------------
 AutoScanBtn.MouseButton1Click:Connect(function()
@@ -366,9 +436,24 @@ QuickCopyBtn.MouseButton1Click:Connect(function()
 	setConsoleMessage("Auto Scanned & Saved (" .. #voxels .. " voxels)", Color3.fromRGB(150, 255, 150))
 end)
 
+GenConsoleBtn.MouseButton1Click:Connect(function()
+	if #scannedVoxelsBuffer > 0 then
+		generateConsoleCode(scannedVoxelsBuffer)
+	elseif #savedStorage > 0 then
+		generateConsoleCode(savedStorage[#savedStorage].Voxels)
+	else
+		local voxels = autoScanTerrain()
+		if #voxels > 0 then
+			scannedVoxelsBuffer = voxels
+			generateConsoleCode(voxels)
+		end
+	end
+end)
+
 ClearBtn.MouseButton1Click:Connect(function()
 	savedStorage = {}
 	multiSelectedMap = {}
+	scannedVoxelsBuffer = {}
 	saveStorageToFile()
 	refreshResultList()
 	setConsoleMessage("Storage cleared!")
@@ -432,8 +517,8 @@ refreshResultList = function()
 			DropdownOverlay.Visible = true
 
 			local popMenu = Instance.new("Frame")
-			popMenu.Size = UDim2.new(0, 60, 0, 18)
-			popMenu.Position = UDim2.new(0, 20, 0, math.clamp(itemFrame.AbsolutePosition.Y - ResultFrame.AbsolutePosition.Y + 90, 10, 180))
+			popMenu.Size = UDim2.new(0, 75, 0, 34)
+			popMenu.Position = UDim2.new(0, 20, 0, math.clamp(itemFrame.AbsolutePosition.Y - ResultFrame.AbsolutePosition.Y + 108, 10, 180))
 			popMenu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 			popMenu.ZIndex = 11
 			popMenu.Parent = DropdownOverlay
@@ -442,8 +527,22 @@ refreshResultList = function()
 			popCorner.CornerRadius = UDim.new(0, 3)
 			popCorner.Parent = popMenu
 
+			local popLayout = Instance.new("UIListLayout")
+			popLayout.SortOrder = Enum.SortOrder.LayoutOrder
+			popLayout.Parent = popMenu
+
+			local genItemBtn = Instance.new("TextButton")
+			genItemBtn.Size = UDim2.new(1, 0, 0, 17)
+			genItemBtn.BackgroundTransparency = 1
+			genItemBtn.Text = "📜 Gen Code"
+			genItemBtn.TextColor3 = Color3.fromRGB(150, 255, 150)
+			genItemBtn.TextSize = 8
+			genItemBtn.Font = Enum.Font.SourceSansBold
+			genItemBtn.ZIndex = 12
+			genItemBtn.Parent = popMenu
+
 			local delBtn = Instance.new("TextButton")
-			delBtn.Size = UDim2.new(1, 0, 1, 0)
+			delBtn.Size = UDim2.new(1, 0, 0, 17)
 			delBtn.BackgroundTransparency = 1
 			delBtn.Text = "🗑️ Hapus"
 			delBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -451,6 +550,11 @@ refreshResultList = function()
 			delBtn.Font = Enum.Font.SourceSansBold
 			delBtn.ZIndex = 12
 			delBtn.Parent = popMenu
+
+			genItemBtn.MouseButton1Click:Connect(function()
+				generateConsoleCode(itemData.Voxels)
+				closeAllDropdowns()
+			end)
 
 			delBtn.MouseButton1Click:Connect(function()
 				table.remove(savedStorage, idx)
