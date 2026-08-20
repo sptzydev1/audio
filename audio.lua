@@ -1,5 +1,5 @@
 -- ======================================================
--- MINI BUILD COPIER & PASTER (DARK WHITE) - STUCK-FREE REAL-TIME PROGRESS
+-- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE)
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -8,6 +8,7 @@ local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
 -- Mendapatkan Nama Game
 local gameName = "Map Item"
@@ -52,7 +53,7 @@ UIStrokeIcon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStrokeIcon.Thickness = 1.5
 UIStrokeIcon.Parent = ToggleButton
 
--- Main Frame
+-- Main Frame UKURAN MINI (Lebar: 460px, Tinggi: 220px)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 460, 0, 220)
@@ -72,7 +73,7 @@ UIStrokeMain.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStrokeMain.Thickness = 1.5
 UIStrokeMain.Parent = MainFrame
 
--- Gradient Effect
+-- Gradient Sinar Putih Berjalan
 local UIGradientIcon = Instance.new("UIGradient")
 UIGradientIcon.Color = ColorSequence.new({
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 40)),
@@ -101,7 +102,7 @@ ToggleButton.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- 2. WATERMARK BAWAH
+-- 2. WATERMARK PALING BAWAH (@IkyyXD)
 --------------------------------------------------
 local BottomWatermark = Instance.new("TextLabel")
 BottomWatermark.Size = UDim2.new(1, 0, 0, 16)
@@ -114,7 +115,7 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KIRI: TOMBOL COPY DENGAN DISPLAY PROGRESS
+-- 3. PAGE KIRI: LIST FITUR MINI
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
 PageKiri.Name = "PageKiri"
@@ -128,29 +129,48 @@ UICornerKiri.CornerRadius = UDim.new(0, 6)
 UICornerKiri.Parent = PageKiri
 
 local TitleKiri = Instance.new("TextLabel")
-TitleKiri.Size = UDim2.new(1, 0, 0, 24)
-TitleKiri.Position = UDim2.new(0, 0, 0, 4)
+TitleKiri.Size = UDim2.new(1, 0, 0, 18)
+TitleKiri.Position = UDim2.new(0, 0, 0, 2)
 TitleKiri.BackgroundTransparency = 1
-TitleKiri.Text = "AUTO COPY"
+TitleKiri.Text = "LIST FITUR"
 TitleKiri.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKiri.TextSize = 10
 TitleKiri.Font = Enum.Font.SourceSansBold
 TitleKiri.Parent = PageKiri
 
-local SelectAllWorkspaceBtn = Instance.new("TextButton")
-SelectAllWorkspaceBtn.Size = UDim2.new(1, -16, 0, 130)
-SelectAllWorkspaceBtn.Position = UDim2.new(0, 8, 0, 38)
-SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-SelectAllWorkspaceBtn.Text = "⚡\nCOPY ALL\nWORKSPACE"
-SelectAllWorkspaceBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SelectAllWorkspaceBtn.TextSize = 11
-SelectAllWorkspaceBtn.Font = Enum.Font.SourceSansBold
-SelectAllWorkspaceBtn.TextWrapped = true
-SelectAllWorkspaceBtn.Parent = PageKiri
+local ListContainer = Instance.new("Frame")
+ListContainer.Size = UDim2.new(1, -12, 1, -26)
+ListContainer.Position = UDim2.new(0, 6, 0, 22)
+ListContainer.BackgroundTransparency = 1
+ListContainer.Parent = PageKiri
 
-local UICornerCopy = Instance.new("UICorner")
-UICornerCopy.CornerRadius = UDim.new(0, 6)
-UICornerCopy.Parent = SelectAllWorkspaceBtn
+local UIListKiri = Instance.new("UIListLayout")
+UIListKiri.SortOrder = Enum.SortOrder.LayoutOrder
+UIListKiri.Padding = UDim.new(0, 3)
+UIListKiri.Parent = ListContainer
+
+local function createFeatureLabel(text, order)
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(1, 0, 0, 22)
+	lbl.LayoutOrder = order
+	lbl.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+	lbl.Text = text
+	lbl.TextColor3 = Color3.fromRGB(220, 220, 220)
+	lbl.TextSize = 9
+	lbl.Font = Enum.Font.SourceSans
+	lbl.Parent = ListContainer
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 4)
+	corner.Parent = lbl
+	return lbl
+end
+
+createFeatureLabel("• Multi-Select Object", 1)
+createFeatureLabel("• Auto Save Storage", 2)
+createFeatureLabel("• Direct Click Paste", 3)
+createFeatureLabel("• Precise Position", 4)
+createFeatureLabel("• Console Live Log", 5)
 
 --------------------------------------------------
 -- 4. PAGE TENGAH: PROFILE MINI
@@ -220,7 +240,7 @@ task.spawn(function()
 end)
 
 --------------------------------------------------
--- 5. PAGE KANAN: SAVED DATA & CONSOLE LOG
+-- 5. PAGE KANAN: KONTROL, LIST & CONSOLE LOG
 --------------------------------------------------
 local PageKanan = Instance.new("Frame")
 PageKanan.Name = "PageKanan"
@@ -243,6 +263,7 @@ TitleKanan.TextSize = 10
 TitleKanan.Font = Enum.Font.SourceSansBold
 TitleKanan.Parent = PageKanan
 
+-- Tombol Titik 3 Header
 local HeaderMenuBtn = Instance.new("TextButton")
 HeaderMenuBtn.Size = UDim2.new(0, 16, 0, 16)
 HeaderMenuBtn.Position = UDim2.new(1, -20, 0, 3)
@@ -291,6 +312,7 @@ local SelectModeBtn = createActionButton("SelectModeBtn", "Mouse Click: OFF", 2)
 local ClearBtn      = createActionButton("ClearBtn", "Reset Selection", 3)
 local SaveBtn       = createActionButton("SaveBtn", "Save Data", 4)
 
+-- Scroll Container List Hasil
 local ResultFrame = Instance.new("ScrollingFrame")
 ResultFrame.Name = "ResultFrame"
 ResultFrame.Size = UDim2.new(1, -12, 0, 60)
@@ -309,6 +331,7 @@ ResultListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ResultListLayout.Padding = UDim.new(0, 2)
 ResultListLayout.Parent = ResultFrame
 
+-- Console Log Box (Menampilkan status copy/paste)
 local ConsoleLog = Instance.new("TextLabel")
 ConsoleLog.Name = "ConsoleLog"
 ConsoleLog.Size = UDim2.new(1, -12, 0, 32)
@@ -327,6 +350,7 @@ local UICornerConsole = Instance.new("UICorner")
 UICornerConsole.CornerRadius = UDim.new(0, 4)
 UICornerConsole.Parent = ConsoleLog
 
+-- Overlay Frame Global untuk Dropdown Menu
 local DropdownOverlay = Instance.new("Frame")
 DropdownOverlay.Name = "DropdownOverlay"
 DropdownOverlay.Size = UDim2.new(1, 0, 1, 0)
@@ -343,11 +367,12 @@ local function closeAllDropdowns()
 end
 
 --------------------------------------------------
--- 6. LOGIKA SYSTEM (AUTO COPY & SERIALIZATION)
+-- 6. LOGIKA SYSTEM (SELEKSI, LOADING & LOGGING)
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
-local isCurrentlyCopying = false
+local selectedParts = {}
+local highlights = {}
 local savedStorage = {}
 local multiSelectedMap = {}
 local listButtons = {}
@@ -394,228 +419,123 @@ SelectModeBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- Penyeleksian Lengkap
+Mouse.Button1Down:Connect(function()
+	if not isCopyEnabled or not isSelecting then return end
+	local target = Mouse.Target
+	if not target then return end
+
+	local ancestorModel = target:FindFirstAncestorOfClass("Model")
+	local partsToSelect = {}
+
+	if ancestorModel and ancestorModel ~= workspace then
+		for _, descendant in ipairs(ancestorModel:GetDescendants()) do
+			if descendant:IsA("BasePart") then
+				table.insert(partsToSelect, descendant)
+			end
+		end
+	elseif target:IsA("BasePart") then
+		table.insert(partsToSelect, target)
+	end
+
+	for _, part in ipairs(partsToSelect) do
+		if selectedParts[part] then
+			selectedParts[part] = nil
+			if highlights[part] then
+				highlights[part]:Destroy()
+				highlights[part] = nil
+			end
+		else
+			selectedParts[part] = true
+			local hl = Instance.new("Highlight")
+			hl.Adornee = part
+			hl.FillColor = Color3.fromRGB(255, 255, 255)
+			hl.FillTransparency = 0.4
+			hl.OutlineColor = Color3.fromRGB(0, 0, 0)
+			hl.Parent = part
+			highlights[part] = hl
+		end
+	end
+	
+	local count = 0
+	for _ in pairs(selectedParts) do count = count + 1 end
+	setConsoleMessage("Selected: " .. count .. " items")
+end)
+
 ClearBtn.MouseButton1Click:Connect(function()
+	for part, hl in pairs(highlights) do
+		if hl then hl:Destroy() end
+	end
+	selectedParts = {}
+	highlights = {}
 	setConsoleMessage("Selection cleared")
 end)
 
---------------------------------------------------
--- SERIALISASI BASEPART
---------------------------------------------------
-local function serializeBasePart(inst)
-	local data = {
-		Name = inst.Name,
-		ClassName = inst.ClassName,
-		Size = {inst.Size.X, inst.Size.Y, inst.Size.Z},
-		Color = {inst.Color.R, inst.Color.G, inst.Color.B},
-		Material = inst.Material.Name,
-		Transparency = inst.Transparency,
-		Reflectance = inst.Reflectance,
-		Anchored = inst.Anchored,
-		CanCollide = inst.CanCollide,
-		CFrame = {inst.CFrame:GetComponents()},
-		Children = {}
-	}
-
-	if inst:IsA("MeshPart") then
-		pcall(function() data.MeshId = inst.MeshId end)
-		pcall(function() data.TextureID = inst.TextureID end)
-	elseif inst:IsA("Part") then
-		data.Shape = inst.Shape.Name
+-- Progress Copy dengan Nama Asli
+local function serializeParts()
+	local data = {}
+	local partList = {}
+	for part in pairs(selectedParts) do
+		if part then table.insert(partList, part) end
 	end
 
-	for _, child in ipairs(inst:GetChildren()) do
-		if child:IsA("SpecialMesh") or child:IsA("BlockMesh") or child:IsA("CylinderMesh") then
-			local meshData = {
-				Name = child.Name,
-				ClassName = child.ClassName,
-				TextureId = child.TextureId,
-				Scale = {child.Scale.X, child.Scale.Y, child.Scale.Z},
-				Offset = {child.Offset.X, child.Offset.Y, child.Offset.Z}
-			}
-			if child:IsA("SpecialMesh") then
-				meshData.MeshId = child.MeshId
-				meshData.MeshType = child.MeshType.Name
-			end
-			table.insert(data.Children, meshData)
-		elseif child:IsA("Decal") or child:IsA("Texture") then
-			local decalData = {
-				Name = child.Name,
-				ClassName = child.ClassName,
-				Texture = child.Texture,
-				Face = child.Face.Name,
-				Transparency = child.Transparency,
-				Color3 = {child.Color3.R, child.Color3.G, child.Color3.B}
-			}
-			if child:IsA("Texture") then
-				decalData.StudsPerTileU = child.StudsPerTileU
-				decalData.StudsPerTileV = child.StudsPerTileV
-			end
-			table.insert(data.Children, decalData)
-		end
-	end
+	local total = #partList
+	for i, part in ipairs(partList) do
+		table.insert(data, {
+			Name = part.Name,
+			ClassName = part.ClassName,
+			Size = {part.Size.X, part.Size.Y, part.Size.Z},
+			Color = {part.Color.R, part.Color.G, part.Color.B},
+			Material = part.Material.Name,
+			Transparency = part.Transparency,
+			Anchored = part.Anchored,
+			CanCollide = part.CanCollide,
+			CFrame = {part.CFrame:GetComponents()}
+		})
 
+		-- Update Log Progress Copy Sesuai Nama Asli Item
+		setConsoleMessage(string.format("[COPY %d/%d]\n%s", i, total, part.Name), Color3.fromRGB(255, 220, 100))
+		if i % 10 == 0 then task.wait() end
+	end
 	return data
 end
 
-local function deserializeBasePart(data)
-	local inst = Instance.new(data.ClassName)
-	inst.Name = data.Name
-
-	if inst:IsA("BasePart") then
-		inst.Size = Vector3.new(unpack(data.Size))
-		inst.Color = Color3.new(unpack(data.Color))
-		inst.Material = Enum.Material[data.Material] or Enum.Material.Plastic
-		inst.Transparency = data.Transparency or 0
-		inst.Reflectance = data.Reflectance or 0
-		inst.Anchored = data.Anchored
-		inst.CanCollide = data.CanCollide
-		inst.CFrame = CFrame.new(unpack(data.CFrame))
-
-		if inst:IsA("MeshPart") and data.MeshId then
-			pcall(function() inst.MeshId = data.MeshId end)
-			pcall(function() inst.TextureID = data.TextureID end)
-		elseif inst:IsA("Part") and data.Shape then
-			pcall(function() inst.Shape = Enum.PartType[data.Shape] end)
-		end
-	end
-
-	if data.Children then
-		for _, childData in ipairs(data.Children) do
-			local childInst = Instance.new(childData.ClassName)
-			childInst.Name = childData.Name
-
-			if childInst:IsA("SpecialMesh") or childInst:IsA("BlockMesh") or childInst:IsA("CylinderMesh") then
-				if childInst:IsA("SpecialMesh") then
-					if childData.MeshId then childInst.MeshId = childData.MeshId end
-					if childData.MeshType then childInst.MeshType = Enum.MeshType[childData.MeshType] end
-				end
-				if childData.TextureId then childInst.TextureId = childData.TextureId end
-				if childData.Scale then childInst.Scale = Vector3.new(unpack(childData.Scale)) end
-				if childData.Offset then childInst.Offset = Vector3.new(unpack(childData.Offset)) end
-			elseif childInst:IsA("Decal") or childInst:IsA("Texture") then
-				if childData.Texture then childInst.Texture = childData.Texture end
-				if childData.Face then childInst.Face = Enum.NormalId[childData.Face] end
-				if childData.Transparency then childInst.Transparency = childData.Transparency end
-				if childData.Color3 then childInst.Color3 = Color3.new(unpack(childData.Color3)) end
-				if childInst:IsA("Texture") then
-					if childData.StudsPerTileU then childInst.StudsPerTileU = childData.StudsPerTileU end
-					if childData.StudsPerTileV then childInst.StudsPerTileV = childData.StudsPerTileV end
-				end
-			end
-			childInst.Parent = inst
-		end
-	end
-
-	return inst
-end
-
---------------------------------------------------
--- AKSI COPY DENGAN BATCHING (ANTI STUCK)
---------------------------------------------------
-SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
-	if isCurrentlyCopying then return end
-	if not isCopyEnabled then
-		setConsoleMessage("Aktifkan Copy Mode (ON) dulu!", Color3.fromRGB(255, 100, 100))
-		return
-	end
-
-	isCurrentlyCopying = true
-	SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(60, 50, 20)
-	SelectAllWorkspaceBtn.Text = "⏳\nMEMINDAYI\nMAP..."
-	setConsoleMessage("Memindai item Workspace...", Color3.fromRGB(255, 220, 100))
-
-	task.spawn(function()
-		local myChar = LocalPlayer.Character
-		local partsToCopy = {}
-		local allDescendants = workspace:GetDescendants()
-
-		-- Filter parts tanpa membuat game freeze
-		for i, desc in ipairs(allDescendants) do
-			if desc:IsA("BasePart") and not desc:IsA("Terrain") then
-				if not (myChar and desc:IsDescendantOf(myChar)) then
-					table.insert(partsToCopy, desc)
-				end
-			end
-			if i % 500 == 0 then
-				task.wait() -- Mencegah freeze saat scanning objek
-			end
-		end
-
-		local total = #partsToCopy
-		if total == 0 then
-			SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-			SelectAllWorkspaceBtn.Text = "⚡\nCOPY ALL\nWORKSPACE"
-			setConsoleMessage("Workspace Kosong / Tidak ada Part!", Color3.fromRGB(255, 100, 100))
-			isCurrentlyCopying = false
-			return
-		end
-
-		local serializedData = {}
-		for i, part in ipairs(partsToCopy) do
-			pcall(function()
-				table.insert(serializedData, serializeBasePart(part))
-			end)
-
-			local percent = math.floor((i / total) * 100)
-			SelectAllWorkspaceBtn.Text = string.format("🔄 COPYING...\n%d%%\n\n[%s]", percent, part.Name)
-
-			-- Berikan jeda frame secara teratur agar UI ter-update tanpa stuck
-			if i % 15 == 0 or i == total then
-				setConsoleMessage(string.format("[%d/%d] (%d%%) - %s", i, total, percent, part.Name), Color3.fromRGB(255, 220, 100))
-				task.wait()
-			end
-		end
-
-		local payload = {
-			Title = gameName .. " (Full Scan)",
-			Parts = serializedData
-		}
-
-		table.insert(savedStorage, payload)
-		saveStorageToFile()
-		refreshResultList()
-
-		SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(20, 60, 30)
-		SelectAllWorkspaceBtn.Text = string.format("✅\nSUKSES 100%\n(%d Parts)", #serializedData)
-		setConsoleMessage("Sukses Copy All! (" .. #serializedData .. " Part)", Color3.fromRGB(150, 255, 150))
-
-		task.wait(2.5)
-		SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-		SelectAllWorkspaceBtn.Text = "⚡\nCOPY ALL\nWORKSPACE"
-		isCurrentlyCopying = false
-	end)
-end)
-
---------------------------------------------------
--- PASTE EXECUTION
---------------------------------------------------
+-- Progress Paste dengan Nama Asli
 local function executePaste(dataList)
 	if not dataList or #dataList == 0 then return end
 
-	local mainFolder = Instance.new("Folder")
-	mainFolder.Name = "Pasted_Build_" .. math.random(100, 999)
-	mainFolder.Parent = workspace
+	local folder = Instance.new("Folder")
+	folder.Name = "Pasted_" .. math.random(100, 999)
+	folder.Parent = workspace
 	local total = #dataList
 
 	task.spawn(function()
-		for i, itemData in ipairs(dataList) do
-			local newPart = deserializeBasePart(itemData)
-			if newPart then
-				newPart.Parent = mainFolder
-			end
+		for i, item in ipairs(dataList) do
+			local newPart = Instance.new(item.ClassName or "Part")
+			newPart.Name = item.Name or "PastedPart"
+			newPart.Size = Vector3.new(unpack(item.Size))
+			newPart.Color = Color3.new(unpack(item.Color))
+			newPart.Material = Enum.Material[item.Material] or Enum.Material.Plastic
+			newPart.Transparency = item.Transparency or 0
+			newPart.Anchored = item.Anchored
+			newPart.CanCollide = item.CanCollide
+			newPart.CFrame = CFrame.new(unpack(item.CFrame))
+			newPart.Parent = folder
 
-			if i % 15 == 0 or i == total then
-				local percent = math.floor((i / total) * 100)
-				setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)", i, total, percent), Color3.fromRGB(100, 200, 255))
+			-- Update Log Progress Paste
+			local percent = math.floor((i / total) * 100)
+			setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)\n%s", i, total, percent, newPart.Name), Color3.fromRGB(100, 200, 255))
+
+			if i % 50 == 0 then
 				task.wait()
 			end
 		end
-		setConsoleMessage("Paste Sukses (" .. total .. " Part)!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Successfully Pasted " .. total .. " items!", Color3.fromRGB(150, 255, 150))
 	end)
 end
 
 -- Refresh UI List Hasil
-function refreshResultList()
+local function refreshResultList()
 	closeAllDropdowns()
 	for _, btn in ipairs(listButtons) do
 		btn:Destroy()
@@ -657,6 +577,7 @@ function refreshResultList()
 		itemBtn.Font = Enum.Font.SourceSans
 		itemBtn.Parent = itemFrame
 
+		-- Klik Item -> Langsung Paste + Loading Log
 		itemBtn.MouseButton1Click:Connect(function()
 			if next(multiSelectedMap) then
 				multiSelectedMap[idx] = not multiSelectedMap[idx] or nil
@@ -666,6 +587,7 @@ function refreshResultList()
 			end
 		end)
 
+		-- Popup Menu Dropdown Hapus
 		itemMenuBtn.MouseButton1Click:Connect(function()
 			closeAllDropdowns()
 			DropdownOverlay.Visible = true
@@ -696,7 +618,7 @@ function refreshResultList()
 				multiSelectedMap[idx] = nil
 				saveStorageToFile()
 				refreshResultList()
-				setConsoleMessage("Item terhapus dari storage")
+				setConsoleMessage("Item deleted from storage")
 			end)
 		end)
 
@@ -706,7 +628,7 @@ function refreshResultList()
 	ResultFrame.CanvasSize = UDim2.new(0, 0, 0, ResultListLayout.AbsoluteContentSize.Y)
 end
 
--- Header Menu Dropdown
+-- Header Dropdown Menu
 HeaderMenuBtn.MouseButton1Click:Connect(function()
 	if DropdownOverlay.Visible then
 		closeAllDropdowns()
@@ -779,15 +701,29 @@ DropdownOverlay.InputBegan:Connect(function(input)
 	end
 end)
 
--- Save Manual
+-- Save Logika
 SaveBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then return end
-	setConsoleMessage("Simpan file storage...", Color3.fromRGB(255, 220, 100))
-	saveStorageToFile()
-	setConsoleMessage("File Storage Tersimpan!", Color3.fromRGB(150, 255, 150))
+	task.spawn(function()
+		local partsData = serializeParts()
+		if #partsData == 0 then 
+			setConsoleMessage("No parts selected!", Color3.fromRGB(255, 100, 100))
+			return 
+		end
+
+		local payload = {
+			Title = gameName,
+			Parts = partsData
+		}
+
+		table.insert(savedStorage, payload)
+		saveStorageToFile()
+		refreshResultList()
+		setConsoleMessage("Saved " .. #partsData .. " items!", Color3.fromRGB(150, 255, 150))
+	end)
 end)
 
--- Auto Load Storage saat eksekusi
+-- Auto Load Storage
 if readfile and isfile and isfile("saved_build_data.dat") then
 	pcall(function()
 		local content = readfile("saved_build_data.dat")
@@ -795,7 +731,7 @@ if readfile and isfile and isfile("saved_build_data.dat") then
 		if type(decoded) == "table" then
 			savedStorage = decoded
 			refreshResultList()
-			setConsoleMessage("Loaded saved file data")
+			setConsoleMessage("Loaded saved data")
 		end
 	end)
 end
