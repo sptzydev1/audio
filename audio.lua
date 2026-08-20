@@ -1,5 +1,5 @@
 -- ======================================================
--- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE) - ALL TYPES SUPPORT
+-- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE) - ALL TYPES FIXED
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -166,10 +166,10 @@ local function createFeatureLabel(text, order)
 	return lbl
 end
 
-createFeatureLabel("• Multi-Select (All Types)", 1)
+createFeatureLabel("• Full Visual Sync (Decals)", 1)
 createFeatureLabel("• Support Folder & Model", 2)
 createFeatureLabel("• Direct Click Paste", 3)
-createFeatureLabel("• Precise Position & Mesh", 4)
+createFeatureLabel("• Precise Mesh & Surface", 4)
 createFeatureLabel("• Console Live Log", 5)
 
 --------------------------------------------------
@@ -367,7 +367,7 @@ local function closeAllDropdowns()
 end
 
 --------------------------------------------------
--- 6. LOGIKA SYSTEM (SUPPORT FOLDER, MODEL, ALL PARTS)
+-- 6. LOGIKA SYSTEM (DENGAN VISUAL FIX PRESISI 100%)
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
@@ -419,7 +419,7 @@ SelectModeBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Penyeleksian (Model, Folder, Part)
+-- Selection Handler
 Mouse.Button1Down:Connect(function()
 	if not isCopyEnabled or not isSelecting then return end
 	local target = Mouse.Target
@@ -466,7 +466,7 @@ ClearBtn.MouseButton1Click:Connect(function()
 	setConsoleMessage("Selection cleared")
 end)
 
--- Fungsi Serialisasi Universal (Mendukung Folder, Model, Part, Mesh, Decal, dll.)
+-- SERIALIZATION LENGKAP
 local function serializeInstance(inst)
 	local data = {
 		Name = inst.Name,
@@ -484,24 +484,44 @@ local function serializeInstance(inst)
 		data.CanCollide = inst.CanCollide
 		data.CFrame = {inst.CFrame:GetComponents()}
 		
+		-- Salin Permukaan (Mencegah Studs liar)
+		data.TopSurface = inst.TopSurface.Name
+		data.BottomSurface = inst.BottomSurface.Name
+		data.LeftSurface = inst.LeftSurface.Name
+		data.RightSurface = inst.RightSurface.Name
+		data.FrontSurface = inst.FrontSurface.Name
+		data.BackSurface = inst.BackSurface.Name
+
 		if inst:IsA("MeshPart") then
 			data.MeshId = inst.MeshId
 			data.TextureID = inst.TextureID
 		elseif inst:IsA("Part") then
 			data.Shape = inst.Shape.Name
 		end
-	elseif inst:IsA("SpecialMesh") then
-		data.MeshId = inst.MeshId
+	elseif inst:IsA("SpecialMesh") or inst:IsA("BlockMesh") or inst:IsA("CylinderMesh") then
+		if inst:IsA("SpecialMesh") then
+			data.MeshId = inst.MeshId
+			data.MeshType = inst.MeshType.Name
+		end
 		data.TextureId = inst.TextureId
-		data.MeshType = inst.MeshType.Name
 		data.Scale = {inst.Scale.X, inst.Scale.Y, inst.Scale.Z}
+		data.Offset = {inst.Offset.X, inst.Offset.Y, inst.Offset.Z}
 	elseif inst:IsA("Decal") or inst:IsA("Texture") then
 		data.Texture = inst.Texture
 		data.Face = inst.Face.Name
+		data.Transparency = inst.Transparency
+		data.Color3 = {inst.Color3.R, inst.Color3.G, inst.Color3.B}
+		if inst:IsA("Texture") then
+			data.StudsPerTileU = inst.StudsPerTileU
+			data.StudsPerTileV = inst.StudsPerTileV
+		end
 	end
 
+	-- Deep Copy untuk Children (Termasuk Decal, Texture, & SpecialMesh)
 	for _, child in ipairs(inst:GetChildren()) do
-		table.insert(data.Children, serializeInstance(child))
+		if not child:IsA("Highlight") then
+			table.insert(data.Children, serializeInstance(child))
+		end
 	end
 
 	return data
@@ -523,7 +543,7 @@ local function serializeAllSelected()
 	return dataList
 end
 
--- Fungsi Deserialisasi Universal (Merekonsiliasi Hirarki & Properti Saat Paste)
+-- DESERIALIZATION PRESISI
 local function deserializeInstance(data)
 	local inst = Instance.new(data.ClassName)
 	inst.Name = data.Name
@@ -538,22 +558,40 @@ local function deserializeInstance(data)
 		inst.CanCollide = data.CanCollide
 		inst.CFrame = CFrame.new(unpack(data.CFrame))
 
+		-- Terapkan Permukaan
+		if data.TopSurface then inst.TopSurface = Enum.SurfaceType[data.TopSurface] end
+		if data.BottomSurface then inst.BottomSurface = Enum.SurfaceType[data.BottomSurface] end
+		if data.LeftSurface then inst.LeftSurface = Enum.SurfaceType[data.LeftSurface] end
+		if data.RightSurface then inst.RightSurface = Enum.SurfaceType[data.RightSurface] end
+		if data.FrontSurface then inst.FrontSurface = Enum.SurfaceType[data.FrontSurface] end
+		if data.BackSurface then inst.BackSurface = Enum.SurfaceType[data.BackSurface] end
+
 		if inst:IsA("MeshPart") and data.MeshId then
 			pcall(function() inst.MeshId = data.MeshId end)
 			pcall(function() inst.TextureID = data.TextureID end)
 		elseif inst:IsA("Part") and data.Shape then
 			pcall(function() inst.Shape = Enum.PartType[data.Shape] end)
 		end
-	elseif inst:IsA("SpecialMesh") then
-		if data.MeshId then inst.MeshId = data.MeshId end
+	elseif inst:IsA("SpecialMesh") or inst:IsA("BlockMesh") or inst:IsA("CylinderMesh") then
+		if inst:IsA("SpecialMesh") then
+			if data.MeshId then inst.MeshId = data.MeshId end
+			if data.MeshType then inst.MeshType = Enum.MeshType[data.MeshType] end
+		end
 		if data.TextureId then inst.TextureId = data.TextureId end
-		if data.MeshType then inst.MeshType = Enum.MeshType[data.MeshType] end
 		if data.Scale then inst.Scale = Vector3.new(unpack(data.Scale)) end
+		if data.Offset then inst.Offset = Vector3.new(unpack(data.Offset)) end
 	elseif inst:IsA("Decal") or inst:IsA("Texture") then
 		if data.Texture then inst.Texture = data.Texture end
 		if data.Face then inst.Face = Enum.NormalId[data.Face] end
+		if data.Transparency then inst.Transparency = data.Transparency end
+		if data.Color3 then inst.Color3 = Color3.new(unpack(data.Color3)) end
+		if inst:IsA("Texture") then
+			if data.StudsPerTileU then inst.StudsPerTileU = data.StudsPerTileU end
+			if data.StudsPerTileV then inst.StudsPerTileV = data.StudsPerTileV end
+		end
 	end
 
+	-- Rekonstruksi Objek Anak
 	if data.Children then
 		for _, childData in ipairs(data.Children) do
 			local childInst = deserializeInstance(childData)
@@ -566,7 +604,7 @@ local function deserializeInstance(data)
 	return inst
 end
 
--- Progress Paste Universal
+-- PASTE EXECUTION
 local function executePaste(dataList)
 	if not dataList or #dataList == 0 then return end
 
@@ -587,7 +625,7 @@ local function executePaste(dataList)
 
 			if i % 10 == 0 then task.wait() end
 		end
-		setConsoleMessage("Successfully Pasted " .. total .. " items/folders!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Successfully Pasted " .. total .. " items!", Color3.fromRGB(150, 255, 150))
 	end)
 end
 
