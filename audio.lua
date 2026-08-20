@@ -1,5 +1,5 @@
 -- ======================================================
--- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE) - FULL AUTO COPY
+-- MINI BUILD COPIER & PASTER (DARK WHITE) - SINGLE BUTTON
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -53,7 +53,7 @@ UIStrokeIcon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStrokeIcon.Thickness = 1.5
 UIStrokeIcon.Parent = ToggleButton
 
--- Main Frame UKURAN MINI (Lebar: 460px, Tinggi: 220px)
+-- Main Frame (Lebar: 460px, Tinggi: 220px)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 460, 0, 220)
@@ -73,7 +73,7 @@ UIStrokeMain.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStrokeMain.Thickness = 1.5
 UIStrokeMain.Parent = MainFrame
 
--- Gradient Sinar
+-- Gradient Effect
 local UIGradientIcon = Instance.new("UIGradient")
 UIGradientIcon.Color = ColorSequence.new({
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 40)),
@@ -102,7 +102,7 @@ ToggleButton.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- 2. WATERMARK PALING BAWAH (@IkyyXD)
+-- 2. WATERMARK BAWAH
 --------------------------------------------------
 local BottomWatermark = Instance.new("TextLabel")
 BottomWatermark.Size = UDim2.new(1, 0, 0, 16)
@@ -115,7 +115,7 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KIRI: FITUR AUTO COPY WORKSPACE
+-- 3. PAGE KIRI: HANYA 1 TOMBOL COPY WORKSPACE
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
 PageKiri.Name = "PageKiri"
@@ -129,48 +129,29 @@ UICornerKiri.CornerRadius = UDim.new(0, 6)
 UICornerKiri.Parent = PageKiri
 
 local TitleKiri = Instance.new("TextLabel")
-TitleKiri.Size = UDim2.new(1, 0, 0, 18)
-TitleKiri.Position = UDim2.new(0, 0, 0, 2)
+TitleKiri.Size = UDim2.new(1, 0, 0, 24)
+TitleKiri.Position = UDim2.new(0, 0, 0, 4)
 TitleKiri.BackgroundTransparency = 1
-TitleKiri.Text = "AUTO COPY WORKSPACE"
+TitleKiri.Text = "AUTO COPY"
 TitleKiri.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleKiri.TextSize = 9
+TitleKiri.TextSize = 10
 TitleKiri.Font = Enum.Font.SourceSansBold
 TitleKiri.Parent = PageKiri
 
-local ListContainer = Instance.new("Frame")
-ListContainer.Size = UDim2.new(1, -12, 1, -26)
-ListContainer.Position = UDim2.new(0, 6, 0, 22)
-ListContainer.BackgroundTransparency = 1
-ListContainer.Parent = PageKiri
+-- Satu Tombol Besar di Page Kiri
+local SelectAllWorkspaceBtn = Instance.new("TextButton")
+SelectAllWorkspaceBtn.Size = UDim2.new(1, -16, 0, 130)
+SelectAllWorkspaceBtn.Position = UDim2.new(0, 8, 0, 38)
+SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SelectAllWorkspaceBtn.Text = "⚡\nCOPY ALL\nWORKSPACE"
+SelectAllWorkspaceBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SelectAllWorkspaceBtn.TextSize = 12
+SelectAllWorkspaceBtn.Font = Enum.Font.SourceSansBold
+SelectAllWorkspaceBtn.Parent = PageKiri
 
-local UIListKiri = Instance.new("UIListLayout")
-UIListKiri.SortOrder = Enum.SortOrder.LayoutOrder
-UIListKiri.Padding = UDim.new(0, 3)
-UIListKiri.Parent = ListContainer
-
-local function createFeatureButton(text, order)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, 0, 0, 22)
-	btn.LayoutOrder = order
-	btn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-	btn.Text = text
-	btn.TextColor3 = Color3.fromRGB(220, 220, 220)
-	btn.TextSize = 9
-	btn.Font = Enum.Font.SourceSansBold
-	btn.Parent = ListContainer
-	
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 4)
-	corner.Parent = btn
-	return btn
-end
-
-local SelectAllWorkspaceBtn = createFeatureButton("⚡ Copy All Workspace", 1)
-local SelectFolderBtn        = createFeatureButton("📁 Copy All Folders", 2)
-local SelectModelBtn         = createFeatureButton("📦 Copy All Models", 3)
-local SelectPartBtn          = createFeatureButton("🧱 Copy All Parts", 4)
-local FlattenStructureBtn    = createFeatureButton("📂 Output: Folder Only", 5)
+local UICornerCopy = Instance.new("UICorner")
+UICornerCopy.CornerRadius = UDim.new(0, 6)
+UICornerCopy.Parent = SelectAllWorkspaceBtn
 
 --------------------------------------------------
 -- 4. PAGE TENGAH: PROFILE MINI
@@ -240,7 +221,7 @@ task.spawn(function()
 end)
 
 --------------------------------------------------
--- 5. PAGE KANAN: KONTROL, LIST & CONSOLE LOG
+-- 5. PAGE KANAN: SAVED DATA & CONSOLE LOG
 --------------------------------------------------
 local PageKanan = Instance.new("Frame")
 PageKanan.Name = "PageKanan"
@@ -363,7 +344,7 @@ local function closeAllDropdowns()
 end
 
 --------------------------------------------------
--- 6. LOGIKA SYSTEM (FULL AUTO COPY & SERIALIZATION)
+-- 6. LOGIKA SYSTEM (AUTO COPY & SERIALIZATION)
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
@@ -376,7 +357,7 @@ local listButtons = {}
 local function saveStorageToFile()
 	if writefile then
 		pcall(function()
-			writefile("saved_build_data.dat", HttpService:JSONEncode(savedStorage))
+			writefile("saved_build_data.dat", HttpService:JSONDecode(savedStorage))
 		end)
 	end
 end
@@ -384,18 +365,6 @@ end
 local function setConsoleMessage(text, color)
 	ConsoleLog.Text = "> " .. text
 	ConsoleLog.TextColor3 = color or Color3.fromRGB(150, 255, 150)
-end
-
-local function addHighlight(obj)
-	if not highlights[obj] then
-		local hl = Instance.new("Highlight")
-		hl.Adornee = obj
-		hl.FillColor = Color3.fromRGB(255, 255, 255)
-		hl.FillTransparency = 0.4
-		hl.OutlineColor = Color3.fromRGB(0, 0, 0)
-		hl.Parent = obj
-		highlights[obj] = hl
-	end
 end
 
 local function removeHighlight(obj)
@@ -434,35 +403,6 @@ SelectModeBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- KLIK MANUAL KLIK MOUSE
-Mouse.Button1Down:Connect(function()
-	if not isCopyEnabled or not isSelecting then return end
-	local target = Mouse.Target
-	if not target or target:IsDescendantOf(LocalPlayer.Character) then return end
-
-	local objectToSelect = target
-	local ancestorFolder = target:FindFirstAncestorOfClass("Folder")
-	local ancestorModel = target:FindFirstAncestorOfClass("Model")
-
-	if ancestorFolder and ancestorFolder ~= workspace then
-		objectToSelect = ancestorFolder
-	elseif ancestorModel and ancestorModel ~= workspace and not Players:GetPlayerFromCharacter(ancestorModel) then
-		objectToSelect = ancestorModel
-	end
-
-	if selectedObjects[objectToSelect] then
-		selectedObjects[objectToSelect] = nil
-		removeHighlight(objectToSelect)
-	else
-		selectedObjects[objectToSelect] = true
-		addHighlight(objectToSelect)
-	end
-	
-	local count = 0
-	for _ in pairs(selectedObjects) do count = count + 1 end
-	setConsoleMessage("Selected: " .. count .. " items")
-end)
-
 ClearBtn.MouseButton1Click:Connect(function()
 	for obj, hl in pairs(highlights) do
 		if hl then hl:Destroy() end
@@ -473,7 +413,7 @@ ClearBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- SERIALISASI & DESERIALISASI PRESISI 100%
+-- SERIALISASI PRESISI SAMA PERSIS (100%)
 --------------------------------------------------
 local function serializeInstance(inst)
 	local data = {
@@ -608,99 +548,58 @@ local function deserializeInstance(data)
 end
 
 --------------------------------------------------
--- AKSI TOMBOL PAGE KIRI (AUTO COPY INSTAN)
+-- AKSI TOMBOL SINGLE COPY ALL WORKSPACE
 --------------------------------------------------
-local function autoCopyAndSave(objectList, featureName)
+SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then
 		setConsoleMessage("Aktifkan Copy Mode (ON) dulu!", Color3.fromRGB(255, 100, 100))
 		return
 	end
 
+	-- Reset seleksi
 	for obj, hl in pairs(highlights) do
 		if hl then hl:Destroy() end
 	end
 	selectedObjects = {}
 	highlights = {}
 
-	local count = 0
-	for _, child in ipairs(objectList) do
-		selectedObjects[child] = true
-		count = count + 1
+	-- Masukkan seluruh isi workspace (kecuali Character, Camera, Terrain)
+	local targets = {}
+	for _, child in ipairs(workspace:GetChildren()) do
+		if child ~= LocalPlayer.Character and not child:IsA("Camera") and not child:IsA("Terrain") then
+			selectedObjects[child] = true
+			table.insert(targets, child)
+		end
 	end
 
-	if count == 0 then
-		setConsoleMessage("Tidak ada " .. featureName .. "!", Color3.fromRGB(255, 100, 100))
+	if #targets == 0 then
+		setConsoleMessage("Workspace Kosong!", Color3.fromRGB(255, 100, 100))
 		return
 	end
 
+	-- Proses Salin dan Simpan Otomatis
 	task.spawn(function()
-		setConsoleMessage("Memproses " .. featureName .. "...", Color3.fromRGB(255, 220, 100))
+		setConsoleMessage("Memproses Copy All Workspace...", Color3.fromRGB(255, 220, 100))
 		local partsData = serializeAllSelected()
 
 		local payload = {
-			Title = gameName .. " (" .. featureName .. ")",
+			Title = gameName .. " (All Workspace)",
 			Parts = partsData
 		}
 
 		table.insert(savedStorage, payload)
 		saveStorageToFile()
 		refreshResultList()
-		setConsoleMessage("Auto Copy " .. featureName .. " Sukses!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Copy Workspace Sukses! (" .. #partsData .. " Item)", Color3.fromRGB(150, 255, 150))
 
-		for obj, hl in pairs(highlights) do
-			if hl then hl:Destroy() end
-		end
+		-- Bersihkan seleksi
 		selectedObjects = {}
 		highlights = {}
 	end)
-end
-
-SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
-	local targets = {}
-	for _, child in ipairs(workspace:GetChildren()) do
-		if child ~= LocalPlayer.Character and not child:IsA("Camera") and not child:IsA("Terrain") then
-			table.insert(targets, child)
-		end
-	end
-	autoCopyAndSave(targets, "All Workspace")
-end)
-
-SelectFolderBtn.MouseButton1Click:Connect(function()
-	local targets = {}
-	for _, child in ipairs(workspace:GetChildren()) do
-		if child:IsA("Folder") then
-			table.insert(targets, child)
-		end
-	end
-	autoCopyAndSave(targets, "Folders")
-end)
-
-SelectModelBtn.MouseButton1Click:Connect(function()
-	local targets = {}
-	for _, child in ipairs(workspace:GetChildren()) do
-		if child:IsA("Model") and not Players:GetPlayerFromCharacter(child) then
-			table.insert(targets, child)
-		end
-	end
-	autoCopyAndSave(targets, "Models")
-end)
-
-SelectPartBtn.MouseButton1Click:Connect(function()
-	local targets = {}
-	for _, child in ipairs(workspace:GetChildren()) do
-		if child:IsA("BasePart") then
-			table.insert(targets, child)
-		end
-	end
-	autoCopyAndSave(targets, "Parts")
-end)
-
-FlattenStructureBtn.MouseButton1Click:Connect(function()
-	setConsoleMessage("Output: Folder Only (Active)", Color3.fromRGB(100, 200, 255))
 end)
 
 --------------------------------------------------
--- PASTE EXECUTION: HANYA FOLDER, TANPA MODEL
+-- PASTE EXECUTION: MASUK KE 1 FOLDER SAJA
 --------------------------------------------------
 local function executePaste(dataList)
 	if not dataList or #dataList == 0 then return end
@@ -733,7 +632,7 @@ local function executePaste(dataList)
 	end)
 end
 
--- Refresh UI List Hasil
+-- Refresh List
 function refreshResultList()
 	closeAllDropdowns()
 	for _, btn in ipairs(listButtons) do
@@ -898,7 +797,7 @@ DropdownOverlay.InputBegan:Connect(function(input)
 	end
 end)
 
--- Simpan Data Manual
+-- Save Manual
 SaveBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then return end
 	task.spawn(function()
