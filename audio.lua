@@ -1,5 +1,5 @@
 -- ======================================================
--- MINI BUILD COPIER & PASTER (DARK WHITE) - SINGLE BUTTON
+-- MINI BUILD COPIER & PASTER (DARK WHITE) - FULL DEEP SCAN
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -115,7 +115,7 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KIRI: HANYA 1 TOMBOL COPY WORKSPACE
+-- 3. PAGE KIRI: 1 TOMBOL DEEP AUTO COPY WORKSPACE
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
 PageKiri.Name = "PageKiri"
@@ -138,7 +138,6 @@ TitleKiri.TextSize = 10
 TitleKiri.Font = Enum.Font.SourceSansBold
 TitleKiri.Parent = PageKiri
 
--- Satu Tombol Besar di Page Kiri
 local SelectAllWorkspaceBtn = Instance.new("TextButton")
 SelectAllWorkspaceBtn.Size = UDim2.new(1, -16, 0, 130)
 SelectAllWorkspaceBtn.Position = UDim2.new(0, 8, 0, 38)
@@ -357,7 +356,7 @@ local listButtons = {}
 local function saveStorageToFile()
 	if writefile then
 		pcall(function()
-			writefile("saved_build_data.dat", HttpService:JSONDecode(savedStorage))
+			writefile("saved_build_data.dat", HttpService:JSONEncode(savedStorage))
 		end)
 	end
 end
@@ -365,13 +364,6 @@ end
 local function setConsoleMessage(text, color)
 	ConsoleLog.Text = "> " .. text
 	ConsoleLog.TextColor3 = color or Color3.fromRGB(150, 255, 150)
-end
-
-local function removeHighlight(obj)
-	if highlights[obj] then
-		highlights[obj]:Destroy()
-		highlights[obj] = nil
-	end
 end
 
 ToggleCopyBtn.MouseButton1Click:Connect(function()
@@ -413,83 +405,66 @@ ClearBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- SERIALISASI PRESISI SAMA PERSIS (100%)
+-- SERIALISASI HANYA PADA LEVEL BASEPART UNTUK EFISIENSI TOTAL
 --------------------------------------------------
-local function serializeInstance(inst)
+local function serializeBasePart(inst)
 	local data = {
 		Name = inst.Name,
 		ClassName = inst.ClassName,
+		Size = {inst.Size.X, inst.Size.Y, inst.Size.Z},
+		Color = {inst.Color.R, inst.Color.G, inst.Color.B},
+		Material = inst.Material.Name,
+		Transparency = inst.Transparency,
+		Reflectance = inst.Reflectance,
+		Anchored = inst.Anchored,
+		CanCollide = inst.CanCollide,
+		CFrame = {inst.CFrame:GetComponents()},
 		Children = {}
 	}
 
-	if inst:IsA("BasePart") then
-		data.Size = {inst.Size.X, inst.Size.Y, inst.Size.Z}
-		data.Color = {inst.Color.R, inst.Color.G, inst.Color.B}
-		data.Material = inst.Material.Name
-		data.Transparency = inst.Transparency
-		data.Reflectance = inst.Reflectance
-		data.Anchored = inst.Anchored
-		data.CanCollide = inst.CanCollide
-		data.CFrame = {inst.CFrame:GetComponents()}
-		
-		data.TopSurface = inst.TopSurface.Name
-		data.BottomSurface = inst.BottomSurface.Name
-		data.LeftSurface = inst.LeftSurface.Name
-		data.RightSurface = inst.RightSurface.Name
-		data.FrontSurface = inst.FrontSurface.Name
-		data.BackSurface = inst.BackSurface.Name
-
-		if inst:IsA("MeshPart") then
-			data.MeshId = inst.MeshId
-			data.TextureID = inst.TextureID
-		elseif inst:IsA("Part") then
-			data.Shape = inst.Shape.Name
-		end
-	elseif inst:IsA("SpecialMesh") or inst:IsA("BlockMesh") or inst:IsA("CylinderMesh") then
-		if inst:IsA("SpecialMesh") then
-			data.MeshId = inst.MeshId
-			data.MeshType = inst.MeshType.Name
-		end
-		data.TextureId = inst.TextureId
-		data.Scale = {inst.Scale.X, inst.Scale.Y, inst.Scale.Z}
-		data.Offset = {inst.Offset.X, inst.Offset.Y, inst.Offset.Z}
-	elseif inst:IsA("Decal") or inst:IsA("Texture") then
-		data.Texture = inst.Texture
-		data.Face = inst.Face.Name
-		data.Transparency = inst.Transparency
-		data.Color3 = {inst.Color3.R, inst.Color3.G, inst.Color3.B}
-		if inst:IsA("Texture") then
-			data.StudsPerTileU = inst.StudsPerTileU
-			data.StudsPerTileV = inst.StudsPerTileV
-		end
+	if inst:IsA("MeshPart") then
+		data.MeshId = inst.MeshId
+		data.TextureID = inst.TextureID
+	elseif inst:IsA("Part") then
+		data.Shape = inst.Shape.Name
 	end
 
+	-- Salin anak visual seperti SpecialMesh, Decal, Texture
 	for _, child in ipairs(inst:GetChildren()) do
-		if not child:IsA("Highlight") then
-			table.insert(data.Children, serializeInstance(child))
+		if child:IsA("SpecialMesh") or child:IsA("BlockMesh") or child:IsA("CylinderMesh") then
+			local meshData = {
+				Name = child.Name,
+				ClassName = child.ClassName,
+				TextureId = child.TextureId,
+				Scale = {child.Scale.X, child.Scale.Y, child.Scale.Z},
+				Offset = {child.Offset.X, child.Offset.Y, child.Offset.Z}
+			}
+			if child:IsA("SpecialMesh") then
+				meshData.MeshId = child.MeshId
+				meshData.MeshType = child.MeshType.Name
+			end
+			table.insert(data.Children, meshData)
+		elseif child:IsA("Decal") or child:IsA("Texture") then
+			local decalData = {
+				Name = child.Name,
+				ClassName = child.ClassName,
+				Texture = child.Texture,
+				Face = child.Face.Name,
+				Transparency = child.Transparency,
+				Color3 = {child.Color3.R, child.Color3.G, child.Color3.B}
+			}
+			if child:IsA("Texture") then
+				decalData.StudsPerTileU = child.StudsPerTileU
+				decalData.StudsPerTileV = child.StudsPerTileV
+			end
+			table.insert(data.Children, decalData)
 		end
 	end
 
 	return data
 end
 
-local function serializeAllSelected()
-	local dataList = {}
-	local objList = {}
-	for obj in pairs(selectedObjects) do
-		if obj then table.insert(objList, obj) end
-	end
-
-	local total = #objList
-	for i, obj in ipairs(objList) do
-		table.insert(dataList, serializeInstance(obj))
-		setConsoleMessage(string.format("[COPY %d/%d]\n%s", i, total, obj.Name), Color3.fromRGB(255, 220, 100))
-		if i % 5 == 0 then task.wait() end
-	end
-	return dataList
-end
-
-local function deserializeInstance(data)
+local function deserializeBasePart(data)
 	local inst = Instance.new(data.ClassName)
 	inst.Name = data.Name
 
@@ -503,44 +478,38 @@ local function deserializeInstance(data)
 		inst.CanCollide = data.CanCollide
 		inst.CFrame = CFrame.new(unpack(data.CFrame))
 
-		if data.TopSurface then inst.TopSurface = Enum.SurfaceType[data.TopSurface] end
-		if data.BottomSurface then inst.BottomSurface = Enum.SurfaceType[data.BottomSurface] end
-		if data.LeftSurface then inst.LeftSurface = Enum.SurfaceType[data.LeftSurface] end
-		if data.RightSurface then inst.RightSurface = Enum.SurfaceType[data.RightSurface] end
-		if data.FrontSurface then inst.FrontSurface = Enum.SurfaceType[data.FrontSurface] end
-		if data.BackSurface then inst.BackSurface = Enum.SurfaceType[data.BackSurface] end
-
 		if inst:IsA("MeshPart") and data.MeshId then
 			pcall(function() inst.MeshId = data.MeshId end)
 			pcall(function() inst.TextureID = data.TextureID end)
 		elseif inst:IsA("Part") and data.Shape then
 			pcall(function() inst.Shape = Enum.PartType[data.Shape] end)
 		end
-	elseif inst:IsA("SpecialMesh") or inst:IsA("BlockMesh") or inst:IsA("CylinderMesh") then
-		if inst:IsA("SpecialMesh") then
-			if data.MeshId then inst.MeshId = data.MeshId end
-			if data.MeshType then inst.MeshType = Enum.MeshType[data.MeshType] end
-		end
-		if data.TextureId then inst.TextureId = data.TextureId end
-		if data.Scale then inst.Scale = Vector3.new(unpack(data.Scale)) end
-		if data.Offset then inst.Offset = Vector3.new(unpack(data.Offset)) end
-	elseif inst:IsA("Decal") or inst:IsA("Texture") then
-		if data.Texture then inst.Texture = data.Texture end
-		if data.Face then inst.Face = Enum.NormalId[data.Face] end
-		if data.Transparency then inst.Transparency = data.Transparency end
-		if data.Color3 then inst.Color3 = Color3.new(unpack(data.Color3)) end
-		if inst:IsA("Texture") then
-			if data.StudsPerTileU then inst.StudsPerTileU = data.StudsPerTileU end
-			if data.StudsPerTileV then inst.StudsPerTileV = data.StudsPerTileV end
-		end
 	end
 
 	if data.Children then
 		for _, childData in ipairs(data.Children) do
-			local childInst = deserializeInstance(childData)
-			if childInst then
-				childInst.Parent = inst
+			local childInst = Instance.new(childData.ClassName)
+			childInst.Name = childData.Name
+
+			if childInst:IsA("SpecialMesh") or childInst:IsA("BlockMesh") or childInst:IsA("CylinderMesh") then
+				if childInst:IsA("SpecialMesh") then
+					if childData.MeshId then childInst.MeshId = childData.MeshId end
+					if childData.MeshType then childInst.MeshType = Enum.MeshType[childData.MeshType] end
+				end
+				if childData.TextureId then childInst.TextureId = childData.TextureId end
+				if childData.Scale then childInst.Scale = Vector3.new(unpack(childData.Scale)) end
+				if childData.Offset then childInst.Offset = Vector3.new(unpack(childData.Offset)) end
+			elseif childInst:IsA("Decal") or childInst:IsA("Texture") then
+				if childData.Texture then childInst.Texture = childData.Texture end
+				if childData.Face then childInst.Face = Enum.NormalId[childData.Face] end
+				if childData.Transparency then childInst.Transparency = childData.Transparency end
+				if childData.Color3 then childInst.Color3 = Color3.new(unpack(childData.Color3)) end
+				if childInst:IsA("Texture") then
+					if childData.StudsPerTileU then childInst.StudsPerTileU = childData.StudsPerTileU end
+					if childData.StudsPerTileV then childInst.StudsPerTileV = childData.StudsPerTileV end
+				end
 			end
+			childInst.Parent = inst
 		end
 	end
 
@@ -548,7 +517,7 @@ local function deserializeInstance(data)
 end
 
 --------------------------------------------------
--- AKSI TOMBOL SINGLE COPY ALL WORKSPACE
+-- AKSI COPY DEEP SCAN WORKSPACE (PEMINDAIAN TERDALAM)
 --------------------------------------------------
 SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then
@@ -556,50 +525,51 @@ SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
 		return
 	end
 
-	-- Reset seleksi
-	for obj, hl in pairs(highlights) do
-		if hl then hl:Destroy() end
-	end
-	selectedObjects = {}
-	highlights = {}
+	setConsoleMessage("Scanning Workspace...", Color3.fromRGB(255, 220, 100))
 
-	-- Masukkan seluruh isi workspace (kecuali Character, Camera, Terrain)
-	local targets = {}
-	for _, child in ipairs(workspace:GetChildren()) do
-		if child ~= LocalPlayer.Character and not child:IsA("Camera") and not child:IsA("Terrain") then
-			selectedObjects[child] = true
-			table.insert(targets, child)
-		end
-	end
-
-	if #targets == 0 then
-		setConsoleMessage("Workspace Kosong!", Color3.fromRGB(255, 100, 100))
-		return
-	end
-
-	-- Proses Salin dan Simpan Otomatis
 	task.spawn(function()
-		setConsoleMessage("Memproses Copy All Workspace...", Color3.fromRGB(255, 220, 100))
-		local partsData = serializeAllSelected()
+		local allDescendants = workspace:GetDescendants()
+		local partsToCopy = {}
+
+		-- Filter seluruh BasePart di kedalaman manapun
+		for _, desc in ipairs(allDescendants) do
+			if desc:IsA("BasePart") then
+				-- Abaikan karakter pemain, camera, dan terrain
+				if not desc:IsDescendantOf(LocalPlayer.Character) and not desc:IsA("Terrain") then
+					table.insert(partsToCopy, desc)
+				end
+			end
+		end
+
+		local total = #partsToCopy
+		if total == 0 then
+			setConsoleMessage("Workspace Kosong / Tidak ada Part!", Color3.fromRGB(255, 100, 100))
+			return
+		end
+
+		local serializedData = {}
+		for i, part in ipairs(partsToCopy) do
+			table.insert(serializedData, serializeBasePart(part))
+			if i % 50 == 0 then
+				setConsoleMessage(string.format("[COPY %d/%d]\n%s", i, total, part.Name), Color3.fromRGB(255, 220, 100))
+				task.wait()
+			end
+		end
 
 		local payload = {
-			Title = gameName .. " (All Workspace)",
-			Parts = partsData
+			Title = gameName .. " (Full Scan)",
+			Parts = serializedData
 		}
 
 		table.insert(savedStorage, payload)
 		saveStorageToFile()
 		refreshResultList()
-		setConsoleMessage("Copy Workspace Sukses! (" .. #partsData .. " Item)", Color3.fromRGB(150, 255, 150))
-
-		-- Bersihkan seleksi
-		selectedObjects = {}
-		highlights = {}
+		setConsoleMessage("Sukses Copy All! (" .. #serializedData .. " Part)", Color3.fromRGB(150, 255, 150))
 	end)
 end)
 
 --------------------------------------------------
--- PASTE EXECUTION: MASUK KE 1 FOLDER SAJA
+-- PASTE EXECUTION: MASUK KE 1 FOLDER UTAMA
 --------------------------------------------------
 local function executePaste(dataList)
 	if not dataList or #dataList == 0 then return end
@@ -611,28 +581,22 @@ local function executePaste(dataList)
 
 	task.spawn(function()
 		for i, itemData in ipairs(dataList) do
-			local newInst = deserializeInstance(itemData)
-			if newInst then
-				if newInst:IsA("Model") or newInst:IsA("Folder") then
-					for _, child in ipairs(newInst:GetChildren()) do
-						child.Parent = mainFolder
-					end
-					newInst:Destroy()
-				else
-					newInst.Parent = mainFolder
-				end
+			local newPart = deserializeBasePart(itemData)
+			if newPart then
+				newPart.Parent = mainFolder
 			end
 
-			local percent = math.floor((i / total) * 100)
-			setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)\n%s", i, total, percent, itemData.Name), Color3.fromRGB(100, 200, 255))
-
-			if i % 10 == 0 then task.wait() end
+			if i % 30 == 0 then
+				local percent = math.floor((i / total) * 100)
+				setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)", i, total, percent), Color3.fromRGB(100, 200, 255))
+				task.wait()
+			end
 		end
-		setConsoleMessage("Paste Sukses ke Folder!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Paste Sukses (" .. total .. " Part)!", Color3.fromRGB(150, 255, 150))
 	end)
 end
 
--- Refresh List
+-- Refresh UI List Hasil
 function refreshResultList()
 	closeAllDropdowns()
 	for _, btn in ipairs(listButtons) do
@@ -800,26 +764,12 @@ end)
 -- Save Manual
 SaveBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then return end
-	task.spawn(function()
-		local partsData = serializeAllSelected()
-		if #partsData == 0 then 
-			setConsoleMessage("No items selected!", Color3.fromRGB(255, 100, 100))
-			return 
-		end
-
-		local payload = {
-			Title = gameName,
-			Parts = partsData
-		}
-
-		table.insert(savedStorage, payload)
-		saveStorageToFile()
-		refreshResultList()
-		setConsoleMessage("Saved " .. #partsData .. " items!", Color3.fromRGB(150, 255, 150))
-	end)
+	setConsoleMessage("Simpan file storage...", Color3.fromRGB(255, 220, 100))
+	saveStorageToFile()
+	setConsoleMessage("File Storage Tersimpan!", Color3.fromRGB(150, 255, 150))
 end)
 
--- Auto Load Storage
+-- Auto Load Storage saat eksekusi
 if readfile and isfile and isfile("saved_build_data.dat") then
 	pcall(function()
 		local content = readfile("saved_build_data.dat")
@@ -827,7 +777,7 @@ if readfile and isfile and isfile("saved_build_data.dat") then
 		if type(decoded) == "table" then
 			savedStorage = decoded
 			refreshResultList()
-			setConsoleMessage("Loaded saved data")
+			setConsoleMessage("Loaded saved file data")
 		end
 	end)
 end
