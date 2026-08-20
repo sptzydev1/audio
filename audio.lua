@@ -1,5 +1,5 @@
 -- ======================================================
--- MINI BUILD COPIER & PASTER (DARK WHITE) - FULL DEEP SCAN & PROGRESS
+-- MINI BUILD COPIER & PASTER (DARK WHITE) - STUCK-FREE REAL-TIME PROGRESS
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -8,7 +8,6 @@ local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
 
 -- Mendapatkan Nama Game
 local gameName = "Map Item"
@@ -53,7 +52,7 @@ UIStrokeIcon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStrokeIcon.Thickness = 1.5
 UIStrokeIcon.Parent = ToggleButton
 
--- Main Frame (Lebar: 460px, Tinggi: 220px)
+-- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 460, 0, 220)
@@ -349,8 +348,6 @@ end
 local isCopyEnabled = false
 local isSelecting = false
 local isCurrentlyCopying = false
-local selectedObjects = {}
-local highlights = {}
 local savedStorage = {}
 local multiSelectedMap = {}
 local listButtons = {}
@@ -358,7 +355,7 @@ local listButtons = {}
 local function saveStorageToFile()
 	if writefile then
 		pcall(function()
-			writefile("saved_build_data.dat", HttpService:JSONDecode(savedStorage))
+			writefile("saved_build_data.dat", HttpService:JSONEncode(savedStorage))
 		end)
 	end
 end
@@ -398,11 +395,6 @@ SelectModeBtn.MouseButton1Click:Connect(function()
 end)
 
 ClearBtn.MouseButton1Click:Connect(function()
-	for obj, hl in pairs(highlights) do
-		if hl then hl:Destroy() end
-	end
-	selectedObjects = {}
-	highlights = {}
 	setConsoleMessage("Selection cleared")
 end)
 
@@ -425,8 +417,8 @@ local function serializeBasePart(inst)
 	}
 
 	if inst:IsA("MeshPart") then
-		data.MeshId = inst.MeshId
-		data.TextureID = inst.TextureID
+		pcall(function() data.MeshId = inst.MeshId end)
+		pcall(function() data.TextureID = inst.TextureID end)
 	elseif inst:IsA("Part") then
 		data.Shape = inst.Shape.Name
 	end
@@ -518,7 +510,7 @@ local function deserializeBasePart(data)
 end
 
 --------------------------------------------------
--- AKSI COPY DENGAN DISPLAY NAMA & PERCENTAGE DI BUTTON
+-- AKSI COPY DENGAN BATCHING (ANTI STUCK)
 --------------------------------------------------
 SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
 	if isCurrentlyCopying then return end
@@ -529,18 +521,23 @@ SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
 
 	isCurrentlyCopying = true
 	SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(60, 50, 20)
-	SelectAllWorkspaceBtn.Text = "⏳\nSCANNING\nWORKSPACE..."
-	setConsoleMessage("Scanning Workspace...", Color3.fromRGB(255, 220, 100))
+	SelectAllWorkspaceBtn.Text = "⏳\nMEMINDAYI\nMAP..."
+	setConsoleMessage("Memindai item Workspace...", Color3.fromRGB(255, 220, 100))
 
 	task.spawn(function()
-		local allDescendants = workspace:GetDescendants()
+		local myChar = LocalPlayer.Character
 		local partsToCopy = {}
+		local allDescendants = workspace:GetDescendants()
 
-		for _, desc in ipairs(allDescendants) do
-			if desc:IsA("BasePart") then
-				if not desc:IsDescendantOf(LocalPlayer.Character) and not desc:IsA("Terrain") then
+		-- Filter parts tanpa membuat game freeze
+		for i, desc in ipairs(allDescendants) do
+			if desc:IsA("BasePart") and not desc:IsA("Terrain") then
+				if not (myChar and desc:IsDescendantOf(myChar)) then
 					table.insert(partsToCopy, desc)
 				end
+			end
+			if i % 500 == 0 then
+				task.wait() -- Mencegah freeze saat scanning objek
 			end
 		end
 
@@ -555,13 +552,16 @@ SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
 
 		local serializedData = {}
 		for i, part in ipairs(partsToCopy) do
-			table.insert(serializedData, serializeBasePart(part))
+			pcall(function()
+				table.insert(serializedData, serializeBasePart(part))
+			end)
 
 			local percent = math.floor((i / total) * 100)
 			SelectAllWorkspaceBtn.Text = string.format("🔄 COPYING...\n%d%%\n\n[%s]", percent, part.Name)
 
-			if i % 25 == 0 or i == total then
-				setConsoleMessage(string.format("[COPY %d/%d] (%d%%)\n%s", i, total, percent, part.Name), Color3.fromRGB(255, 220, 100))
+			-- Berikan jeda frame secara teratur agar UI ter-update tanpa stuck
+			if i % 15 == 0 or i == total then
+				setConsoleMessage(string.format("[%d/%d] (%d%%) - %s", i, total, percent, part.Name), Color3.fromRGB(255, 220, 100))
 				task.wait()
 			end
 		end
@@ -576,7 +576,7 @@ SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
 		refreshResultList()
 
 		SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(20, 60, 30)
-		SelectAllWorkspaceBtn.Text = string.format("✅\nFINISHED 100%\n(%d Parts)", #serializedData)
+		SelectAllWorkspaceBtn.Text = string.format("✅\nSUKSES 100%\n(%d Parts)", #serializedData)
 		setConsoleMessage("Sukses Copy All! (" .. #serializedData .. " Part)", Color3.fromRGB(150, 255, 150))
 
 		task.wait(2.5)
@@ -604,7 +604,7 @@ local function executePaste(dataList)
 				newPart.Parent = mainFolder
 			end
 
-			if i % 30 == 0 or i == total then
+			if i % 15 == 0 or i == total then
 				local percent = math.floor((i / total) * 100)
 				setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)", i, total, percent), Color3.fromRGB(100, 200, 255))
 				task.wait()
