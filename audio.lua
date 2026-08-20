@@ -1,5 +1,5 @@
 -- ======================================================
--- MINI BUILD COPIER & PASTER (DARK WHITE) - FULL DEEP SCAN
+-- MINI BUILD COPIER & PASTER (DARK WHITE) - FULL DEEP SCAN & PROGRESS
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -115,7 +115,7 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KIRI: 1 TOMBOL DEEP AUTO COPY WORKSPACE
+-- 3. PAGE KIRI: TOMBOL COPY DENGAN DISPLAY PROGRESS
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
 PageKiri.Name = "PageKiri"
@@ -144,8 +144,9 @@ SelectAllWorkspaceBtn.Position = UDim2.new(0, 8, 0, 38)
 SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 SelectAllWorkspaceBtn.Text = "⚡\nCOPY ALL\nWORKSPACE"
 SelectAllWorkspaceBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SelectAllWorkspaceBtn.TextSize = 12
+SelectAllWorkspaceBtn.TextSize = 11
 SelectAllWorkspaceBtn.Font = Enum.Font.SourceSansBold
+SelectAllWorkspaceBtn.TextWrapped = true
 SelectAllWorkspaceBtn.Parent = PageKiri
 
 local UICornerCopy = Instance.new("UICorner")
@@ -347,6 +348,7 @@ end
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
+local isCurrentlyCopying = false
 local selectedObjects = {}
 local highlights = {}
 local savedStorage = {}
@@ -356,7 +358,7 @@ local listButtons = {}
 local function saveStorageToFile()
 	if writefile then
 		pcall(function()
-			writefile("saved_build_data.dat", HttpService:JSONEncode(savedStorage))
+			writefile("saved_build_data.dat", HttpService:JSONDecode(savedStorage))
 		end)
 	end
 end
@@ -405,7 +407,7 @@ ClearBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- SERIALISASI HANYA PADA LEVEL BASEPART UNTUK EFISIENSI TOTAL
+-- SERIALISASI BASEPART
 --------------------------------------------------
 local function serializeBasePart(inst)
 	local data = {
@@ -429,7 +431,6 @@ local function serializeBasePart(inst)
 		data.Shape = inst.Shape.Name
 	end
 
-	-- Salin anak visual seperti SpecialMesh, Decal, Texture
 	for _, child in ipairs(inst:GetChildren()) do
 		if child:IsA("SpecialMesh") or child:IsA("BlockMesh") or child:IsA("CylinderMesh") then
 			local meshData = {
@@ -517,24 +518,26 @@ local function deserializeBasePart(data)
 end
 
 --------------------------------------------------
--- AKSI COPY DEEP SCAN WORKSPACE (PEMINDAIAN TERDALAM)
+-- AKSI COPY DENGAN DISPLAY NAMA & PERCENTAGE DI BUTTON
 --------------------------------------------------
 SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
+	if isCurrentlyCopying then return end
 	if not isCopyEnabled then
 		setConsoleMessage("Aktifkan Copy Mode (ON) dulu!", Color3.fromRGB(255, 100, 100))
 		return
 	end
 
+	isCurrentlyCopying = true
+	SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(60, 50, 20)
+	SelectAllWorkspaceBtn.Text = "⏳\nSCANNING\nWORKSPACE..."
 	setConsoleMessage("Scanning Workspace...", Color3.fromRGB(255, 220, 100))
 
 	task.spawn(function()
 		local allDescendants = workspace:GetDescendants()
 		local partsToCopy = {}
 
-		-- Filter seluruh BasePart di kedalaman manapun
 		for _, desc in ipairs(allDescendants) do
 			if desc:IsA("BasePart") then
-				-- Abaikan karakter pemain, camera, dan terrain
 				if not desc:IsDescendantOf(LocalPlayer.Character) and not desc:IsA("Terrain") then
 					table.insert(partsToCopy, desc)
 				end
@@ -543,15 +546,22 @@ SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
 
 		local total = #partsToCopy
 		if total == 0 then
+			SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+			SelectAllWorkspaceBtn.Text = "⚡\nCOPY ALL\nWORKSPACE"
 			setConsoleMessage("Workspace Kosong / Tidak ada Part!", Color3.fromRGB(255, 100, 100))
+			isCurrentlyCopying = false
 			return
 		end
 
 		local serializedData = {}
 		for i, part in ipairs(partsToCopy) do
 			table.insert(serializedData, serializeBasePart(part))
-			if i % 50 == 0 then
-				setConsoleMessage(string.format("[COPY %d/%d]\n%s", i, total, part.Name), Color3.fromRGB(255, 220, 100))
+
+			local percent = math.floor((i / total) * 100)
+			SelectAllWorkspaceBtn.Text = string.format("🔄 COPYING...\n%d%%\n\n[%s]", percent, part.Name)
+
+			if i % 25 == 0 or i == total then
+				setConsoleMessage(string.format("[COPY %d/%d] (%d%%)\n%s", i, total, percent, part.Name), Color3.fromRGB(255, 220, 100))
 				task.wait()
 			end
 		end
@@ -564,12 +574,20 @@ SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
 		table.insert(savedStorage, payload)
 		saveStorageToFile()
 		refreshResultList()
+
+		SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(20, 60, 30)
+		SelectAllWorkspaceBtn.Text = string.format("✅\nFINISHED 100%\n(%d Parts)", #serializedData)
 		setConsoleMessage("Sukses Copy All! (" .. #serializedData .. " Part)", Color3.fromRGB(150, 255, 150))
+
+		task.wait(2.5)
+		SelectAllWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+		SelectAllWorkspaceBtn.Text = "⚡\nCOPY ALL\nWORKSPACE"
+		isCurrentlyCopying = false
 	end)
 end)
 
 --------------------------------------------------
--- PASTE EXECUTION: MASUK KE 1 FOLDER UTAMA
+-- PASTE EXECUTION
 --------------------------------------------------
 local function executePaste(dataList)
 	if not dataList or #dataList == 0 then return end
@@ -586,7 +604,7 @@ local function executePaste(dataList)
 				newPart.Parent = mainFolder
 			end
 
-			if i % 30 == 0 then
+			if i % 30 == 0 or i == total then
 				local percent = math.floor((i / total) * 100)
 				setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)", i, total, percent), Color3.fromRGB(100, 200, 255))
 				task.wait()
