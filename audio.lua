@@ -1,5 +1,5 @@
 -- ======================================================
--- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE) - ALL TYPES FIXED
+-- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE) - FULL AUTO COPY
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -73,7 +73,7 @@ UIStrokeMain.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStrokeMain.Thickness = 1.5
 UIStrokeMain.Parent = MainFrame
 
--- Gradient Sinar Putih Berjalan
+-- Gradient Sinar
 local UIGradientIcon = Instance.new("UIGradient")
 UIGradientIcon.Color = ColorSequence.new({
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 40)),
@@ -115,7 +115,7 @@ BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KIRI: LIST FITUR MINI
+-- 3. PAGE KIRI: FITUR AUTO COPY WORKSPACE
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
 PageKiri.Name = "PageKiri"
@@ -132,9 +132,9 @@ local TitleKiri = Instance.new("TextLabel")
 TitleKiri.Size = UDim2.new(1, 0, 0, 18)
 TitleKiri.Position = UDim2.new(0, 0, 0, 2)
 TitleKiri.BackgroundTransparency = 1
-TitleKiri.Text = "LIST FITUR"
+TitleKiri.Text = "AUTO COPY WORKSPACE"
 TitleKiri.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleKiri.TextSize = 10
+TitleKiri.TextSize = 9
 TitleKiri.Font = Enum.Font.SourceSansBold
 TitleKiri.Parent = PageKiri
 
@@ -149,28 +149,28 @@ UIListKiri.SortOrder = Enum.SortOrder.LayoutOrder
 UIListKiri.Padding = UDim.new(0, 3)
 UIListKiri.Parent = ListContainer
 
-local function createFeatureLabel(text, order)
-	local lbl = Instance.new("TextLabel")
-	lbl.Size = UDim2.new(1, 0, 0, 22)
-	lbl.LayoutOrder = order
-	lbl.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-	lbl.Text = text
-	lbl.TextColor3 = Color3.fromRGB(220, 220, 220)
-	lbl.TextSize = 9
-	lbl.Font = Enum.Font.SourceSans
-	lbl.Parent = ListContainer
+local function createFeatureButton(text, order)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 22)
+	btn.LayoutOrder = order
+	btn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+	btn.Text = text
+	btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+	btn.TextSize = 9
+	btn.Font = Enum.Font.SourceSansBold
+	btn.Parent = ListContainer
 	
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 4)
-	corner.Parent = lbl
-	return lbl
+	corner.Parent = btn
+	return btn
 end
 
-createFeatureLabel("• Full Visual Sync (Decals)", 1)
-createFeatureLabel("• Support Folder & Model", 2)
-createFeatureLabel("• Direct Click Paste", 3)
-createFeatureLabel("• Precise Mesh & Surface", 4)
-createFeatureLabel("• Console Live Log", 5)
+local SelectAllWorkspaceBtn = createFeatureButton("⚡ Copy All Workspace", 1)
+local SelectFolderBtn        = createFeatureButton("📁 Copy All Folders", 2)
+local SelectModelBtn         = createFeatureButton("📦 Copy All Models", 3)
+local SelectPartBtn          = createFeatureButton("🧱 Copy All Parts", 4)
+local FlattenStructureBtn    = createFeatureButton("📂 Output: Folder Only", 5)
 
 --------------------------------------------------
 -- 4. PAGE TENGAH: PROFILE MINI
@@ -263,7 +263,6 @@ TitleKanan.TextSize = 10
 TitleKanan.Font = Enum.Font.SourceSansBold
 TitleKanan.Parent = PageKanan
 
--- Tombol Titik 3 Header
 local HeaderMenuBtn = Instance.new("TextButton")
 HeaderMenuBtn.Size = UDim2.new(0, 16, 0, 16)
 HeaderMenuBtn.Position = UDim2.new(1, -20, 0, 3)
@@ -312,7 +311,6 @@ local SelectModeBtn = createActionButton("SelectModeBtn", "Mouse Click: OFF", 2)
 local ClearBtn      = createActionButton("ClearBtn", "Reset Selection", 3)
 local SaveBtn       = createActionButton("SaveBtn", "Save Data", 4)
 
--- Scroll Container List Hasil
 local ResultFrame = Instance.new("ScrollingFrame")
 ResultFrame.Name = "ResultFrame"
 ResultFrame.Size = UDim2.new(1, -12, 0, 60)
@@ -331,7 +329,6 @@ ResultListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ResultListLayout.Padding = UDim.new(0, 2)
 ResultListLayout.Parent = ResultFrame
 
--- Console Log Box
 local ConsoleLog = Instance.new("TextLabel")
 ConsoleLog.Name = "ConsoleLog"
 ConsoleLog.Size = UDim2.new(1, -12, 0, 32)
@@ -350,7 +347,6 @@ local UICornerConsole = Instance.new("UICorner")
 UICornerConsole.CornerRadius = UDim.new(0, 4)
 UICornerConsole.Parent = ConsoleLog
 
--- Overlay Frame Global untuk Dropdown Menu
 local DropdownOverlay = Instance.new("Frame")
 DropdownOverlay.Name = "DropdownOverlay"
 DropdownOverlay.Size = UDim2.new(1, 0, 1, 0)
@@ -367,7 +363,7 @@ local function closeAllDropdowns()
 end
 
 --------------------------------------------------
--- 6. LOGIKA SYSTEM (DENGAN VISUAL FIX PRESISI 100%)
+-- 6. LOGIKA SYSTEM (FULL AUTO COPY & SERIALIZATION)
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
@@ -388,6 +384,25 @@ end
 local function setConsoleMessage(text, color)
 	ConsoleLog.Text = "> " .. text
 	ConsoleLog.TextColor3 = color or Color3.fromRGB(150, 255, 150)
+end
+
+local function addHighlight(obj)
+	if not highlights[obj] then
+		local hl = Instance.new("Highlight")
+		hl.Adornee = obj
+		hl.FillColor = Color3.fromRGB(255, 255, 255)
+		hl.FillTransparency = 0.4
+		hl.OutlineColor = Color3.fromRGB(0, 0, 0)
+		hl.Parent = obj
+		highlights[obj] = hl
+	end
+end
+
+local function removeHighlight(obj)
+	if highlights[obj] then
+		highlights[obj]:Destroy()
+		highlights[obj] = nil
+	end
 end
 
 ToggleCopyBtn.MouseButton1Click:Connect(function()
@@ -419,11 +434,11 @@ SelectModeBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Selection Handler
+-- KLIK MANUAL KLIK MOUSE
 Mouse.Button1Down:Connect(function()
 	if not isCopyEnabled or not isSelecting then return end
 	local target = Mouse.Target
-	if not target then return end
+	if not target or target:IsDescendantOf(LocalPlayer.Character) then return end
 
 	local objectToSelect = target
 	local ancestorFolder = target:FindFirstAncestorOfClass("Folder")
@@ -431,30 +446,21 @@ Mouse.Button1Down:Connect(function()
 
 	if ancestorFolder and ancestorFolder ~= workspace then
 		objectToSelect = ancestorFolder
-	elseif ancestorModel and ancestorModel ~= workspace then
+	elseif ancestorModel and ancestorModel ~= workspace and not Players:GetPlayerFromCharacter(ancestorModel) then
 		objectToSelect = ancestorModel
 	end
 
 	if selectedObjects[objectToSelect] then
 		selectedObjects[objectToSelect] = nil
-		if highlights[objectToSelect] then
-			highlights[objectToSelect]:Destroy()
-			highlights[objectToSelect] = nil
-		end
+		removeHighlight(objectToSelect)
 	else
 		selectedObjects[objectToSelect] = true
-		local hl = Instance.new("Highlight")
-		hl.Adornee = objectToSelect
-		hl.FillColor = Color3.fromRGB(255, 255, 255)
-		hl.FillTransparency = 0.4
-		hl.OutlineColor = Color3.fromRGB(0, 0, 0)
-		hl.Parent = objectToSelect
-		highlights[objectToSelect] = hl
+		addHighlight(objectToSelect)
 	end
 	
 	local count = 0
 	for _ in pairs(selectedObjects) do count = count + 1 end
-	setConsoleMessage("Selected: " .. count .. " items/containers")
+	setConsoleMessage("Selected: " .. count .. " items")
 end)
 
 ClearBtn.MouseButton1Click:Connect(function()
@@ -466,7 +472,9 @@ ClearBtn.MouseButton1Click:Connect(function()
 	setConsoleMessage("Selection cleared")
 end)
 
--- SERIALIZATION LENGKAP
+--------------------------------------------------
+-- SERIALISASI & DESERIALISASI PRESISI 100%
+--------------------------------------------------
 local function serializeInstance(inst)
 	local data = {
 		Name = inst.Name,
@@ -484,7 +492,6 @@ local function serializeInstance(inst)
 		data.CanCollide = inst.CanCollide
 		data.CFrame = {inst.CFrame:GetComponents()}
 		
-		-- Salin Permukaan (Mencegah Studs liar)
 		data.TopSurface = inst.TopSurface.Name
 		data.BottomSurface = inst.BottomSurface.Name
 		data.LeftSurface = inst.LeftSurface.Name
@@ -517,7 +524,6 @@ local function serializeInstance(inst)
 		end
 	end
 
-	-- Deep Copy untuk Children (Termasuk Decal, Texture, & SpecialMesh)
 	for _, child in ipairs(inst:GetChildren()) do
 		if not child:IsA("Highlight") then
 			table.insert(data.Children, serializeInstance(child))
@@ -543,7 +549,6 @@ local function serializeAllSelected()
 	return dataList
 end
 
--- DESERIALIZATION PRESISI
 local function deserializeInstance(data)
 	local inst = Instance.new(data.ClassName)
 	inst.Name = data.Name
@@ -558,7 +563,6 @@ local function deserializeInstance(data)
 		inst.CanCollide = data.CanCollide
 		inst.CFrame = CFrame.new(unpack(data.CFrame))
 
-		-- Terapkan Permukaan
 		if data.TopSurface then inst.TopSurface = Enum.SurfaceType[data.TopSurface] end
 		if data.BottomSurface then inst.BottomSurface = Enum.SurfaceType[data.BottomSurface] end
 		if data.LeftSurface then inst.LeftSurface = Enum.SurfaceType[data.LeftSurface] end
@@ -591,7 +595,6 @@ local function deserializeInstance(data)
 		end
 	end
 
-	-- Rekonstruksi Objek Anak
 	if data.Children then
 		for _, childData in ipairs(data.Children) do
 			local childInst = deserializeInstance(childData)
@@ -604,7 +607,101 @@ local function deserializeInstance(data)
 	return inst
 end
 
--- PASTE EXECUTION
+--------------------------------------------------
+-- AKSI TOMBOL PAGE KIRI (AUTO COPY INSTAN)
+--------------------------------------------------
+local function autoCopyAndSave(objectList, featureName)
+	if not isCopyEnabled then
+		setConsoleMessage("Aktifkan Copy Mode (ON) dulu!", Color3.fromRGB(255, 100, 100))
+		return
+	end
+
+	for obj, hl in pairs(highlights) do
+		if hl then hl:Destroy() end
+	end
+	selectedObjects = {}
+	highlights = {}
+
+	local count = 0
+	for _, child in ipairs(objectList) do
+		selectedObjects[child] = true
+		count = count + 1
+	end
+
+	if count == 0 then
+		setConsoleMessage("Tidak ada " .. featureName .. "!", Color3.fromRGB(255, 100, 100))
+		return
+	end
+
+	task.spawn(function()
+		setConsoleMessage("Memproses " .. featureName .. "...", Color3.fromRGB(255, 220, 100))
+		local partsData = serializeAllSelected()
+
+		local payload = {
+			Title = gameName .. " (" .. featureName .. ")",
+			Parts = partsData
+		}
+
+		table.insert(savedStorage, payload)
+		saveStorageToFile()
+		refreshResultList()
+		setConsoleMessage("Auto Copy " .. featureName .. " Sukses!", Color3.fromRGB(150, 255, 150))
+
+		for obj, hl in pairs(highlights) do
+			if hl then hl:Destroy() end
+		end
+		selectedObjects = {}
+		highlights = {}
+	end)
+end
+
+SelectAllWorkspaceBtn.MouseButton1Click:Connect(function()
+	local targets = {}
+	for _, child in ipairs(workspace:GetChildren()) do
+		if child ~= LocalPlayer.Character and not child:IsA("Camera") and not child:IsA("Terrain") then
+			table.insert(targets, child)
+		end
+	end
+	autoCopyAndSave(targets, "All Workspace")
+end)
+
+SelectFolderBtn.MouseButton1Click:Connect(function()
+	local targets = {}
+	for _, child in ipairs(workspace:GetChildren()) do
+		if child:IsA("Folder") then
+			table.insert(targets, child)
+		end
+	end
+	autoCopyAndSave(targets, "Folders")
+end)
+
+SelectModelBtn.MouseButton1Click:Connect(function()
+	local targets = {}
+	for _, child in ipairs(workspace:GetChildren()) do
+		if child:IsA("Model") and not Players:GetPlayerFromCharacter(child) then
+			table.insert(targets, child)
+		end
+	end
+	autoCopyAndSave(targets, "Models")
+end)
+
+SelectPartBtn.MouseButton1Click:Connect(function()
+	local targets = {}
+	for _, child in ipairs(workspace:GetChildren()) do
+		if child:IsA("BasePart") then
+			table.insert(targets, child)
+		end
+	end
+	autoCopyAndSave(targets, "Parts")
+end)
+
+FlattenStructureBtn.MouseButton1Click:Connect(function()
+	setConsoleMessage("Output: Folder Only (Active)", Color3.fromRGB(100, 200, 255))
+end)
+
+--------------------------------------------------
+-- PASTE EXECUTION: HANYA FOLDER, TANPA MODEL
+--------------------------------------------------
 local function executePaste(dataList)
 	if not dataList or #dataList == 0 then return end
 
@@ -617,7 +714,14 @@ local function executePaste(dataList)
 		for i, itemData in ipairs(dataList) do
 			local newInst = deserializeInstance(itemData)
 			if newInst then
-				newInst.Parent = mainFolder
+				if newInst:IsA("Model") or newInst:IsA("Folder") then
+					for _, child in ipairs(newInst:GetChildren()) do
+						child.Parent = mainFolder
+					end
+					newInst:Destroy()
+				else
+					newInst.Parent = mainFolder
+				end
 			end
 
 			local percent = math.floor((i / total) * 100)
@@ -625,12 +729,12 @@ local function executePaste(dataList)
 
 			if i % 10 == 0 then task.wait() end
 		end
-		setConsoleMessage("Successfully Pasted " .. total .. " items!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Paste Sukses ke Folder!", Color3.fromRGB(150, 255, 150))
 	end)
 end
 
 -- Refresh UI List Hasil
-local function refreshResultList()
+function refreshResultList()
 	closeAllDropdowns()
 	for _, btn in ipairs(listButtons) do
 		btn:Destroy()
@@ -672,7 +776,6 @@ local function refreshResultList()
 		itemBtn.Font = Enum.Font.SourceSans
 		itemBtn.Parent = itemFrame
 
-		-- Klik Item -> Langsung Paste
 		itemBtn.MouseButton1Click:Connect(function()
 			if next(multiSelectedMap) then
 				multiSelectedMap[idx] = not multiSelectedMap[idx] or nil
@@ -682,7 +785,6 @@ local function refreshResultList()
 			end
 		end)
 
-		-- Popup Menu Dropdown Hapus
 		itemMenuBtn.MouseButton1Click:Connect(function()
 			closeAllDropdowns()
 			DropdownOverlay.Visible = true
@@ -713,7 +815,7 @@ local function refreshResultList()
 				multiSelectedMap[idx] = nil
 				saveStorageToFile()
 				refreshResultList()
-				setConsoleMessage("Item deleted from storage")
+				setConsoleMessage("Item terhapus dari storage")
 			end)
 		end)
 
@@ -723,7 +825,7 @@ local function refreshResultList()
 	ResultFrame.CanvasSize = UDim2.new(0, 0, 0, ResultListLayout.AbsoluteContentSize.Y)
 end
 
--- Header Dropdown Menu
+-- Header Menu Dropdown
 HeaderMenuBtn.MouseButton1Click:Connect(function()
 	if DropdownOverlay.Visible then
 		closeAllDropdowns()
@@ -796,7 +898,7 @@ DropdownOverlay.InputBegan:Connect(function(input)
 	end
 end)
 
--- Save Logika
+-- Simpan Data Manual
 SaveBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then return end
 	task.spawn(function()
