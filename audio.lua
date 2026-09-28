@@ -1,5 +1,5 @@
 -- ======================================================
--- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE)
+-- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE - FULL MODEL & PROPERTY)
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -166,10 +166,10 @@ local function createFeatureLabel(text, order)
 	return lbl
 end
 
-createFeatureLabel("• Multi-Select Object", 1)
+createFeatureLabel("• Full Model & Properties", 1)
 createFeatureLabel("• Auto Save Storage", 2)
-createFeatureLabel("• Direct Click Paste", 3)
-createFeatureLabel("• Precise Position", 4)
+createFeatureLabel("• Mesh, Light & VFX Support", 3)
+createFeatureLabel("• Precise Position & CFrame", 4)
 createFeatureLabel("• Console Live Log", 5)
 
 --------------------------------------------------
@@ -331,7 +331,7 @@ ResultListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ResultListLayout.Padding = UDim.new(0, 2)
 ResultListLayout.Parent = ResultFrame
 
--- Console Log Box (Menampilkan status copy/paste)
+-- Console Log Box
 local ConsoleLog = Instance.new("TextLabel")
 ConsoleLog.Name = "ConsoleLog"
 ConsoleLog.Size = UDim2.new(1, -12, 0, 32)
@@ -350,7 +350,7 @@ local UICornerConsole = Instance.new("UICorner")
 UICornerConsole.CornerRadius = UDim.new(0, 4)
 UICornerConsole.Parent = ConsoleLog
 
--- Overlay Frame Global untuk Dropdown Menu
+-- Overlay Frame Global
 local DropdownOverlay = Instance.new("Frame")
 DropdownOverlay.Name = "DropdownOverlay"
 DropdownOverlay.Size = UDim2.new(1, 0, 1, 0)
@@ -367,7 +367,7 @@ local function closeAllDropdowns()
 end
 
 --------------------------------------------------
--- 6. LOGIKA SYSTEM (SELEKSI, LOADING & LOGGING)
+-- 6. SERIALIZER PROPERTI & MODEL LENGKAP
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
@@ -390,6 +390,154 @@ local function setConsoleMessage(text, color)
 	ConsoleLog.TextColor3 = color or Color3.fromRGB(150, 255, 150)
 end
 
+-- Serializer Instance beserta Seluruh Propertinya
+local function serializeInstance(inst)
+	local data = {
+		Name = inst.Name,
+		ClassName = inst.ClassName,
+		Children = {}
+	}
+
+	-- Properti BasePart
+	if inst:IsA("BasePart") then
+		data.Size = {inst.Size.X, inst.Size.Y, inst.Size.Z}
+		data.Color = {inst.Color.R, inst.Color.G, inst.Color.B}
+		data.Material = inst.Material.Name
+		data.Transparency = inst.Transparency
+		data.Reflectance = inst.Reflectance
+		data.Anchored = inst.Anchored
+		data.CanCollide = inst.CanCollide
+		data.CanTouch = inst.CanTouch
+		data.CanQuery = inst.CanQuery
+		data.CastShadow = inst.CastShadow
+		data.CFrame = {inst.CFrame:GetComponents()}
+		
+		if inst:IsA("MeshPart") then
+			data.MeshId = inst.MeshId
+			data.TextureID = inst.TextureID
+		elseif inst:IsA("CornerWedgePart") or inst:IsA("WedgePart") then
+			data.PartType = inst.ClassName
+		elseif inst:IsA("Part") then
+			data.Shape = inst.Shape.Name
+		end
+	elseif inst:IsA("SpecialMesh") then
+		data.MeshId = inst.MeshId
+		data.TextureId = inst.TextureId
+		data.MeshType = inst.MeshType.Name
+		data.Scale = {inst.Scale.X, inst.Scale.Y, inst.Scale.Z}
+		data.Offset = {inst.Offset.X, inst.Offset.Y, inst.Offset.Z}
+	elseif inst:IsA("Decal") or inst:IsA("Texture") then
+		data.Texture = inst.Texture
+		data.Face = inst.Face.Name
+		data.Transparency = inst.Transparency
+	elseif inst:IsA("Light") then
+		data.Color = {inst.Color.R, inst.Color.G, inst.Color.B}
+		data.Brightness = inst.Brightness
+		data.Range = inst.Range
+		data.Shadows = inst.Shadows
+		data.Enabled = inst.Enabled
+	elseif inst:IsA("ParticleEmitter") then
+		data.Texture = inst.Texture
+		data.Rate = inst.Rate
+		data.Lifetime = {inst.Lifetime.Min, inst.Lifetime.Max}
+		data.Speed = {inst.Speed.Min, inst.Speed.Max}
+		data.Enabled = inst.Enabled
+	elseif inst:IsA("Sound") then
+		data.SoundId = inst.SoundId
+		data.Volume = inst.Volume
+		data.Pitch = inst.Pitch
+		data.Looped = inst.Looped
+	elseif inst:IsA("Attachment") then
+		data.CFrame = {inst.CFrame:GetComponents()}
+	end
+
+	-- Rekursi seluruh Anak (Children)
+	for _, child in ipairs(inst:GetChildren()) do
+		if not child:IsA("Feature") and not child:IsA("Highlight") then
+			table.insert(data.Children, serializeInstance(child))
+		end
+	end
+
+	return data
+end
+
+-- Deserializer & Instance Generator
+local function deserializeInstance(data)
+	local inst
+	local success = pcall(function()
+		inst = Instance.new(data.ClassName)
+	end)
+	
+	if not success or not inst then
+		inst = Instance.new("Folder")
+	end
+
+	inst.Name = data.Name or "PastedObject"
+
+	-- Properti BasePart
+	if inst:IsA("BasePart") then
+		if data.Size then inst.Size = Vector3.new(unpack(data.Size)) end
+		if data.Color then inst.Color = Color3.new(unpack(data.Color)) end
+		if data.Material and Enum.Material[data.Material] then inst.Material = Enum.Material[data.Material] end
+		if data.Transparency then inst.Transparency = data.Transparency end
+		if data.Reflectance then inst.Reflectance = data.Reflectance end
+		if data.Anchored ~= nil then inst.Anchored = data.Anchored end
+		if data.CanCollide ~= nil then inst.CanCollide = data.CanCollide end
+		if data.CanTouch ~= nil then inst.CanTouch = data.CanTouch end
+		if data.CanQuery ~= nil then inst.CanQuery = data.CanQuery end
+		if data.CastShadow ~= nil then inst.CastShadow = data.CastShadow end
+		if data.CFrame then inst.CFrame = CFrame.new(unpack(data.CFrame)) end
+
+		if inst:IsA("Part") and data.Shape then
+			pcall(function() inst.Shape = Enum.PartType[data.Shape] end)
+		end
+	elseif inst:IsA("SpecialMesh") then
+		if data.MeshId then inst.MeshId = data.MeshId end
+		if data.TextureId then inst.TextureId = data.TextureId end
+		if data.MeshType then pcall(function() inst.MeshType = Enum.MeshType[data.MeshType] end) end
+		if data.Scale then inst.Scale = Vector3.new(unpack(data.Scale)) end
+		if data.Offset then inst.Offset = Vector3.new(unpack(data.Offset)) end
+	elseif inst:IsA("Decal") or inst:IsA("Texture") then
+		if data.Texture then inst.Texture = data.Texture end
+		if data.Face then pcall(function() inst.Face = Enum.NormalId[data.Face] end) end
+		if data.Transparency then inst.Transparency = data.Transparency end
+	elseif inst:IsA("Light") then
+		if data.Color then inst.Color = Color3.new(unpack(data.Color)) end
+		if data.Brightness then inst.Brightness = data.Brightness end
+		if data.Range then inst.Range = data.Range end
+		if data.Shadows ~= nil then inst.Shadows = data.Shadows end
+		if data.Enabled ~= nil then inst.Enabled = data.Enabled end
+	elseif inst:IsA("ParticleEmitter") then
+		if data.Texture then inst.Texture = data.Texture end
+		if data.Rate then inst.Rate = data.Rate end
+		if data.Lifetime then inst.Lifetime = NumberRange.new(data.Lifetime[1], data.Lifetime[2]) end
+		if data.Speed then inst.Speed = NumberRange.new(data.Speed[1], data.Speed[2]) end
+		if data.Enabled ~= nil then inst.Enabled = data.Enabled end
+	elseif inst:IsA("Sound") then
+		if data.SoundId then inst.SoundId = data.SoundId end
+		if data.Volume then inst.Volume = data.Volume end
+		if data.Pitch then inst.Pitch = data.Pitch end
+		if data.Looped ~= nil then inst.Looped = data.Looped end
+	elseif inst:IsA("Attachment") then
+		if data.CFrame then inst.CFrame = CFrame.new(unpack(data.CFrame)) end
+	end
+
+	-- Rekursi Pemasangan Anak (Children)
+	if data.Children then
+		for _, childData in ipairs(data.Children) do
+			local childInst = deserializeInstance(childData)
+			if childInst then
+				childInst.Parent = inst
+			end
+		end
+	end
+
+	return inst
+end
+
+--------------------------------------------------
+-- 7. LOGIKA KONTROL SELEKSI & EKSOPORT
+--------------------------------------------------
 ToggleCopyBtn.MouseButton1Click:Connect(function()
 	isCopyEnabled = not isCopyEnabled
 	if isCopyEnabled then
@@ -412,58 +560,45 @@ SelectModeBtn.MouseButton1Click:Connect(function()
 	if isSelecting then
 		SelectModeBtn.Text = "Mouse Click: ON"
 		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(50, 80, 120)
-		setConsoleMessage("Click object to select")
+		setConsoleMessage("Click object/model to select")
 	else
 		SelectModeBtn.Text = "Mouse Click: OFF"
 		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	end
 end)
 
--- Penyeleksian Lengkap
 Mouse.Button1Down:Connect(function()
 	if not isCopyEnabled or not isSelecting then return end
 	local target = Mouse.Target
 	if not target then return end
 
 	local ancestorModel = target:FindFirstAncestorOfClass("Model")
-	local partsToSelect = {}
+	local targetObject = (ancestorModel and ancestorModel ~= workspace) and ancestorModel or target
 
-	if ancestorModel and ancestorModel ~= workspace then
-		for _, descendant in ipairs(ancestorModel:GetDescendants()) do
-			if descendant:IsA("BasePart") then
-				table.insert(partsToSelect, descendant)
-			end
+	if selectedParts[targetObject] then
+		selectedParts[targetObject] = nil
+		if highlights[targetObject] then
+			highlights[targetObject]:Destroy()
+			highlights[targetObject] = nil
 		end
-	elseif target:IsA("BasePart") then
-		table.insert(partsToSelect, target)
-	end
-
-	for _, part in ipairs(partsToSelect) do
-		if selectedParts[part] then
-			selectedParts[part] = nil
-			if highlights[part] then
-				highlights[part]:Destroy()
-				highlights[part] = nil
-			end
-		else
-			selectedParts[part] = true
-			local hl = Instance.new("Highlight")
-			hl.Adornee = part
-			hl.FillColor = Color3.fromRGB(255, 255, 255)
-			hl.FillTransparency = 0.4
-			hl.OutlineColor = Color3.fromRGB(0, 0, 0)
-			hl.Parent = part
-			highlights[part] = hl
-		end
+	else
+		selectedParts[targetObject] = true
+		local hl = Instance.new("Highlight")
+		hl.Adornee = targetObject
+		hl.FillColor = Color3.fromRGB(255, 255, 255)
+		hl.FillTransparency = 0.4
+		hl.OutlineColor = Color3.fromRGB(0, 0, 0)
+		hl.Parent = targetObject
+		highlights[targetObject] = hl
 	end
 	
 	local count = 0
 	for _ in pairs(selectedParts) do count = count + 1 end
-	setConsoleMessage("Selected: " .. count .. " items")
+	setConsoleMessage("Selected: " .. count .. " objects")
 end)
 
 ClearBtn.MouseButton1Click:Connect(function()
-	for part, hl in pairs(highlights) do
+	for obj, hl in pairs(highlights) do
 		if hl then hl:Destroy() end
 	end
 	selectedParts = {}
@@ -471,36 +606,22 @@ ClearBtn.MouseButton1Click:Connect(function()
 	setConsoleMessage("Selection cleared")
 end)
 
--- Progress Copy dengan Nama Asli
 local function serializeParts()
 	local data = {}
-	local partList = {}
-	for part in pairs(selectedParts) do
-		if part then table.insert(partList, part) end
+	local objList = {}
+	for obj in pairs(selectedParts) do
+		if obj then table.insert(objList, obj) end
 	end
 
-	local total = #partList
-	for i, part in ipairs(partList) do
-		table.insert(data, {
-			Name = part.Name,
-			ClassName = part.ClassName,
-			Size = {part.Size.X, part.Size.Y, part.Size.Z},
-			Color = {part.Color.R, part.Color.G, part.Color.B},
-			Material = part.Material.Name,
-			Transparency = part.Transparency,
-			Anchored = part.Anchored,
-			CanCollide = part.CanCollide,
-			CFrame = {part.CFrame:GetComponents()}
-		})
-
-		-- Update Log Progress Copy Sesuai Nama Asli Item
-		setConsoleMessage(string.format("[COPY %d/%d]\n%s", i, total, part.Name), Color3.fromRGB(255, 220, 100))
-		if i % 10 == 0 then task.wait() end
+	local total = #objList
+	for i, obj in ipairs(objList) do
+		table.insert(data, serializeInstance(obj))
+		setConsoleMessage(string.format("[COPY %d/%d]\n%s", i, total, obj.Name), Color3.fromRGB(255, 220, 100))
+		if i % 5 == 0 then task.wait() end
 	end
 	return data
 end
 
--- Progress Paste dengan Nama Asli
 local function executePaste(dataList)
 	if not dataList or #dataList == 0 then return end
 
@@ -510,31 +631,21 @@ local function executePaste(dataList)
 	local total = #dataList
 
 	task.spawn(function()
-		for i, item in ipairs(dataList) do
-			local newPart = Instance.new(item.ClassName or "Part")
-			newPart.Name = item.Name or "PastedPart"
-			newPart.Size = Vector3.new(unpack(item.Size))
-			newPart.Color = Color3.new(unpack(item.Color))
-			newPart.Material = Enum.Material[item.Material] or Enum.Material.Plastic
-			newPart.Transparency = item.Transparency or 0
-			newPart.Anchored = item.Anchored
-			newPart.CanCollide = item.CanCollide
-			newPart.CFrame = CFrame.new(unpack(item.CFrame))
-			newPart.Parent = folder
-
-			-- Update Log Progress Paste
-			local percent = math.floor((i / total) * 100)
-			setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)\n%s", i, total, percent, newPart.Name), Color3.fromRGB(100, 200, 255))
-
-			if i % 50 == 0 then
-				task.wait()
+		for i, itemData in ipairs(dataList) do
+			local newInst = deserializeInstance(itemData)
+			if newInst then
+				newInst.Parent = folder
 			end
+
+			local percent = math.floor((i / total) * 100)
+			setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)\n%s", i, total, percent, itemData.Name or "Object"), Color3.fromRGB(100, 200, 255))
+
+			if i % 10 == 0 then task.wait() end
 		end
 		setConsoleMessage("Successfully Pasted " .. total .. " items!", Color3.fromRGB(150, 255, 150))
 	end)
 end
 
--- Refresh UI List Hasil
 local function refreshResultList()
 	closeAllDropdowns()
 	for _, btn in ipairs(listButtons) do
@@ -577,7 +688,6 @@ local function refreshResultList()
 		itemBtn.Font = Enum.Font.SourceSans
 		itemBtn.Parent = itemFrame
 
-		-- Klik Item -> Langsung Paste + Loading Log
 		itemBtn.MouseButton1Click:Connect(function()
 			if next(multiSelectedMap) then
 				multiSelectedMap[idx] = not multiSelectedMap[idx] or nil
@@ -587,7 +697,6 @@ local function refreshResultList()
 			end
 		end)
 
-		-- Popup Menu Dropdown Hapus
 		itemMenuBtn.MouseButton1Click:Connect(function()
 			closeAllDropdowns()
 			DropdownOverlay.Visible = true
@@ -628,7 +737,6 @@ local function refreshResultList()
 	ResultFrame.CanvasSize = UDim2.new(0, 0, 0, ResultListLayout.AbsoluteContentSize.Y)
 end
 
--- Header Dropdown Menu
 HeaderMenuBtn.MouseButton1Click:Connect(function()
 	if DropdownOverlay.Visible then
 		closeAllDropdowns()
@@ -701,13 +809,12 @@ DropdownOverlay.InputBegan:Connect(function(input)
 	end
 end)
 
--- Save Logika
 SaveBtn.MouseButton1Click:Connect(function()
 	if not isCopyEnabled then return end
 	task.spawn(function()
 		local partsData = serializeParts()
 		if #partsData == 0 then 
-			setConsoleMessage("No parts selected!", Color3.fromRGB(255, 100, 100))
+			setConsoleMessage("No objects selected!", Color3.fromRGB(255, 100, 100))
 			return 
 		end
 
@@ -719,11 +826,10 @@ SaveBtn.MouseButton1Click:Connect(function()
 		table.insert(savedStorage, payload)
 		saveStorageToFile()
 		refreshResultList()
-		setConsoleMessage("Saved " .. #partsData .. " items!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Saved " .. #partsData .. " objects!", Color3.fromRGB(150, 255, 150))
 	end)
 end)
 
--- Auto Load Storage
 if readfile and isfile and isfile("saved_build_data.dat") then
 	pcall(function()
 		local content = readfile("saved_build_data.dat")
