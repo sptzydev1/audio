@@ -1,5 +1,5 @@
 -- ======================================================
--- STARTERGUI COPIER & PASTER (CLEAN SOURCE FIX)
+-- STARTERGUI COPIER & PASTER (ROBLOX STUDIO LITE)
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -16,6 +16,7 @@ pcall(function()
 	end
 end)
 
+-- Hapus GUI lama jika ada
 local oldGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("IkyyGuiCopyTool")
 if oldGui then oldGui:Destroy() end
 
@@ -134,7 +135,7 @@ local InfoContainer = Instance.new("TextLabel")
 InfoContainer.Size = UDim2.new(1, -12, 1, -26)
 InfoContainer.Position = UDim2.new(0, 6, 0, 22)
 InfoContainer.BackgroundTransparency = 1
-InfoContainer.Text = "• Clean Source Fix\n• Target: PlayerGui\n• Auto Ignore CoreGUI\n• Full Layout Support\n• Aman untuk Studio Lite"
+InfoContainer.Text = "• Copy 100% Asli\n• Target: StarterGui\n• Support ScreenGui\n• Auto Save File\n• Aman untuk Studio"
 InfoContainer.TextColor3 = Color3.fromRGB(200, 200, 200)
 InfoContainer.TextSize = 9
 InfoContainer.Font = Enum.Font.SourceSans
@@ -159,7 +160,7 @@ local TitleKanan = Instance.new("TextLabel")
 TitleKanan.Size = UDim2.new(1, -12, 0, 18)
 TitleKanan.Position = UDim2.new(0, 6, 0, 2)
 TitleKanan.BackgroundTransparency = 1
-TitleKanan.Text = "GUI STORAGE"
+TitleKanan.Text = "STARTERGUI STORAGE"
 TitleKanan.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKanan.TextSize = 10
 TitleKanan.Font = Enum.Font.SourceSansBold
@@ -170,7 +171,7 @@ local CopyAllBtn = Instance.new("TextButton")
 CopyAllBtn.Size = UDim2.new(1, -12, 0, 20)
 CopyAllBtn.Position = UDim2.new(0, 6, 0, 22)
 CopyAllBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 120)
-CopyAllBtn.Text = "📥 Copy GUI Project dari PlayerGui"
+CopyAllBtn.Text = "📥 Copy Semua dari StarterGui"
 CopyAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CopyAllBtn.TextSize = 9
 CopyAllBtn.Font = Enum.Font.SourceSansBold
@@ -216,15 +217,7 @@ UICornerConsole.CornerRadius = UDim.new(0, 4)
 UICornerConsole.Parent = ConsoleLog
 
 --------------------------------------------------
--- 5. FUNGSI MEMBERSIHKAN TAG HTML KODE
---------------------------------------------------
-local function cleanHtmlTags(str)
-	if type(str) ~= "string" then return str end
-	return str:gsub("<[^>]+>", "")
-end
-
---------------------------------------------------
--- 6. SERIALIZER & DESERIALIZER DEEP FIX
+-- 5. SERIALIZER & DESERIALIZER MENDALAM KHUSUS GUI
 --------------------------------------------------
 local savedStorage = {}
 local listButtons = {}
@@ -242,6 +235,7 @@ local function setConsoleMessage(text, color)
 	ConsoleLog.TextColor3 = color or Color3.fromRGB(150, 255, 150)
 end
 
+-- Fungsi Rekursif Menyalin Properti GUI Secara Lengkap
 local function serializeGuiDeep(inst)
 	local data = {
 		Name = inst.Name,
@@ -249,25 +243,16 @@ local function serializeGuiDeep(inst)
 		Children = {}
 	}
 
+	-- Properti Umum UI (GuiObject / Text / Image / dll)
 	pcall(function()
-		if inst:IsA("ScreenGui") then
-			data.ResetOnSpawn = inst.ResetOnSpawn
-			data.Enabled = inst.Enabled
-			data.ZIndexBehavior = inst.ZIndexBehavior.Name
-		end
-
 		if inst:IsA("GuiObject") then
 			data.Size = {inst.Size.X.Scale, inst.Size.X.Offset, inst.Size.Y.Scale, inst.Size.Y.Offset}
 			data.Position = {inst.Position.X.Scale, inst.Position.X.Offset, inst.Position.Y.Scale, inst.Position.Y.Offset}
-			data.AnchorPoint = {inst.AnchorPoint.X, inst.AnchorPoint.Y}
 			data.BackgroundColor3 = {inst.BackgroundColor3.R, inst.BackgroundColor3.G, inst.BackgroundColor3.B}
 			data.BackgroundTransparency = inst.BackgroundTransparency
 			data.Visible = inst.Visible
 			data.ZIndex = inst.ZIndex
 			data.Rotation = inst.Rotation
-			data.ClipsDescendants = inst.ClipsDescendants
-			data.AutomaticSize = inst.AutomaticSize.Name
-			data.LayoutOrder = inst.LayoutOrder
 		end
 
 		if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
@@ -278,58 +263,36 @@ local function serializeGuiDeep(inst)
 			data.TextXAlignment = inst.TextXAlignment.Name
 			data.TextYAlignment = inst.TextYAlignment.Name
 			data.TextWrapped = inst.TextWrapped
-			data.TextScaled = inst.TextScaled
 		end
 
 		if inst:IsA("ImageLabel") or inst:IsA("ImageButton") then
 			data.Image = inst.Image
 			data.ImageColor3 = {inst.ImageColor3.R, inst.ImageColor3.G, inst.ImageColor3.B}
 			data.ImageTransparency = inst.ImageTransparency
-			data.ScaleType = inst.ScaleType.Name
 		end
 
 		if inst:IsA("ScrollingFrame") then
 			data.CanvasSize = {inst.CanvasSize.X.Scale, inst.CanvasSize.X.Offset, inst.CanvasSize.Y.Scale, inst.CanvasSize.Y.Offset}
 			data.ScrollBarThickness = inst.ScrollBarThickness
-			data.AutomaticCanvasSize = inst.AutomaticCanvasSize.Name
 		end
 		
 		if inst:IsA("UIStroke") then
 			data.Thickness = inst.Thickness
 			data.Color = {inst.Color.R, inst.Color.G, inst.Color.B}
 			data.Transparency = inst.Transparency
-			data.ApplyStrokeMode = inst.ApplyStrokeMode.Name
 		end
 
 		if inst:IsA("UICorner") then
 			data.CornerRadiusScale = inst.CornerRadius.Scale
 			data.CornerRadiusOffset = inst.CornerRadius.Offset
 		end
-
-		if inst:IsA("UIListLayout") or inst:IsA("UIGridLayout") then
-			data.Padding = {inst.Padding.Scale, inst.Padding.Offset}
-			data.FillDirection = inst.FillDirection.Name
-			data.HorizontalAlignment = inst.HorizontalAlignment.Name
-			data.VerticalAlignment = inst.VerticalAlignment.Name
-			data.SortOrder = inst.SortOrder.Name
-			if inst:IsA("UIGridLayout") then
-				data.CellSize = {inst.CellSize.X.Scale, inst.CellSize.X.Offset, inst.CellSize.Y.Scale, inst.CellSize.Y.Offset}
-				data.CellPadding = {inst.CellPadding.X.Scale, inst.CellPadding.X.Offset, inst.CellPadding.Y.Scale, inst.CellPadding.Y.Offset}
-			end
-		end
-
-		if inst:IsA("UIPadding") then
-			data.PaddingLeft = {inst.PaddingLeft.Scale, inst.PaddingLeft.Offset}
-			data.PaddingRight = {inst.PaddingRight.Scale, inst.PaddingRight.Offset}
-			data.PaddingTop = {inst.PaddingTop.Scale, inst.PaddingTop.Offset}
-			data.PaddingBottom = {inst.PaddingBottom.Scale, inst.PaddingBottom.Offset}
-		end
 		
-		if (inst:IsA("LocalScript") or inst:IsA("ModuleScript")) and data.ScriptSource then
-			data.ScriptSource = cleanHtmlTags(inst.Source)
+		if inst:IsA("LocalScript") or inst:IsA("ModuleScript") then
+			data.ScriptSource = inst.Source
 		end
 	end)
 
+	-- Rekursi Anak (Children)
 	for _, child in ipairs(inst:GetChildren()) do
 		table.insert(data.Children, serializeGuiDeep(child))
 	end
@@ -337,6 +300,7 @@ local function serializeGuiDeep(inst)
 	return data
 end
 
+-- Fungsi Rekursif Memasang/Paste GUI Kembali ke StarterGui
 local function deserializeGuiDeep(data)
 	local inst
 	pcall(function()
@@ -350,27 +314,19 @@ local function deserializeGuiDeep(data)
 	inst.Name = data.Name or "PastedGUI"
 
 	pcall(function()
-		if inst:IsA("ScreenGui") then
-			if data.ResetOnSpawn ~= nil then inst.ResetOnSpawn = data.ResetOnSpawn end
-			if data.Enabled ~= nil then inst.Enabled = data.Enabled end
-			if data.ZIndexBehavior and Enum.ZIndexBehavior[data.ZIndexBehavior] then
-				inst.ZIndexBehavior = Enum.ZIndexBehavior[data.ZIndexBehavior]
-			end
+		if inst:IsA("GuiObject") and data.Size then
+			inst.Size = UDim2.new(unpack(data.Size))
 		end
-
-		if inst:IsA("GuiObject") then
-			if data.Size then inst.Size = UDim2.new(unpack(data.Size)) end
-			if data.Position then inst.Position = UDim2.new(unpack(data.Position)) end
-			if data.AnchorPoint then inst.AnchorPoint = Vector2.new(unpack(data.AnchorPoint)) end
-			if data.BackgroundColor3 then inst.BackgroundColor3 = Color3.new(unpack(data.BackgroundColor3)) end
-			if data.BackgroundTransparency ~= nil then inst.BackgroundTransparency = data.BackgroundTransparency end
-			if data.Visible ~= nil then inst.Visible = data.Visible end
-			if data.ZIndex then inst.ZIndex = data.ZIndex end
-			if data.Rotation then inst.Rotation = data.Rotation end
-			if data.ClipsDescendants ~= nil then inst.ClipsDescendants = data.ClipsDescendants end
-			if data.AutomaticSize and Enum.AutomaticSize[data.AutomaticSize] then inst.AutomaticSize = Enum.AutomaticSize[data.AutomaticSize] end
-			if data.LayoutOrder then inst.LayoutOrder = data.LayoutOrder end
+		if inst:IsA("GuiObject") and data.Position then
+			inst.Position = UDim2.new(unpack(data.Position))
 		end
+		if inst:IsA("GuiObject") and data.BackgroundColor3 then
+			inst.BackgroundColor3 = Color3.new(unpack(data.BackgroundColor3))
+		end
+		if inst:IsA("GuiObject") and data.BackgroundTransparency then inst.BackgroundTransparency = data.BackgroundTransparency end
+		if inst:IsA("GuiObject") and data.Visible ~= nil then inst.Visible = data.Visible end
+		if inst:IsA("GuiObject") and data.ZIndex then inst.ZIndex = data.ZIndex end
+		if inst:IsA("GuiObject") and data.Rotation then inst.Rotation = data.Rotation end
 
 		if (inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox")) then
 			if data.Text then inst.Text = data.Text end
@@ -380,27 +336,23 @@ local function deserializeGuiDeep(data)
 			if data.TextXAlignment and Enum.TextXAlignment[data.TextXAlignment] then inst.TextXAlignment = Enum.TextXAlignment[data.TextXAlignment] end
 			if data.TextYAlignment and Enum.TextYAlignment[data.TextYAlignment] then inst.TextYAlignment = Enum.TextYAlignment[data.TextYAlignment] end
 			if data.TextWrapped ~= nil then inst.TextWrapped = data.TextWrapped end
-			if data.TextScaled ~= nil then inst.TextScaled = data.TextScaled end
 		end
 
 		if (inst:IsA("ImageLabel") or inst:IsA("ImageButton")) then
 			if data.Image then inst.Image = data.Image end
 			if data.ImageColor3 then inst.ImageColor3 = Color3.new(unpack(data.ImageColor3)) end
-			if data.ImageTransparency ~= nil then inst.ImageTransparency = data.ImageTransparency end
-			if data.ScaleType and Enum.ScaleType[data.ScaleType] then inst.ScaleType = Enum.ScaleType[data.ScaleType] end
+			if data.ImageTransparency then inst.ImageTransparency = data.ImageTransparency end
 		end
 
 		if inst:IsA("ScrollingFrame") then
 			if data.CanvasSize then inst.CanvasSize = UDim2.new(unpack(data.CanvasSize)) end
 			if data.ScrollBarThickness then inst.ScrollBarThickness = data.ScrollBarThickness end
-			if data.AutomaticCanvasSize and Enum.AutomaticSize[data.AutomaticCanvasSize] then inst.AutomaticCanvasSize = Enum.AutomaticSize[data.AutomaticCanvasSize] end
 		end
 		
 		if inst:IsA("UIStroke") then
 			if data.Thickness then inst.Thickness = data.Thickness end
 			if data.Color then inst.Color = Color3.new(unpack(data.Color)) end
-			if data.Transparency ~= nil then inst.Transparency = data.Transparency end
-			if data.ApplyStrokeMode and Enum.ApplyStrokeMode[data.ApplyStrokeMode] then inst.ApplyStrokeMode = Enum.ApplyStrokeMode[data.ApplyStrokeMode] end
+			if data.Transparency then inst.Transparency = data.Transparency end
 		end
 
 		if inst:IsA("UICorner") then
@@ -408,31 +360,13 @@ local function deserializeGuiDeep(data)
 				inst.CornerRadius = UDim.new(data.CornerRadiusScale, data.CornerRadiusOffset)
 			end
 		end
-
-		if inst:IsA("UIListLayout") or inst:IsA("UIGridLayout") then
-			if data.Padding then inst.Padding = UDim.new(unpack(data.Padding)) end
-			if data.FillDirection and Enum.FillDirection[data.FillDirection] then inst.FillDirection = Enum.FillDirection[data.FillDirection] end
-			if data.HorizontalAlignment and Enum.HorizontalAlignment[data.HorizontalAlignment] then inst.HorizontalAlignment = Enum.HorizontalAlignment[data.HorizontalAlignment] end
-			if data.VerticalAlignment and Enum.VerticalAlignment[data.VerticalAlignment] then inst.VerticalAlignment = Enum.VerticalAlignment[data.VerticalAlignment] end
-			if data.SortOrder and Enum.SortOrder[data.SortOrder] then inst.SortOrder = Enum.SortOrder[data.SortOrder] end
-			if inst:IsA("UIGridLayout") then
-				if data.CellSize then inst.CellSize = UDim2.new(unpack(data.CellSize)) end
-				if data.CellPadding then inst.CellPadding = UDim2.new(unpack(data.CellPadding)) end
-			end
-		end
-
-		if inst:IsA("UIPadding") then
-			if data.PaddingLeft then inst.PaddingLeft = UDim.new(unpack(data.PaddingLeft)) end
-			if data.PaddingRight then inst.PaddingRight = UDim.new(unpack(data.PaddingRight)) end
-			if data.PaddingTop then inst.PaddingTop = UDim.new(unpack(data.PaddingTop)) end
-			if data.PaddingBottom then inst.PaddingBottom = UDim.new(unpack(data.PaddingBottom)) end
-		end
 		
 		if (inst:IsA("LocalScript") or inst:IsA("ModuleScript")) and data.ScriptSource then
 			inst.Source = data.ScriptSource
 		end
 	end)
 
+	-- Rekursi Pasang Anak
 	if data.Children then
 		for _, childData in ipairs(data.Children) do
 			local childInst = deserializeGuiDeep(childData)
@@ -446,7 +380,7 @@ local function deserializeGuiDeep(data)
 end
 
 --------------------------------------------------
--- 7. FUNGSI TOMBOL INTERAKSI & REFRESH LIST
+-- 6. FUNGSI TOMBOL INTERAKSI & REFRESH LIST
 --------------------------------------------------
 local function refreshResultList()
 	for _, btn in ipairs(listButtons) do
@@ -487,27 +421,15 @@ local function refreshResultList()
 		delBtn.Parent = itemFrame
 
 		pasteBtn.MouseButton1Click:Connect(function()
-			setConsoleMessage("Pasting to PlayerGui...", Color3.fromRGB(100, 200, 255))
+			setConsoleMessage("Pasting to StarterGui...", Color3.fromRGB(100, 200, 255))
 			task.spawn(function()
-				local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 				for _, guiData in ipairs(itemData.Items) do
 					local newGui = deserializeGuiDeep(guiData)
 					if newGui then
-						if newGui:IsA("ScreenGui") then
-							newGui.Parent = playerGui
-						else
-							local targetScreen = playerGui:FindFirstChild("PastedGuiContainer")
-							if not targetScreen then
-								targetScreen = Instance.new("ScreenGui")
-								targetScreen.Name = "PastedGuiContainer"
-								targetScreen.ResetOnSpawn = false
-								targetScreen.Parent = playerGui
-							end
-							newGui.Parent = targetScreen
-						end
+						newGui.Parent = StarterGui
 					end
 				end
-				setConsoleMessage("Successfully pasted to PlayerGui!", Color3.fromRGB(150, 255, 150))
+				setConsoleMessage("Successfully pasted to StarterGui!", Color3.fromRGB(150, 255, 150))
 			end)
 		end)
 
@@ -527,34 +449,17 @@ end
 CopyAllBtn.MouseButton1Click:Connect(function()
 	task.spawn(function()
 		local copiedItems = {}
-		setConsoleMessage("Scanning Target GUI...", Color3.fromRGB(255, 220, 100))
+		setConsoleMessage("Scanning StarterGui...", Color3.fromRGB(255, 220, 100))
 
-		-- Daftar UI bawaan Roblox & Internal yang WAJIB DIABAIKAN
-		local ignoredNames = {
-			["IkyyGuiCopyTool"] = true,
-			["PastedGuiContainer"] = true,
-			["Chat"] = true,
-			["BubbleChat"] = true,
-			["Freecam"] = true,
-			["PlayerList"] = true,
-			["ControlGui"] = true,
-			["RbxCameraUI"] = true,
-			["CoreGui"] = true,
-			["PurchasePromptApp"] = true,
-			["RobloxNetworkPauseNotification"] = true
-		}
-
-		local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-		if playerGui then
-			for _, child in ipairs(playerGui:GetChildren()) do
-				if not ignoredNames[child.Name] then
-					table.insert(copiedItems, serializeGuiDeep(child))
-				end
+		for _, child in ipairs(StarterGui:GetChildren()) do
+			-- Jangan ikutkan GUI alat ini sendiri
+			if child.Name ~= "IkyyGuiCopyTool" then
+				table.insert(copiedItems, serializeGuiDeep(child))
 			end
 		end
 
 		if #copiedItems == 0 then
-			setConsoleMessage("GUI Project tidak ditemukan!", Color3.fromRGB(255, 100, 100))
+			setConsoleMessage("StarterGui is empty!", Color3.fromRGB(255, 100, 100))
 			return
 		end
 
@@ -566,14 +471,15 @@ CopyAllBtn.MouseButton1Click:Connect(function()
 		table.insert(savedStorage, payload)
 		saveStorageToFile()
 		refreshResultList()
-		setConsoleMessage("Saved " .. #copiedItems .. " Project GUI!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Saved " .. #copiedItems .. " GUI from StarterGui!", Color3.fromRGB(150, 255, 150))
 	end)
 end)
 
+-- Muat data tersimpan otomatis saat dijalankan
 if readfile and isfile and isfile("saved_gui_data.dat") then
 	pcall(function()
 		local content = readfile("saved_gui_data.dat")
-		local decoded = HttpService:JSONEncode(content)
+		local decoded = HttpService:JSONDecode(content)
 		if type(decoded) == "table" then
 			savedStorage = decoded
 			refreshResultList()
