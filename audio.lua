@@ -1,33 +1,30 @@
 -- ======================================================
--- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE - ADVANCED SCANNER)
+-- STARTERGUI COPIER & PASTER (ROBLOX STUDIO LITE)
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-local MarketplaceService = game:GetService("MarketplaceService")
+local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
 
--- Mendapatkan Nama Game
-local gameName = "Map Item"
+local guiName = "Project GUI"
 pcall(function()
-	local info = MarketplaceService:GetProductInfo(game.PlaceId)
-	if info and info.Name then
-		gameName = info.Name
+	if game.Name and game.Name ~= "" then
+		guiName = game.Name
 	end
 end)
 
 -- Hapus GUI lama jika ada
-local oldGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("IkyyCopyToolMini")
+local oldGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("IkyyGuiCopyTool")
 if oldGui then oldGui:Destroy() end
 
 --------------------------------------------------
 -- 1. UTAMA: SCREEN GUI & FLOATING ICON
 --------------------------------------------------
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "IkyyCopyToolMini"
+ScreenGui.Name = "IkyyGuiCopyTool"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -36,7 +33,7 @@ ToggleButton.Name = "ToggleButton"
 ToggleButton.Size = UDim2.new(0, 32, 0, 32)
 ToggleButton.Position = UDim2.new(0, 10, 0.5, -16)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-ToggleButton.Text = "📦"
+ToggleButton.Text = "🗂️"
 ToggleButton.TextSize = 14
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Active = true
@@ -54,8 +51,8 @@ UIStrokeIcon.Parent = ToggleButton
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 460, 0, 220)
-MainFrame.Position = UDim2.new(0.5, -230, 0.5, -110)
+MainFrame.Size = UDim2.new(0, 420, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -100)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -99,24 +96,23 @@ ToggleButton.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- 2. WATERMARK PALING BAWAH (@IkyyXD)
+-- 2. WATERMARK BAWAH (@IkyyXD)
 --------------------------------------------------
 local BottomWatermark = Instance.new("TextLabel")
 BottomWatermark.Size = UDim2.new(1, 0, 0, 16)
 BottomWatermark.Position = UDim2.new(0, 0, 1, -16)
 BottomWatermark.BackgroundTransparency = 1
-BottomWatermark.Text = "@IkyyXD"
+BottomWatermark.Text = "StarterGui Copier by @IkyyXD"
 BottomWatermark.TextColor3 = Color3.fromRGB(150, 150, 150)
 BottomWatermark.TextSize = 10
 BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PAGE KIRI: LIST FITUR MINI
+-- 3. PANEL KIRI: INFO & PANDUAN
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
-PageKiri.Name = "PageKiri"
-PageKiri.Size = UDim2.new(0, 142, 1, -22)
+PageKiri.Size = UDim2.new(0, 130, 1, -22)
 PageKiri.Position = UDim2.new(0, 6, 0, 6)
 PageKiri.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 PageKiri.Parent = MainFrame
@@ -129,120 +125,30 @@ local TitleKiri = Instance.new("TextLabel")
 TitleKiri.Size = UDim2.new(1, 0, 0, 18)
 TitleKiri.Position = UDim2.new(0, 0, 0, 2)
 TitleKiri.BackgroundTransparency = 1
-TitleKiri.Text = "LIST FITUR"
+TitleKiri.Text = "INFO FITUR"
 TitleKiri.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKiri.TextSize = 10
 TitleKiri.Font = Enum.Font.SourceSansBold
 TitleKiri.Parent = PageKiri
 
-local ListContainer = Instance.new("Frame")
-ListContainer.Size = UDim2.new(1, -12, 1, -26)
-ListContainer.Position = UDim2.new(0, 6, 0, 22)
-ListContainer.BackgroundTransparency = 1
-ListContainer.Parent = PageKiri
-
-local UIListKiri = Instance.new("UIListLayout")
-UIListKiri.SortOrder = Enum.SortOrder.LayoutOrder
-UIListKiri.Padding = UDim.new(0, 3)
-UIListKiri.Parent = ListContainer
-
-local function createFeatureLabel(text, order)
-	local lbl = Instance.new("TextLabel")
-	lbl.Size = UDim2.new(1, 0, 0, 22)
-	lbl.LayoutOrder = order
-	lbl.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-	lbl.Text = text
-	lbl.TextColor3 = Color3.fromRGB(220, 220, 220)
-	lbl.TextSize = 9
-	lbl.Font = Enum.Font.SourceSans
-	lbl.Parent = ListContainer
-	
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 4)
-	corner.Parent = lbl
-	return lbl
-end
-
-createFeatureLabel("• Deep Property Scanner", 1)
-createFeatureLabel("• Full Surface & Texture", 2)
-createFeatureLabel("• SpawnLocation Support", 3)
-createFeatureLabel("• Multi-Object Hierarchy", 4)
-createFeatureLabel("• Live Console Log", 5)
+local InfoContainer = Instance.new("TextLabel")
+InfoContainer.Size = UDim2.new(1, -12, 1, -26)
+InfoContainer.Position = UDim2.new(0, 6, 0, 22)
+InfoContainer.BackgroundTransparency = 1
+InfoContainer.Text = "• Copy 100% Asli\n• Target: StarterGui\n• Support ScreenGui\n• Auto Save File\n• Aman untuk Studio"
+InfoContainer.TextColor3 = Color3.fromRGB(200, 200, 200)
+InfoContainer.TextSize = 9
+InfoContainer.Font = Enum.Font.SourceSans
+InfoContainer.TextXAlignment = Enum.TextXAlignment.Left
+InfoContainer.TextYAlignment = Enum.TextYAlignment.Top
+InfoContainer.Parent = PageKiri
 
 --------------------------------------------------
--- 4. PAGE TENGAH: PROFILE MINI
---------------------------------------------------
-local PageTengah = Instance.new("Frame")
-PageTengah.Name = "PageTengah"
-PageTengah.Size = UDim2.new(0, 142, 1, -22)
-PageTengah.Position = UDim2.new(0, 154, 0, 6)
-PageTengah.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-PageTengah.Parent = MainFrame
-
-local UICornerTengah = Instance.new("UICorner")
-UICornerTengah.CornerRadius = UDim.new(0, 6)
-UICornerTengah.Parent = PageTengah
-
-local TitleTengah = Instance.new("TextLabel")
-TitleTengah.Size = UDim2.new(1, 0, 0, 18)
-TitleTengah.Position = UDim2.new(0, 0, 0, 2)
-TitleTengah.BackgroundTransparency = 1
-TitleTengah.Text = "PROFILE AKUN"
-TitleTengah.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleTengah.TextSize = 10
-TitleTengah.Font = Enum.Font.SourceSansBold
-TitleTengah.Parent = PageTengah
-
-local AvatarImg = Instance.new("ImageLabel")
-AvatarImg.Size = UDim2.new(0, 32, 0, 32)
-AvatarImg.Position = UDim2.new(0, 6, 0, 22)
-AvatarImg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-AvatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
-AvatarImg.Parent = PageTengah
-
-local UICornerAvatar = Instance.new("UICorner")
-UICornerAvatar.CornerRadius = UDim.new(1, 0)
-UICornerAvatar.Parent = AvatarImg
-
-local ProfileDetails = Instance.new("TextLabel")
-ProfileDetails.Size = UDim2.new(1, -44, 0, 32)
-ProfileDetails.Position = UDim2.new(0, 42, 0, 22)
-ProfileDetails.BackgroundTransparency = 1
-ProfileDetails.TextXAlignment = Enum.TextXAlignment.Left
-ProfileDetails.TextYAlignment = Enum.TextYAlignment.Center
-ProfileDetails.Text = "👤 " .. LocalPlayer.DisplayName .. "\n🗓️ " .. LocalPlayer.AccountAge .. " Hari"
-ProfileDetails.TextColor3 = Color3.fromRGB(220, 220, 220)
-ProfileDetails.TextSize = 9
-ProfileDetails.Font = Enum.Font.SourceSans
-ProfileDetails.Parent = PageTengah
-
-local InfoList = Instance.new("TextLabel")
-InfoList.Size = UDim2.new(1, -12, 0, 115)
-InfoList.Position = UDim2.new(0, 6, 0, 60)
-InfoList.BackgroundTransparency = 1
-InfoList.TextXAlignment = Enum.TextXAlignment.Left
-InfoList.TextYAlignment = Enum.TextYAlignment.Top
-InfoList.TextColor3 = Color3.fromRGB(180, 180, 180)
-InfoList.TextSize = 9
-InfoList.Font = Enum.Font.SourceSans
-InfoList.Text = "👥 Friends: Loading...\n⭐ Followers: Loading...\n📌 Following: Loading..."
-InfoList.Parent = PageTengah
-
-task.spawn(function()
-	local friendsCount, followersCount, followingCount = "0", "0", "0"
-	pcall(function() friendsCount = tostring(#Players:GetFriendsAsync(LocalPlayer.UserId):GetCurrentPage()) end)
-	pcall(function() followersCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followers/count")).count) end)
-	pcall(function() followingCount = tostring(HttpService:JSONDecode(game:HttpGet("https://friends.roblox.com/v1/users/" .. LocalPlayer.UserId .. "/followings/count")).count) end)
-	InfoList.Text = "👥 Friends: " .. friendsCount .. "\n⭐ Followers: " .. followersCount .. "\n📌 Following: " .. followingCount
-end)
-
---------------------------------------------------
--- 5. PAGE KANAN: KONTROL, LIST & CONSOLE LOG
+-- 4. PANEL KANAN: KONTROL & LIST DATA
 --------------------------------------------------
 local PageKanan = Instance.new("Frame")
-PageKanan.Name = "PageKanan"
-PageKanan.Size = UDim2.new(0, 150, 1, -22)
-PageKanan.Position = UDim2.new(0, 302, 0, 6)
+PageKanan.Size = UDim2.new(0, 268, 1, -22)
+PageKanan.Position = UDim2.new(0, 142, 0, 6)
 PageKanan.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 PageKanan.Parent = MainFrame
 
@@ -251,67 +157,33 @@ UICornerKanan.CornerRadius = UDim.new(0, 6)
 UICornerKanan.Parent = PageKanan
 
 local TitleKanan = Instance.new("TextLabel")
-TitleKanan.Size = UDim2.new(1, -24, 0, 18)
-TitleKanan.Position = UDim2.new(0, 0, 0, 2)
+TitleKanan.Size = UDim2.new(1, -12, 0, 18)
+TitleKanan.Position = UDim2.new(0, 6, 0, 2)
 TitleKanan.BackgroundTransparency = 1
-TitleKanan.Text = "DATA SAVED"
+TitleKanan.Text = "STARTERGUI STORAGE"
 TitleKanan.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKanan.TextSize = 10
 TitleKanan.Font = Enum.Font.SourceSansBold
+TitleKanan.TextXAlignment = Enum.TextXAlignment.Left
 TitleKanan.Parent = PageKanan
 
-local HeaderMenuBtn = Instance.new("TextButton")
-HeaderMenuBtn.Size = UDim2.new(0, 16, 0, 16)
-HeaderMenuBtn.Position = UDim2.new(1, -20, 0, 3)
-HeaderMenuBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-HeaderMenuBtn.Text = "⋮"
-HeaderMenuBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-HeaderMenuBtn.TextSize = 10
-HeaderMenuBtn.Font = Enum.Font.SourceSansBold
-HeaderMenuBtn.Parent = PageKanan
+local CopyAllBtn = Instance.new("TextButton")
+CopyAllBtn.Size = UDim2.new(1, -12, 0, 20)
+CopyAllBtn.Position = UDim2.new(0, 6, 0, 22)
+CopyAllBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 120)
+CopyAllBtn.Text = "📥 Copy Semua dari StarterGui"
+CopyAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CopyAllBtn.TextSize = 9
+CopyAllBtn.Font = Enum.Font.SourceSansBold
+CopyAllBtn.Parent = PageKanan
 
-local UICornerHeaderBtn = Instance.new("UICorner")
-UICornerHeaderBtn.CornerRadius = UDim.new(0, 3)
-UICornerHeaderBtn.Parent = HeaderMenuBtn
-
-local BtnContainer = Instance.new("Frame")
-BtnContainer.Size = UDim2.new(1, -12, 0, 68)
-BtnContainer.Position = UDim2.new(0, 6, 0, 20)
-BtnContainer.BackgroundTransparency = 1
-BtnContainer.Parent = PageKanan
-
-local UIListKanan = Instance.new("UIListLayout")
-UIListKanan.SortOrder = Enum.SortOrder.LayoutOrder
-UIListKanan.Padding = UDim.new(0, 2)
-UIListKanan.Parent = BtnContainer
-
-local function createActionButton(name, text, order)
-	local btn = Instance.new("TextButton")
-	btn.Name = name
-	btn.Size = UDim2.new(1, 0, 0, 15)
-	btn.LayoutOrder = order
-	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	btn.Text = text
-	btn.TextColor3 = Color3.fromRGB(240, 240, 240)
-	btn.TextSize = 9
-	btn.Font = Enum.Font.SourceSansBold
-	btn.Parent = BtnContainer
-	
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 3)
-	corner.Parent = btn
-	return btn
-end
-
-local ToggleCopyBtn = createActionButton("ToggleCopyBtn", "Copy Mode: OFF", 1)
-local SelectModeBtn = createActionButton("SelectModeBtn", "Mouse Click: OFF", 2)
-local ClearBtn      = createActionButton("ClearBtn", "Reset Selection", 3)
-local SaveBtn       = createActionButton("SaveBtn", "Save Data", 4)
+local UICornerCopyBtn = Instance.new("UICorner")
+UICornerCopyBtn.CornerRadius = UDim.new(0, 4)
+UICornerCopyBtn.Parent = CopyAllBtn
 
 local ResultFrame = Instance.new("ScrollingFrame")
-ResultFrame.Name = "ResultFrame"
-ResultFrame.Size = UDim2.new(1, -12, 0, 60)
-ResultFrame.Position = UDim2.new(0, 6, 0, 90)
+ResultFrame.Size = UDim2.new(1, -12, 0, 75)
+ResultFrame.Position = UDim2.new(0, 6, 0, 46)
 ResultFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 ResultFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ResultFrame.ScrollBarThickness = 2
@@ -329,7 +201,7 @@ ResultListLayout.Parent = ResultFrame
 local ConsoleLog = Instance.new("TextLabel")
 ConsoleLog.Name = "ConsoleLog"
 ConsoleLog.Size = UDim2.new(1, -12, 0, 32)
-ConsoleLog.Position = UDim2.new(0, 6, 0, 154)
+ConsoleLog.Position = UDim2.new(0, 6, 0, 126)
 ConsoleLog.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
 ConsoleLog.Text = "> System Ready..."
 ConsoleLog.TextColor3 = Color3.fromRGB(150, 255, 150)
@@ -344,36 +216,16 @@ local UICornerConsole = Instance.new("UICorner")
 UICornerConsole.CornerRadius = UDim.new(0, 4)
 UICornerConsole.Parent = ConsoleLog
 
-local DropdownOverlay = Instance.new("Frame")
-DropdownOverlay.Name = "DropdownOverlay"
-DropdownOverlay.Size = UDim2.new(1, 0, 1, 0)
-DropdownOverlay.BackgroundTransparency = 1
-DropdownOverlay.Visible = false
-DropdownOverlay.ZIndex = 10
-DropdownOverlay.Parent = PageKanan
-
-local function closeAllDropdowns()
-	DropdownOverlay.Visible = false
-	for _, child in ipairs(DropdownOverlay:GetChildren()) do
-		child:Destroy()
-	end
-end
-
 --------------------------------------------------
--- 6. FULL DEEP PROPERTI SCANNER (SEMUA PROPERTI)
+-- 5. SERIALIZER & DESERIALIZER MENDALAM KHUSUS GUI
 --------------------------------------------------
-local isCopyEnabled = false
-local isSelecting = false
-local selectedParts = {}
-local highlights = {}
 local savedStorage = {}
-local multiSelectedMap = {}
 local listButtons = {}
 
 local function saveStorageToFile()
 	if writefile then
 		pcall(function()
-			writefile("saved_build_data.dat", HttpService:JSONEncode(savedStorage))
+			writefile("saved_gui_data.dat", HttpService:JSONEncode(savedStorage))
 		end)
 	end
 end
@@ -383,176 +235,141 @@ local function setConsoleMessage(text, color)
 	ConsoleLog.TextColor3 = color or Color3.fromRGB(150, 255, 150)
 end
 
--- Scan mendalam seluruh properti sesuai tipe kelasnya
-local function serializeInstanceDeep(inst)
+-- Fungsi Rekursif Menyalin Properti GUI Secara Lengkap
+local function serializeGuiDeep(inst)
 	local data = {
 		Name = inst.Name,
 		ClassName = inst.ClassName,
 		Children = {}
 	}
 
-	-- Properti BasePart (Sesuai panel Properti Roblox Studio)
-	if inst:IsA("BasePart") then
-		data.Size = {inst.Size.X, inst.Size.Y, inst.Size.Z}
-		data.Color = {inst.Color.R, inst.Color.G, inst.Color.B}
-		data.BrickColor = inst.BrickColor.Name
-		data.Material = inst.Material.Name
-		data.Transparency = inst.Transparency
-		data.Reflectance = inst.Reflectance
-		data.Anchored = inst.Anchored
-		data.CanCollide = inst.CanCollide
-		data.CanTouch = inst.CanTouch
-		data.CanQuery = inst.CanQuery
-		data.CastShadow = inst.CastShadow
-		data.Massless = inst.Massless
-		data.CFrame = {inst.CFrame:GetComponents()}
-
-		-- Permukaan (Surfaces: Studs, Smooth, Inset, dll.)
-		pcall(function()
-			data.TopSurface = inst.TopSurface.Name
-			data.BottomSurface = inst.BottomSurface.Name
-			data.FrontSurface = inst.FrontSurface.Name
-			data.BackSurface = inst.BackSurface.Name
-			data.LeftSurface = inst.LeftSurface.Name
-			data.RightSurface = inst.RightSurface.Name
-		end)
-
-		-- Shape & Specific BasePart
-		if inst:IsA("Part") then
-			data.Shape = inst.Shape.Name
-		elseif inst:IsA("MeshPart") then
-			data.MeshId = inst.MeshId
-			data.TextureID = inst.TextureID
+	-- Properti Umum UI (GuiObject / Text / Image / dll)
+	pcall(function()
+		if inst:IsA("GuiObject") then
+			data.Size = {inst.Size.X.Scale, inst.Size.X.Offset, inst.Size.Y.Scale, inst.Size.Y.Offset}
+			data.Position = {inst.Position.X.Scale, inst.Position.X.Offset, inst.Position.Y.Scale, inst.Position.Y.Offset}
+			data.BackgroundColor3 = {inst.BackgroundColor3.R, inst.BackgroundColor3.G, inst.BackgroundColor3.B}
+			data.BackgroundTransparency = inst.BackgroundTransparency
+			data.Visible = inst.Visible
+			data.ZIndex = inst.ZIndex
+			data.Rotation = inst.Rotation
 		end
 
-		-- SpawnLocation Properties (Khusus Spawn)
-		if inst:IsA("SpawnLocation") then
-			data.Neutral = inst.Neutral
-			data.Duration = inst.Duration
-			data.AllowTeamChangeOnTouch = inst.AllowTeamChangeOnTouch
-			data.TeamColor = inst.TeamColor.Name
-			data.Enabled = inst.Enabled
+		if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
+			data.Text = inst.Text
+			data.TextColor3 = {inst.TextColor3.R, inst.TextColor3.G, inst.TextColor3.B}
+			data.TextSize = inst.TextSize
+			data.Font = inst.Font.Name
+			data.TextXAlignment = inst.TextXAlignment.Name
+			data.TextYAlignment = inst.TextYAlignment.Name
+			data.TextWrapped = inst.TextWrapped
 		end
-	elseif inst:IsA("Decal") or inst:IsA("Texture") then
-		data.Texture = inst.Texture
-		data.Face = inst.Face.Name
-		data.Transparency = inst.Transparency
-		if inst:IsA("Texture") then
-			data.StudsPerTileU = inst.StudsPerTileU
-			data.StudsPerTileV = inst.StudsPerTileV
-		end
-	elseif inst:IsA("SpecialMesh") then
-		data.MeshId = inst.MeshId
-		data.TextureId = inst.TextureId
-		data.MeshType = inst.MeshType.Name
-		data.Scale = {inst.Scale.X, inst.Scale.Y, inst.Scale.Z}
-		data.Offset = {inst.Offset.X, inst.Offset.Y, inst.Offset.Z}
-	elseif inst:IsA("Light") then
-		data.Color = {inst.Color.R, inst.Color.G, inst.Color.B}
-		data.Brightness = inst.Brightness
-		data.Range = inst.Range
-		data.Shadows = inst.Shadows
-		data.Enabled = inst.Enabled
-	elseif inst:IsA("Sound") then
-		data.SoundId = inst.SoundId
-		data.Volume = inst.Volume
-		data.Pitch = inst.Pitch
-		data.Looped = inst.Looped
-	elseif inst:IsA("ParticleEmitter") then
-		data.Texture = inst.Texture
-		data.Rate = inst.Rate
-		data.Enabled = inst.Enabled
-	end
 
-	-- Scan Anak (Children & Decal Stiker di dalam SpawnLocation)
+		if inst:IsA("ImageLabel") or inst:IsA("ImageButton") then
+			data.Image = inst.Image
+			data.ImageColor3 = {inst.ImageColor3.R, inst.ImageColor3.G, inst.ImageColor3.B}
+			data.ImageTransparency = inst.ImageTransparency
+		end
+
+		if inst:IsA("ScrollingFrame") then
+			data.CanvasSize = {inst.CanvasSize.X.Scale, inst.CanvasSize.X.Offset, inst.CanvasSize.Y.Scale, inst.CanvasSize.Y.Offset}
+			data.ScrollBarThickness = inst.ScrollBarThickness
+		end
+		
+		if inst:IsA("UIStroke") then
+			data.Thickness = inst.Thickness
+			data.Color = {inst.Color.R, inst.Color.G, inst.Color.B}
+			data.Transparency = inst.Transparency
+		end
+
+		if inst:IsA("UICorner") then
+			data.CornerRadiusScale = inst.CornerRadius.Scale
+			data.CornerRadiusOffset = inst.CornerRadius.Offset
+		end
+		
+		if inst:IsA("LocalScript") or inst:IsA("ModuleScript") then
+			data.ScriptSource = inst.Source
+		end
+	end)
+
+	-- Rekursi Anak (Children)
 	for _, child in ipairs(inst:GetChildren()) do
-		if not child:IsA("Feature") and not child:IsA("Highlight") then
-			table.insert(data.Children, serializeInstanceDeep(child))
-		end
+		table.insert(data.Children, serializeGuiDeep(child))
 	end
 
 	return data
 end
 
--- Re-build/Paste dengan Replikasi Properti Asli 100%
-local function deserializeInstanceDeep(data)
+-- Fungsi Rekursif Memasang/Paste GUI Kembali ke StarterGui
+local function deserializeGuiDeep(data)
 	local inst
-	local ok = pcall(function()
+	pcall(function()
 		inst = Instance.new(data.ClassName)
 	end)
 
-	if not ok or not inst then
+	if not inst then
 		inst = Instance.new("Folder")
 	end
 
-	inst.Name = data.Name or "PastedObject"
+	inst.Name = data.Name or "PastedGUI"
 
-	if inst:IsA("BasePart") then
-		if data.Size then inst.Size = Vector3.new(unpack(data.Size)) end
-		if data.Color then inst.Color = Color3.new(unpack(data.Color)) end
-		if data.Material and Enum.Material[data.Material] then inst.Material = Enum.Material[data.Material] end
-		if data.Transparency ~= nil then inst.Transparency = data.Transparency end
-		if data.Reflectance ~= nil then inst.Reflectance = data.Reflectance end
-		if data.Anchored ~= nil then inst.Anchored = data.Anchored end
-		if data.CanCollide ~= nil then inst.CanCollide = data.CanCollide end
-		if data.CanTouch ~= nil then inst.CanTouch = data.CanTouch end
-		if data.CanQuery ~= nil then inst.CanQuery = data.CanQuery end
-		if data.CastShadow ~= nil then inst.CastShadow = data.CastShadow end
-		if data.Massless ~= nil then inst.Massless = data.Massless end
-		if data.CFrame then inst.CFrame = CFrame.new(unpack(data.CFrame)) end
+	pcall(function()
+		if inst:IsA("GuiObject") and data.Size then
+			inst.Size = UDim2.new(unpack(data.Size))
+		end
+		if inst:IsA("GuiObject") and data.Position then
+			inst.Position = UDim2.new(unpack(data.Position))
+		end
+		if inst:IsA("GuiObject") and data.BackgroundColor3 then
+			inst.BackgroundColor3 = Color3.new(unpack(data.BackgroundColor3))
+		end
+		if inst:IsA("GuiObject") and data.BackgroundTransparency then inst.BackgroundTransparency = data.BackgroundTransparency end
+		if inst:IsA("GuiObject") and data.Visible ~= nil then inst.Visible = data.Visible end
+		if inst:IsA("GuiObject") and data.ZIndex then inst.ZIndex = data.ZIndex end
+		if inst:IsA("GuiObject") and data.Rotation then inst.Rotation = data.Rotation end
 
-		-- Replikasi Permukaan (Studs/Tongkat/Smooth)
-		pcall(function()
-			if data.TopSurface then inst.TopSurface = Enum.SurfaceType[data.TopSurface] end
-			if data.BottomSurface then inst.BottomSurface = Enum.SurfaceType[data.BottomSurface] end
-			if data.FrontSurface then inst.FrontSurface = Enum.SurfaceType[data.FrontSurface] end
-			if data.BackSurface then inst.BackSurface = Enum.SurfaceType[data.BackSurface] end
-			if data.LeftSurface then inst.LeftSurface = Enum.SurfaceType[data.LeftSurface] end
-			if data.RightSurface then inst.RightSurface = Enum.SurfaceType[data.RightSurface] end
-		end)
-
-		if inst:IsA("Part") and data.Shape then
-			pcall(function() inst.Shape = Enum.PartType[data.Shape] end)
+		if (inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox")) then
+			if data.Text then inst.Text = data.Text end
+			if data.TextColor3 then inst.TextColor3 = Color3.new(unpack(data.TextColor3)) end
+			if data.TextSize then inst.TextSize = data.TextSize end
+			if data.Font and Enum.Font[data.Font] then inst.Font = Enum.Font[data.Font] end
+			if data.TextXAlignment and Enum.TextXAlignment[data.TextXAlignment] then inst.TextXAlignment = Enum.TextXAlignment[data.TextXAlignment] end
+			if data.TextYAlignment and Enum.TextYAlignment[data.TextYAlignment] then inst.TextYAlignment = Enum.TextYAlignment[data.TextYAlignment] end
+			if data.TextWrapped ~= nil then inst.TextWrapped = data.TextWrapped end
 		end
 
-		if inst:IsA("SpawnLocation") then
-			if data.Neutral ~= nil then inst.Neutral = data.Neutral end
-			if data.Duration ~= nil then inst.Duration = data.Duration end
-			if data.AllowTeamChangeOnTouch ~= nil then inst.AllowTeamChangeOnTouch = data.AllowTeamChangeOnTouch end
-			if data.TeamColor then inst.TeamColor = BrickColor.new(data.TeamColor) end
-			if data.Enabled ~= nil then inst.Enabled = data.Enabled end
+		if (inst:IsA("ImageLabel") or inst:IsA("ImageButton")) then
+			if data.Image then inst.Image = data.Image end
+			if data.ImageColor3 then inst.ImageColor3 = Color3.new(unpack(data.ImageColor3)) end
+			if data.ImageTransparency then inst.ImageTransparency = data.ImageTransparency end
 		end
-	elseif inst:IsA("Decal") or inst:IsA("Texture") then
-		if data.Texture then inst.Texture = data.Texture end
-		if data.Face then pcall(function() inst.Face = Enum.NormalId[data.Face] end) end
-		if data.Transparency ~= nil then inst.Transparency = data.Transparency end
-		if inst:IsA("Texture") then
-			if data.StudsPerTileU then inst.StudsPerTileU = data.StudsPerTileU end
-			if data.StudsPerTileV then inst.StudsPerTileV = data.StudsPerTileV end
+
+		if inst:IsA("ScrollingFrame") then
+			if data.CanvasSize then inst.CanvasSize = UDim2.new(unpack(data.CanvasSize)) end
+			if data.ScrollBarThickness then inst.ScrollBarThickness = data.ScrollBarThickness end
 		end
-	elseif inst:IsA("SpecialMesh") then
-		if data.MeshId then inst.MeshId = data.MeshId end
-		if data.TextureId then inst.TextureId = data.TextureId end
-		if data.MeshType then pcall(function() inst.MeshType = Enum.MeshType[data.MeshType] end) end
-		if data.Scale then inst.Scale = Vector3.new(unpack(data.Scale)) end
-		if data.Offset then inst.Offset = Vector3.new(unpack(data.Offset)) end
-	elseif inst:IsA("Light") then
-		if data.Color then inst.Color = Color3.new(unpack(data.Color)) end
-		if data.Brightness then inst.Brightness = data.Brightness end
-		if data.Range then inst.Range = data.Range end
-		if data.Shadows ~= nil then inst.Shadows = data.Shadows end
-		if data.Enabled ~= nil then inst.Enabled = data.Enabled end
-	elseif inst:IsA("Sound") then
-		if data.SoundId then inst.SoundId = data.SoundId end
-		if data.Volume then inst.Volume = data.Volume end
-		if data.Pitch then inst.Pitch = data.Pitch end
-		if data.Looped ~= nil then inst.Looped = data.Looped end
-	end
+		
+		if inst:IsA("UIStroke") then
+			if data.Thickness then inst.Thickness = data.Thickness end
+			if data.Color then inst.Color = Color3.new(unpack(data.Color)) end
+			if data.Transparency then inst.Transparency = data.Transparency end
+		end
+
+		if inst:IsA("UICorner") then
+			if data.CornerRadiusScale and data.CornerRadiusOffset then
+				inst.CornerRadius = UDim.new(data.CornerRadiusScale, data.CornerRadiusOffset)
+			end
+		end
+		
+		if (inst:IsA("LocalScript") or inst:IsA("ModuleScript")) and data.ScriptSource then
+			inst.Source = data.ScriptSource
+		end
+	end)
 
 	-- Rekursi Pasang Anak
 	if data.Children then
 		for _, childData in ipairs(data.Children) do
-			local childInst = deserializeInstanceDeep(childData)
+			local childInst = deserializeGuiDeep(childData)
 			if childInst then
 				childInst.Parent = inst
 			end
@@ -563,199 +380,64 @@ local function deserializeInstanceDeep(data)
 end
 
 --------------------------------------------------
--- 7. LOGIKA KONTROL SELEKSI & EXECUTION
+-- 6. FUNGSI TOMBOL INTERAKSI & REFRESH LIST
 --------------------------------------------------
-ToggleCopyBtn.MouseButton1Click:Connect(function()
-	isCopyEnabled = not isCopyEnabled
-	if isCopyEnabled then
-		ToggleCopyBtn.Text = "Copy Mode: ON"
-		ToggleCopyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		setConsoleMessage("Copy Mode Active")
-	else
-		isSelecting = false
-		SelectModeBtn.Text = "Mouse Click: OFF"
-		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		ToggleCopyBtn.Text = "Copy Mode: OFF"
-		ToggleCopyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		setConsoleMessage("Copy Mode Standby")
-	end
-end)
-
-SelectModeBtn.MouseButton1Click:Connect(function()
-	if not isCopyEnabled then return end
-	isSelecting = not isSelecting
-	if isSelecting then
-		SelectModeBtn.Text = "Mouse Click: ON"
-		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(50, 80, 120)
-		setConsoleMessage("Click object to scan")
-	else
-		SelectModeBtn.Text = "Mouse Click: OFF"
-		SelectModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	end
-end)
-
-Mouse.Button1Down:Connect(function()
-	if not isCopyEnabled or not isSelecting then return end
-	local target = Mouse.Target
-	if not target then return end
-
-	local ancestorModel = target:FindFirstAncestorOfClass("Model")
-	local targetObject = (ancestorModel and ancestorModel ~= workspace) and ancestorModel or target
-
-	if selectedParts[targetObject] then
-		selectedParts[targetObject] = nil
-		if highlights[targetObject] then
-			highlights[targetObject]:Destroy()
-			highlights[targetObject] = nil
-		end
-	else
-		selectedParts[targetObject] = true
-		local hl = Instance.new("Highlight")
-		hl.Adornee = targetObject
-		hl.FillColor = Color3.fromRGB(255, 255, 255)
-		hl.FillTransparency = 0.4
-		hl.OutlineColor = Color3.fromRGB(0, 0, 0)
-		hl.Parent = targetObject
-		highlights[targetObject] = hl
-	end
-	
-	local count = 0
-	for _ in pairs(selectedParts) do count = count + 1 end
-	setConsoleMessage("Selected: " .. count .. " items")
-end)
-
-ClearBtn.MouseButton1Click:Connect(function()
-	for obj, hl in pairs(highlights) do
-		if hl then hl:Destroy() end
-	end
-	selectedParts = {}
-	highlights = {}
-	setConsoleMessage("Selection cleared")
-end)
-
-local function serializeParts()
-	local data = {}
-	local objList = {}
-	for obj in pairs(selectedParts) do
-		if obj then table.insert(objList, obj) end
-	end
-
-	local total = #objList
-	for i, obj in ipairs(objList) do
-		table.insert(data, serializeInstanceDeep(obj))
-		setConsoleMessage(string.format("[SCAN %d/%d]\n%s", i, total, obj.Name), Color3.fromRGB(255, 220, 100))
-		if i % 5 == 0 then task.wait() end
-	end
-	return data
-end
-
-local function executePaste(dataList)
-	if not dataList or #dataList == 0 then return end
-
-	local folder = Instance.new("Folder")
-	folder.Name = "Pasted_" .. math.random(100, 999)
-	folder.Parent = workspace
-	local total = #dataList
-
-	task.spawn(function()
-		for i, itemData in ipairs(dataList) do
-			local newInst = deserializeInstanceDeep(itemData)
-			if newInst then
-				newInst.Parent = folder
-			end
-
-			local percent = math.floor((i / total) * 100)
-			setConsoleMessage(string.format("[PASTE %d/%d] (%d%%)\n%s", i, total, percent, itemData.Name or "Object"), Color3.fromRGB(100, 200, 255))
-
-			if i % 10 == 0 then task.wait() end
-		end
-		setConsoleMessage("Pasted " .. total .. " items successfully!", Color3.fromRGB(150, 255, 150))
-	end)
-end
-
 local function refreshResultList()
-	closeAllDropdowns()
 	for _, btn in ipairs(listButtons) do
 		btn:Destroy()
 	end
 	listButtons = {}
 
 	for idx, itemData in ipairs(savedStorage) do
-		local isMultiSelected = multiSelectedMap[idx]
-
 		local itemFrame = Instance.new("Frame")
-		itemFrame.Size = UDim2.new(1, -4, 0, 16)
+		itemFrame.Size = UDim2.new(1, -4, 0, 18)
 		itemFrame.LayoutOrder = idx
-		itemFrame.BackgroundColor3 = isMultiSelected and Color3.fromRGB(80, 50, 50) or Color3.fromRGB(25, 25, 25)
+		itemFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 		itemFrame.Parent = ResultFrame
 
-		local cornerFrame = Instance.new("UICorner")
-		cornerFrame.CornerRadius = UDim.new(0, 3)
-		cornerFrame.Parent = itemFrame
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 3)
+		corner.Parent = itemFrame
 
-		local itemMenuBtn = Instance.new("TextButton")
-		itemMenuBtn.Size = UDim2.new(0, 14, 1, 0)
-		itemMenuBtn.Position = UDim2.new(0, 2, 0, 0)
-		itemMenuBtn.BackgroundTransparency = 1
-		itemMenuBtn.Text = "⋮"
-		itemMenuBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-		itemMenuBtn.TextSize = 10
-		itemMenuBtn.Font = Enum.Font.SourceSansBold
-		itemMenuBtn.ZIndex = 2
-		itemMenuBtn.Parent = itemFrame
+		local pasteBtn = Instance.new("TextButton")
+		pasteBtn.Size = UDim2.new(1, -22, 1, 0)
+		pasteBtn.Position = UDim2.new(0, 4, 0, 0)
+		pasteBtn.BackgroundTransparency = 1
+		pasteBtn.Text = idx .. ". " .. itemData.Title .. " (" .. #itemData.Items .. " GUI)"
+		pasteBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+		pasteBtn.TextXAlignment = Enum.TextXAlignment.Left
+		pasteBtn.TextSize = 8
+		pasteBtn.Font = Enum.Font.SourceSansBold
+		pasteBtn.Parent = itemFrame
 
-		local itemBtn = Instance.new("TextButton")
-		itemBtn.Size = UDim2.new(1, -18, 1, 0)
-		itemBtn.Position = UDim2.new(0, 18, 0, 0)
-		itemBtn.BackgroundTransparency = 1
-		itemBtn.Text = idx .. ". " .. itemData.Title .. " (" .. #itemData.Parts .. ")"
-		itemBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-		itemBtn.TextXAlignment = Enum.TextXAlignment.Left
-		itemBtn.TextSize = 8
-		itemBtn.Font = Enum.Font.SourceSans
-		itemBtn.Parent = itemFrame
+		local delBtn = Instance.new("TextButton")
+		delBtn.Size = UDim2.new(0, 14, 1, 0)
+		delBtn.Position = UDim2.new(1, -16, 0, 0)
+		delBtn.BackgroundTransparency = 1
+		delBtn.Text = "×"
+		delBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+		delBtn.TextSize = 12
+		delBtn.Font = Enum.Font.SourceSansBold
+		delBtn.Parent = itemFrame
 
-		itemBtn.MouseButton1Click:Connect(function()
-			if next(multiSelectedMap) then
-				multiSelectedMap[idx] = not multiSelectedMap[idx] or nil
-				refreshResultList()
-			else
-				executePaste(itemData.Parts)
-			end
+		pasteBtn.MouseButton1Click:Connect(function()
+			setConsoleMessage("Pasting to StarterGui...", Color3.fromRGB(100, 200, 255))
+			task.spawn(function()
+				for _, guiData in ipairs(itemData.Items) do
+					local newGui = deserializeGuiDeep(guiData)
+					if newGui then
+						newGui.Parent = StarterGui
+					end
+				end
+				setConsoleMessage("Successfully pasted to StarterGui!", Color3.fromRGB(150, 255, 150))
+			end)
 		end)
 
-		itemMenuBtn.MouseButton1Click:Connect(function()
-			closeAllDropdowns()
-			DropdownOverlay.Visible = true
-
-			local popMenu = Instance.new("Frame")
-			popMenu.Size = UDim2.new(0, 60, 0, 18)
-			popMenu.Position = UDim2.new(0, 20, 0, math.clamp(itemFrame.AbsolutePosition.Y - ResultFrame.AbsolutePosition.Y + 90, 10, 180))
-			popMenu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-			popMenu.ZIndex = 11
-			popMenu.Parent = DropdownOverlay
-
-			local popCorner = Instance.new("UICorner")
-			popCorner.CornerRadius = UDim.new(0, 3)
-			popCorner.Parent = popMenu
-
-			local delBtn = Instance.new("TextButton")
-			delBtn.Size = UDim2.new(1, 0, 1, 0)
-			delBtn.BackgroundTransparency = 1
-			delBtn.Text = "🗑️ Hapus"
-			delBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-			delBtn.TextSize = 8
-			delBtn.Font = Enum.Font.SourceSansBold
-			delBtn.ZIndex = 12
-			delBtn.Parent = popMenu
-
-			delBtn.MouseButton1Click:Connect(function()
-				table.remove(savedStorage, idx)
-				multiSelectedMap[idx] = nil
-				saveStorageToFile()
-				refreshResultList()
-				setConsoleMessage("Item deleted from storage")
-			end)
+		delBtn.MouseButton1Click:Connect(function()
+			table.remove(savedStorage, idx)
+			saveStorageToFile()
+			refreshResultList()
+			setConsoleMessage("Item deleted from storage")
 		end)
 
 		table.insert(listButtons, itemFrame)
@@ -764,107 +446,44 @@ local function refreshResultList()
 	ResultFrame.CanvasSize = UDim2.new(0, 0, 0, ResultListLayout.AbsoluteContentSize.Y)
 end
 
-HeaderMenuBtn.MouseButton1Click:Connect(function()
-	if DropdownOverlay.Visible then
-		closeAllDropdowns()
-		return
-	end
-	closeAllDropdowns()
-	DropdownOverlay.Visible = true
+CopyAllBtn.MouseButton1Click:Connect(function()
+	task.spawn(function()
+		local copiedItems = {}
+		setConsoleMessage("Scanning StarterGui...", Color3.fromRGB(255, 220, 100))
 
-	local menuFrame = Instance.new("Frame")
-	menuFrame.Size = UDim2.new(0, 85, 0, 38)
-	menuFrame.Position = UDim2.new(1, -90, 0, 20)
-	menuFrame.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
-	menuFrame.ZIndex = 11
-	menuFrame.Parent = DropdownOverlay
-
-	local menuCorner = Instance.new("UICorner")
-	menuCorner.CornerRadius = UDim.new(0, 4)
-	menuCorner.Parent = menuFrame
-
-	local layout = Instance.new("UIListLayout")
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Padding = UDim.new(0, 1)
-	layout.Parent = menuFrame
-
-	local selectAllBtn = Instance.new("TextButton")
-	selectAllBtn.Size = UDim2.new(1, 0, 0, 18)
-	selectAllBtn.BackgroundTransparency = 1
-	selectAllBtn.Text = "☑️ Select All"
-	selectAllBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-	selectAllBtn.TextSize = 8
-	selectAllBtn.Font = Enum.Font.SourceSans
-	selectAllBtn.ZIndex = 12
-	selectAllBtn.Parent = menuFrame
-
-	local deleteSelectedBtn = Instance.new("TextButton")
-	deleteSelectedBtn.Size = UDim2.new(1, 0, 0, 18)
-	deleteSelectedBtn.BackgroundTransparency = 1
-	deleteSelectedBtn.Text = "🗑️ Hapus Terpilih"
-	deleteSelectedBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-	deleteSelectedBtn.TextSize = 8
-	deleteSelectedBtn.Font = Enum.Font.SourceSansBold
-	deleteSelectedBtn.ZIndex = 12
-	deleteSelectedBtn.Parent = menuFrame
-
-	selectAllBtn.MouseButton1Click:Connect(function()
-		for i = 1, #savedStorage do
-			multiSelectedMap[i] = true
-		end
-		refreshResultList()
-	end)
-
-	deleteSelectedBtn.MouseButton1Click:Connect(function()
-		local newStorage = {}
-		for i, data in ipairs(savedStorage) do
-			if not multiSelectedMap[i] then
-				table.insert(newStorage, data)
+		for _, child in ipairs(StarterGui:GetChildren()) do
+			-- Jangan ikutkan GUI alat ini sendiri
+			if child.Name ~= "IkyyGuiCopyTool" then
+				table.insert(copiedItems, serializeGuiDeep(child))
 			end
 		end
-		savedStorage = newStorage
-		multiSelectedMap = {}
-		saveStorageToFile()
-		refreshResultList()
-		setConsoleMessage("Selected items deleted")
-	end)
-end)
 
-DropdownOverlay.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		closeAllDropdowns()
-	end
-end)
-
-SaveBtn.MouseButton1Click:Connect(function()
-	if not isCopyEnabled then return end
-	task.spawn(function()
-		local partsData = serializeParts()
-		if #partsData == 0 then 
-			setConsoleMessage("No items selected!", Color3.fromRGB(255, 100, 100))
-			return 
+		if #copiedItems == 0 then
+			setConsoleMessage("StarterGui is empty!", Color3.fromRGB(255, 100, 100))
+			return
 		end
 
 		local payload = {
-			Title = gameName,
-			Parts = partsData
+			Title = guiName,
+			Items = copiedItems
 		}
 
 		table.insert(savedStorage, payload)
 		saveStorageToFile()
 		refreshResultList()
-		setConsoleMessage("Saved " .. #partsData .. " items!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Saved " .. #copiedItems .. " GUI from StarterGui!", Color3.fromRGB(150, 255, 150))
 	end)
 end)
 
-if readfile and isfile and isfile("saved_build_data.dat") then
+-- Muat data tersimpan otomatis saat dijalankan
+if readfile and isfile and isfile("saved_gui_data.dat") then
 	pcall(function()
-		local content = readfile("saved_build_data.dat")
+		local content = readfile("saved_gui_data.dat")
 		local decoded = HttpService:JSONDecode(content)
 		if type(decoded) == "table" then
 			savedStorage = decoded
 			refreshResultList()
-			setConsoleMessage("Loaded saved data")
+			setConsoleMessage("Loaded saved GUI data")
 		end
 	end)
 end
