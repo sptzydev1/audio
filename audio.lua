@@ -134,7 +134,7 @@ local InfoContainer = Instance.new("TextLabel")
 InfoContainer.Size = UDim2.new(1, -12, 1, -26)
 InfoContainer.Position = UDim2.new(0, 6, 0, 22)
 InfoContainer.BackgroundTransparency = 1
-InfoContainer.Text = "• Clean Source Fix\n• Target: PlayerGui\n• Full Layout Support\n• Auto Save File\n• Aman untuk Studio"
+InfoContainer.Text = "• Clean Source Fix\n• Target: PlayerGui\n• Auto Ignore CoreGUI\n• Full Layout Support\n• Aman untuk Studio Lite"
 InfoContainer.TextColor3 = Color3.fromRGB(200, 200, 200)
 InfoContainer.TextSize = 9
 InfoContainer.Font = Enum.Font.SourceSans
@@ -170,7 +170,7 @@ local CopyAllBtn = Instance.new("TextButton")
 CopyAllBtn.Size = UDim2.new(1, -12, 0, 20)
 CopyAllBtn.Position = UDim2.new(0, 6, 0, 22)
 CopyAllBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 120)
-CopyAllBtn.Text = "📥 Copy Semua dari PlayerGui / StarterGui"
+CopyAllBtn.Text = "📥 Copy GUI Project dari PlayerGui"
 CopyAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CopyAllBtn.TextSize = 9
 CopyAllBtn.Font = Enum.Font.SourceSansBold
@@ -325,7 +325,7 @@ local function serializeGuiDeep(inst)
 			data.PaddingBottom = {inst.PaddingBottom.Scale, inst.PaddingBottom.Offset}
 		end
 		
-		if inst:IsA("LocalScript") or inst:IsA("ModuleScript") then
+		if (inst:IsA("LocalScript") or inst:IsA("ModuleScript")) and data.ScriptSource then
 			data.ScriptSource = cleanHtmlTags(inst.Source)
 		end
 	end)
@@ -493,8 +493,6 @@ local function refreshResultList()
 				for _, guiData in ipairs(itemData.Items) do
 					local newGui = deserializeGuiDeep(guiData)
 					if newGui then
-						-- Jika berupa ScreenGui langsung ditaruh di PlayerGui
-						-- Jika objek lain, ditaruh ke ScreenGui dummy jika belum ada
 						if newGui:IsA("ScreenGui") then
 							newGui.Parent = playerGui
 						else
@@ -529,22 +527,34 @@ end
 CopyAllBtn.MouseButton1Click:Connect(function()
 	task.spawn(function()
 		local copiedItems = {}
-		setConsoleMessage("Scanning GUI...", Color3.fromRGB(255, 220, 100))
+		setConsoleMessage("Scanning Target GUI...", Color3.fromRGB(255, 220, 100))
 
-		-- Scan PlayerGui & StarterGui agar serbaguna
-		local targets = {LocalPlayer:FindFirstChild("PlayerGui"), StarterGui}
-		for _, targetFolder in ipairs(targets) do
-			if targetFolder then
-				for _, child in ipairs(targetFolder:GetChildren()) do
-					if child.Name ~= "IkyyGuiCopyTool" and child.Name ~= "PastedGuiContainer" then
-						table.insert(copiedItems, serializeGuiDeep(child))
-					end
+		-- Daftar UI bawaan Roblox & Internal yang WAJIB DIABAIKAN
+		local ignoredNames = {
+			["IkyyGuiCopyTool"] = true,
+			["PastedGuiContainer"] = true,
+			["Chat"] = true,
+			["BubbleChat"] = true,
+			["Freecam"] = true,
+			["PlayerList"] = true,
+			["ControlGui"] = true,
+			["RbxCameraUI"] = true,
+			["CoreGui"] = true,
+			["PurchasePromptApp"] = true,
+			["RobloxNetworkPauseNotification"] = true
+		}
+
+		local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+		if playerGui then
+			for _, child in ipairs(playerGui:GetChildren()) do
+				if not ignoredNames[child.Name] then
+					table.insert(copiedItems, serializeGuiDeep(child))
 				end
 			end
 		end
 
 		if #copiedItems == 0 then
-			setConsoleMessage("No GUI found!", Color3.fromRGB(255, 100, 100))
+			setConsoleMessage("GUI Project tidak ditemukan!", Color3.fromRGB(255, 100, 100))
 			return
 		end
 
@@ -556,14 +566,14 @@ CopyAllBtn.MouseButton1Click:Connect(function()
 		table.insert(savedStorage, payload)
 		saveStorageToFile()
 		refreshResultList()
-		setConsoleMessage("Saved " .. #copiedItems .. " GUI Elements!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Saved " .. #copiedItems .. " Project GUI!", Color3.fromRGB(150, 255, 150))
 	end)
 end)
 
 if readfile and isfile and isfile("saved_gui_data.dat") then
 	pcall(function()
 		local content = readfile("saved_gui_data.dat")
-		local decoded = HttpService:JSONDecode(content)
+		local decoded = HttpService:JSONEncode(content)
 		if type(decoded) == "table" then
 			savedStorage = decoded
 			refreshResultList()
