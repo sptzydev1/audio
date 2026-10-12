@@ -7,6 +7,7 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
+local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
 local guiName = "Project GUI"
@@ -135,7 +136,7 @@ local InfoContainer = Instance.new("TextLabel")
 InfoContainer.Size = UDim2.new(1, -12, 1, -26)
 InfoContainer.Position = UDim2.new(0, 6, 0, 22)
 InfoContainer.BackgroundTransparency = 1
-InfoContainer.Text = "• Copy 100% Asli\n• Target: StarterGui\n• Support ScreenGui\n• Auto Save File\n• Aman untuk Studio"
+InfoContainer.Text = "• Copy 100% Asli\n• Target: Folder Bundle\n• Support ScreenGui\n• Auto Save File\n• Aman untuk Studio"
 InfoContainer.TextColor3 = Color3.fromRGB(200, 200, 200)
 InfoContainer.TextSize = 9
 InfoContainer.Font = Enum.Font.SourceSans
@@ -243,7 +244,6 @@ local function serializeGuiDeep(inst)
 		Children = {}
 	}
 
-	-- Properti Umum UI (GuiObject / Text / Image / dll)
 	pcall(function()
 		if inst:IsA("GuiObject") then
 			data.Size = {inst.Size.X.Scale, inst.Size.X.Offset, inst.Size.Y.Scale, inst.Size.Y.Offset}
@@ -292,7 +292,6 @@ local function serializeGuiDeep(inst)
 		end
 	end)
 
-	-- Rekursi Anak (Children)
 	for _, child in ipairs(inst:GetChildren()) do
 		table.insert(data.Children, serializeGuiDeep(child))
 	end
@@ -300,7 +299,7 @@ local function serializeGuiDeep(inst)
 	return data
 end
 
--- Fungsi Rekursif Memasang/Paste GUI Kembali ke StarterGui
+-- Fungsi Rekursif Memasang/Paste GUI Kembali
 local function deserializeGuiDeep(data)
 	local inst
 	pcall(function()
@@ -346,7 +345,7 @@ local function deserializeGuiDeep(data)
 
 		if inst:IsA("ScrollingFrame") then
 			if data.CanvasSize then inst.CanvasSize = UDim2.new(unpack(data.CanvasSize)) end
-			if data.ScrollBarThickness then inst.ScrollBarThickness = data.ScrollBarThickness end
+			if data.ScrollBarThickness then inst.ScrollBarThickness = inst.ScrollBarThickness end
 		end
 		
 		if inst:IsA("UIStroke") then
@@ -366,7 +365,6 @@ local function deserializeGuiDeep(data)
 		end
 	end)
 
-	-- Rekursi Pasang Anak
 	if data.Children then
 		for _, childData in ipairs(data.Children) do
 			local childInst = deserializeGuiDeep(childData)
@@ -420,16 +418,25 @@ local function refreshResultList()
 		delBtn.Font = Enum.Font.SourceSansBold
 		delBtn.Parent = itemFrame
 
+		-- MODIFIKASI: Mengumpulkan hasil deserialize ke dalam satu Folder khusus
 		pasteBtn.MouseButton1Click:Connect(function()
-			setConsoleMessage("Pasting to StarterGui...", Color3.fromRGB(100, 200, 255))
+			setConsoleMessage("Creating packed folder...", Color3.fromRGB(100, 200, 255))
 			task.spawn(function()
+				-- Buat Folder penampung (bisa diubah parent-nya ke Workspace atau PlayerGui)
+				local bundleFolder = Instance.new("Folder")
+				bundleFolder.Name = "BackupBundle_" .. itemData.Title
+				
 				for _, guiData in ipairs(itemData.Items) do
 					local newGui = deserializeGuiDeep(guiData)
 					if newGui then
-						newGui.Parent = StarterGui
+						newGui.Parent = bundleFolder
 					end
 				end
-				setConsoleMessage("Successfully pasted to StarterGui!", Color3.fromRGB(150, 255, 150))
+				
+				-- Masukkan folder ke Workspace agar rapi dan mudah ditarik manual ke StarterGui/PlayerGui
+				bundleFolder.Parent = Workspace
+				
+				setConsoleMessage("Packed into Workspace folder!", Color3.fromRGB(150, 255, 150))
 			end)
 		end)
 
@@ -452,7 +459,6 @@ CopyAllBtn.MouseButton1Click:Connect(function()
 		setConsoleMessage("Scanning StarterGui...", Color3.fromRGB(255, 220, 100))
 
 		for _, child in ipairs(StarterGui:GetChildren()) do
-			-- Jangan ikutkan GUI alat ini sendiri
 			if child.Name ~= "IkyyGuiCopyTool" then
 				table.insert(copiedItems, serializeGuiDeep(child))
 			end
