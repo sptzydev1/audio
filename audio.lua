@@ -1,5 +1,5 @@
 -- ======================================================
--- STARTERGUI COPIER & PASTER (ROBLOX STUDIO LITE)
+-- BOTH (STARTERGUI & WORKSPACE) COPIER & PASTER
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
 -- ======================================================
 
@@ -7,24 +7,24 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
+local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
-local guiName = "Project GUI"
+local projectName = "Project Build"
 pcall(function()
 	if game.Name and game.Name ~= "" then
-		guiName = game.Name
+		projectName = game.Name
 	end
 end)
 
--- Hapus GUI lama jika ada
-local oldGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("IkyyGuiCopyTool")
+local oldGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("IkyyCopyToolAdvanced")
 if oldGui then oldGui:Destroy() end
 
 --------------------------------------------------
 -- 1. UTAMA: SCREEN GUI & FLOATING ICON
 --------------------------------------------------
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "IkyyGuiCopyTool"
+ScreenGui.Name = "IkyyCopyToolAdvanced"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -33,7 +33,7 @@ ToggleButton.Name = "ToggleButton"
 ToggleButton.Size = UDim2.new(0, 32, 0, 32)
 ToggleButton.Position = UDim2.new(0, 10, 0.5, -16)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-ToggleButton.Text = "🗂️"
+ToggleButton.Text = "📦"
 ToggleButton.TextSize = 14
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Active = true
@@ -51,8 +51,8 @@ UIStrokeIcon.Parent = ToggleButton
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 420, 0, 200)
-MainFrame.Position = UDim2.new(0.5, -210, 0.5, -100)
+MainFrame.Size = UDim2.new(0, 430, 0, 210)
+MainFrame.Position = UDim2.new(0.5, -215, 0.5, -105)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -102,14 +102,14 @@ local BottomWatermark = Instance.new("TextLabel")
 BottomWatermark.Size = UDim2.new(1, 0, 0, 16)
 BottomWatermark.Position = UDim2.new(0, 0, 1, -16)
 BottomWatermark.BackgroundTransparency = 1
-BottomWatermark.Text = "StarterGui Copier by @IkyyXD"
+BottomWatermark.Text = "Universal Copier by @IkyyXD"
 BottomWatermark.TextColor3 = Color3.fromRGB(150, 150, 150)
 BottomWatermark.TextSize = 10
 BottomWatermark.Font = Enum.Font.SourceSansBold
 BottomWatermark.Parent = MainFrame
 
 --------------------------------------------------
--- 3. PANEL KIRI: INFO & PANDUAN
+-- 3. PANEL KIRI: INFO & MODE TARGET
 --------------------------------------------------
 local PageKiri = Instance.new("Frame")
 PageKiri.Size = UDim2.new(0, 130, 1, -22)
@@ -125,17 +125,33 @@ local TitleKiri = Instance.new("TextLabel")
 TitleKiri.Size = UDim2.new(1, 0, 0, 18)
 TitleKiri.Position = UDim2.new(0, 0, 0, 2)
 TitleKiri.BackgroundTransparency = 1
-TitleKiri.Text = "INFO FITUR"
+TitleKiri.Text = "PILIH TARGET"
 TitleKiri.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKiri.TextSize = 10
 TitleKiri.Font = Enum.Font.SourceSansBold
 TitleKiri.Parent = PageKiri
 
+local currentMode = "BOTH" -- Pilihan: "StarterGui", "Workspace", atau "BOTH"
+
+local ModeBtn = Instance.new("TextButton")
+ModeBtn.Size = UDim2.new(1, -12, 0, 24)
+ModeBtn.Position = UDim2.new(0, 6, 0, 22)
+ModeBtn.BackgroundColor3 = Color3.fromRGB(50, 40, 80)
+ModeBtn.Text = "Target: BOTH"
+ModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ModeBtn.TextSize = 9
+ModeBtn.Font = Enum.Font.SourceSansBold
+ModeBtn.Parent = PageKiri
+
+local UICornerMode = Instance.new("UICorner")
+UICornerMode.CornerRadius = UDim.new(0, 4)
+UICornerMode.Parent = ModeBtn
+
 local InfoContainer = Instance.new("TextLabel")
-InfoContainer.Size = UDim2.new(1, -12, 1, -26)
-InfoContainer.Position = UDim2.new(0, 6, 0, 22)
+InfoContainer.Size = UDim2.new(1, -12, 1, -54)
+InfoContainer.Position = UDim2.new(0, 6, 0, 50)
 InfoContainer.BackgroundTransparency = 1
-InfoContainer.Text = "• Copy 100% Asli\n• Target: StarterGui\n• Support ScreenGui\n• Auto Save File\n• Aman untuk Studio"
+InfoContainer.Text = "• Copy Bersamaan\n• GUI & Workspace\n• Clean Source Fix\n• Auto Save File\n• Aman untuk Studio"
 InfoContainer.TextColor3 = Color3.fromRGB(200, 200, 200)
 InfoContainer.TextSize = 9
 InfoContainer.Font = Enum.Font.SourceSans
@@ -144,10 +160,10 @@ InfoContainer.TextYAlignment = Enum.TextYAlignment.Top
 InfoContainer.Parent = PageKiri
 
 --------------------------------------------------
--- 4. PANEL KANAN: KONTROL & LIST DATA
+-- 4. PANEL KANAN: KONTROL & STORAGE
 --------------------------------------------------
 local PageKanan = Instance.new("Frame")
-PageKanan.Size = UDim2.new(0, 268, 1, -22)
+PageKanan.Size = UDim2.new(0, 276, 1, -22)
 PageKanan.Position = UDim2.new(0, 142, 0, 6)
 PageKanan.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 PageKanan.Parent = MainFrame
@@ -160,7 +176,7 @@ local TitleKanan = Instance.new("TextLabel")
 TitleKanan.Size = UDim2.new(1, -12, 0, 18)
 TitleKanan.Position = UDim2.new(0, 6, 0, 2)
 TitleKanan.BackgroundTransparency = 1
-TitleKanan.Text = "STARTERGUI STORAGE"
+TitleKanan.Text = "UNIVERSAL STORAGE"
 TitleKanan.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleKanan.TextSize = 10
 TitleKanan.Font = Enum.Font.SourceSansBold
@@ -171,7 +187,7 @@ local CopyAllBtn = Instance.new("TextButton")
 CopyAllBtn.Size = UDim2.new(1, -12, 0, 20)
 CopyAllBtn.Position = UDim2.new(0, 6, 0, 22)
 CopyAllBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 120)
-CopyAllBtn.Text = "📥 Copy Semua dari StarterGui"
+CopyAllBtn.Text = "📥 Copy Bersamaan (All)"
 CopyAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CopyAllBtn.TextSize = 9
 CopyAllBtn.Font = Enum.Font.SourceSansBold
@@ -217,7 +233,15 @@ UICornerConsole.CornerRadius = UDim.new(0, 4)
 UICornerConsole.Parent = ConsoleLog
 
 --------------------------------------------------
--- 5. SERIALIZER & DESERIALIZER MENDALAM KHUSUS GUI
+-- 5. FUNGSI MEMBERSIHKAN TAG HTML KODE
+--------------------------------------------------
+local function cleanHtmlTags(str)
+	if type(str) ~= "string" then return str end
+	return str:gsub("<[^>]+>", "")
+end
+
+--------------------------------------------------
+-- 6. UNIVERSAL SERIALIZER & DESERIALIZER
 --------------------------------------------------
 local savedStorage = {}
 local listButtons = {}
@@ -225,7 +249,7 @@ local listButtons = {}
 local function saveStorageToFile()
 	if writefile then
 		pcall(function()
-			writefile("saved_gui_data.dat", HttpService:JSONEncode(savedStorage))
+			writefile("saved_universal_data.dat", HttpService:JSONEncode(savedStorage))
 		end)
 	end
 end
@@ -235,15 +259,13 @@ local function setConsoleMessage(text, color)
 	ConsoleLog.TextColor3 = color or Color3.fromRGB(150, 255, 150)
 end
 
--- Fungsi Rekursif Menyalin Properti GUI Secara Lengkap
-local function serializeGuiDeep(inst)
+local function serializeUniversal(inst)
 	local data = {
 		Name = inst.Name,
 		ClassName = inst.ClassName,
 		Children = {}
 	}
 
-	-- Properti Umum UI (GuiObject / Text / Image / dll)
 	pcall(function()
 		if inst:IsA("GuiObject") then
 			data.Size = {inst.Size.X.Scale, inst.Size.X.Offset, inst.Size.Y.Scale, inst.Size.Y.Offset}
@@ -286,22 +308,36 @@ local function serializeGuiDeep(inst)
 			data.CornerRadiusScale = inst.CornerRadius.Scale
 			data.CornerRadiusOffset = inst.CornerRadius.Offset
 		end
+
+		if inst:IsA("BasePart") then
+			data.PartSize = {inst.Size.X, inst.Size.Y, inst.Size.Z}
+			data.Color = {inst.Color.R, inst.Color.G, inst.Color.B}
+			data.Material = inst.Material.Name
+			data.Transparency = inst.Transparency
+			data.Reflectance = inst.Reflectance
+			data.Anchored = inst.Anchored
+			data.CanCollide = inst.CanCollide
+			data.CFrame = {inst.CFrame:GetComponents()}
+			if inst:IsA("Part") then
+				data.Shape = inst.Shape.Name
+			end
+		end
 		
-		if inst:IsA("LocalScript") or inst:IsA("ModuleScript") then
-			data.ScriptSource = inst.Source
+		if inst:IsA("LocalScript") or inst:IsA("ModuleScript") or inst:IsA("Script") then
+			data.ScriptSource = cleanHtmlTags(inst.Source)
 		end
 	end)
 
-	-- Rekursi Anak (Children)
 	for _, child in ipairs(inst:GetChildren()) do
-		table.insert(data.Children, serializeGuiDeep(child))
+		if child.Name ~= "IkyyCopyToolAdvanced" then
+			table.insert(data.Children, serializeUniversal(child))
+		end
 	end
 
 	return data
 end
 
--- Fungsi Rekursif Memasang/Paste GUI Kembali ke StarterGui
-local function deserializeGuiDeep(data)
+local function deserializeUniversal(data)
 	local inst
 	pcall(function()
 		inst = Instance.new(data.ClassName)
@@ -311,18 +347,12 @@ local function deserializeGuiDeep(data)
 		inst = Instance.new("Folder")
 	end
 
-	inst.Name = data.Name or "PastedGUI"
+	inst.Name = data.Name or "PastedObject"
 
 	pcall(function()
-		if inst:IsA("GuiObject") and data.Size then
-			inst.Size = UDim2.new(unpack(data.Size))
-		end
-		if inst:IsA("GuiObject") and data.Position then
-			inst.Position = UDim2.new(unpack(data.Position))
-		end
-		if inst:IsA("GuiObject") and data.BackgroundColor3 then
-			inst.BackgroundColor3 = Color3.new(unpack(data.BackgroundColor3))
-		end
+		if inst:IsA("GuiObject") and data.Size then inst.Size = UDim2.new(unpack(data.Size)) end
+		if inst:IsA("GuiObject") and data.Position then inst.Position = UDim2.new(unpack(data.Position)) end
+		if inst:IsA("GuiObject") and data.BackgroundColor3 then inst.BackgroundColor3 = Color3.new(unpack(data.BackgroundColor3)) end
 		if inst:IsA("GuiObject") and data.BackgroundTransparency then inst.BackgroundTransparency = data.BackgroundTransparency end
 		if inst:IsA("GuiObject") and data.Visible ~= nil then inst.Visible = data.Visible end
 		if inst:IsA("GuiObject") and data.ZIndex then inst.ZIndex = data.ZIndex end
@@ -346,7 +376,7 @@ local function deserializeGuiDeep(data)
 
 		if inst:IsA("ScrollingFrame") then
 			if data.CanvasSize then inst.CanvasSize = UDim2.new(unpack(data.CanvasSize)) end
-			if data.ScrollBarThickness then inst.ScrollBarThickness = data.ScrollBarThickness end
+			if data.ScrollBarThickness then inst.ScrollBarThickness = inst.ScrollBarThickness end
 		end
 		
 		if inst:IsA("UIStroke") then
@@ -360,16 +390,29 @@ local function deserializeGuiDeep(data)
 				inst.CornerRadius = UDim.new(data.CornerRadiusScale, data.CornerRadiusOffset)
 			end
 		end
+
+		if inst:IsA("BasePart") then
+			if data.PartSize then inst.Size = Vector3.new(unpack(data.PartSize)) end
+			if data.Color then inst.Color = Color3.new(unpack(data.Color)) end
+			if data.Material and Enum.Material[data.Material] then inst.Material = Enum.Material[data.Material] end
+			if data.Transparency ~= nil then inst.Transparency = data.Transparency end
+			if data.Reflectance ~= nil then inst.Reflectance = data.Reflectance end
+			if data.Anchored ~= nil then inst.Anchored = data.Anchored end
+			if data.CanCollide ~= nil then inst.CanCollide = data.CanCollide end
+			if data.CFrame then inst.CFrame = CFrame.new(unpack(data.CFrame)) end
+			if inst:IsA("Part") and data.Shape then
+				pcall(function() inst.Shape = Enum.PartType[data.Shape] end)
+			end
+		end
 		
-		if (inst:IsA("LocalScript") or inst:IsA("ModuleScript")) and data.ScriptSource then
+		if (inst:IsA("LocalScript") or inst:IsA("ModuleScript") or inst:IsA("Script")) and data.ScriptSource then
 			inst.Source = data.ScriptSource
 		end
 	end)
 
-	-- Rekursi Pasang Anak
 	if data.Children then
 		for _, childData in ipairs(data.Children) do
-			local childInst = deserializeGuiDeep(childData)
+			local childInst = deserializeUniversal(childData)
 			if childInst then
 				childInst.Parent = inst
 			end
@@ -380,8 +423,25 @@ local function deserializeGuiDeep(data)
 end
 
 --------------------------------------------------
--- 6. FUNGSI TOMBOL INTERAKSI & REFRESH LIST
+-- 7. INTERAKSI TOMBOL MODE & STORAGE
 --------------------------------------------------
+ModeBtn.MouseButton1Click:Connect(function()
+	if currentMode == "BOTH" then
+		currentMode = "StarterGui"
+		ModeBtn.Text = "Target: StarterGui"
+		ModeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	elseif currentMode == "StarterGui" then
+		currentMode = "Workspace"
+		ModeBtn.Text = "Target: Workspace"
+		ModeBtn.BackgroundColor3 = Color3.fromRGB(80, 50, 40)
+	else
+		currentMode = "BOTH"
+		ModeBtn.Text = "Target: BOTH"
+		ModeBtn.BackgroundColor3 = Color3.fromRGB(50, 40, 80)
+	end
+	setConsoleMessage("Mode changed to: " .. currentMode)
+end)
+
 local function refreshResultList()
 	for _, btn in ipairs(listButtons) do
 		btn:Destroy()
@@ -403,7 +463,7 @@ local function refreshResultList()
 		pasteBtn.Size = UDim2.new(1, -22, 1, 0)
 		pasteBtn.Position = UDim2.new(0, 4, 0, 0)
 		pasteBtn.BackgroundTransparency = 1
-		pasteBtn.Text = idx .. ". " .. itemData.Title .. " (" .. #itemData.Items .. " GUI)"
+		pasteBtn.Text = idx .. ". [" .. itemData.Type .. "] " .. itemData.Title .. " (" .. #itemData.Items .. ")"
 		pasteBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
 		pasteBtn.TextXAlignment = Enum.TextXAlignment.Left
 		pasteBtn.TextSize = 8
@@ -421,15 +481,25 @@ local function refreshResultList()
 		delBtn.Parent = itemFrame
 
 		pasteBtn.MouseButton1Click:Connect(function()
-			setConsoleMessage("Pasting to StarterGui...", Color3.fromRGB(100, 200, 255))
+			setConsoleMessage("Pasting items...", Color3.fromRGB(100, 200, 255))
 			task.spawn(function()
-				for _, guiData in ipairs(itemData.Items) do
-					local newGui = deserializeGuiDeep(guiData)
-					if newGui then
-						newGui.Parent = StarterGui
+				for _, objData in ipairs(itemData.Items) do
+					local newInst = deserializeUniversal(objData)
+					if newInst then
+						if itemData.Type == "BOTH" then
+							-- Jika tipenya BOTH, arahkan GuiObject ke StarterGui dan sisanya ke Workspace
+							if newInst:IsA("ScreenGui") or newInst:IsA("Folder") and newInst:FindFirstChildOfClass("GuiObject") then
+								newInst.Parent = StarterGui
+							else
+								newInst.Parent = Workspace
+							end
+						else
+							local targetParent = (itemData.Type == "Workspace") and Workspace or StarterGui
+							newInst.Parent = targetParent
+						end
 					end
 				end
-				setConsoleMessage("Successfully pasted to StarterGui!", Color3.fromRGB(150, 255, 150))
+				setConsoleMessage("Successfully pasted " .. itemData.Type .." items!", Color3.fromRGB(150, 255, 150))
 			end)
 		end)
 
@@ -449,41 +519,50 @@ end
 CopyAllBtn.MouseButton1Click:Connect(function()
 	task.spawn(function()
 		local copiedItems = {}
-		setConsoleMessage("Scanning StarterGui...", Color3.fromRGB(255, 220, 100))
+		setConsoleMessage("Scanning " .. currentMode .."...", Color3.fromRGB(255, 220, 100))
 
-		for _, child in ipairs(StarterGui:GetChildren()) do
-			-- Jangan ikutkan GUI alat ini sendiri
-			if child.Name ~= "IkyyGuiCopyTool" then
-				table.insert(copiedItems, serializeGuiDeep(child))
+		if currentMode == "BOTH" or currentMode == "StarterGui" then
+			for _, child in ipairs(StarterGui:GetChildren()) do
+				if child.Name ~= "IkyyCopyToolAdvanced" then
+					table.insert(copiedItems, serializeUniversal(child))
+				end
+			end
+		end
+
+		if currentMode == "BOTH" or currentMode == "Workspace" then
+			for _, child in ipairs(Workspace:GetChildren()) do
+				if child ~= LocalPlayer and child.Name ~= "Camera" and child.Name ~= "Terrain" and child.Name ~= "IkyyCopyToolAdvanced" then
+					table.insert(copiedItems, serializeUniversal(child))
+				end
 			end
 		end
 
 		if #copiedItems == 0 then
-			setConsoleMessage("StarterGui is empty!", Color3.fromRGB(255, 100, 100))
+			setConsoleMessage("Target container is empty!", Color3.fromRGB(255, 100, 100))
 			return
 		end
 
 		local payload = {
-			Title = guiName,
+			Title = projectName,
+			Type = currentMode,
 			Items = copiedItems
 		}
 
 		table.insert(savedStorage, payload)
 		saveStorageToFile()
 		refreshResultList()
-		setConsoleMessage("Saved " .. #copiedItems .. " GUI from StarterGui!", Color3.fromRGB(150, 255, 150))
+		setConsoleMessage("Saved " .. #copiedItems .. " items (" .. currentMode .. ")!", Color3.fromRGB(150, 255, 150))
 	end)
 end)
 
--- Muat data tersimpan otomatis saat dijalankan
-if readfile and isfile and isfile("saved_gui_data.dat") then
+if readfile and isfile and isfile("saved_universal_data.dat") then
 	pcall(function()
-		local content = readfile("saved_gui_data.dat")
+		local content = readfile("saved_universal_data.dat")
 		local decoded = HttpService:JSONDecode(content)
 		if type(decoded) == "table" then
 			savedStorage = decoded
 			refreshResultList()
-			setConsoleMessage("Loaded saved GUI data")
+			setConsoleMessage("Loaded saved universal data")
 		end
 	end)
 end
