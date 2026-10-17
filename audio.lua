@@ -1,7 +1,7 @@
 -- ======================================================
 -- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE)
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
--- UPDATE: FULL AUTO DANCE SCANNER (WITHOUT CLICKING)
+-- UPDATE: HYBRID UI HOOK & ANIMATION LISTENER
 -- ======================================================
 
 local Players = game:GetService("Players")
@@ -36,6 +36,7 @@ local featureStates = {
 }
 
 local savedDances = {} -- Table untuk menampung {Name = ..., Id = ...}
+local lastClickedDanceName = "Dance"
 
 --------------------------------------------------
 -- 1. UTAMA: SCREEN GUI & FLOATING ICON
@@ -449,7 +450,7 @@ TabSwitchBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- 6. LOGIKA AUTO SCANNER DANCE (TANPA KLIK)
+-- 6. LOGIKA DANCE LOGGER REAL-TIME
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
@@ -526,78 +527,81 @@ local function refreshDanceList()
 	DanceFrame.CanvasSize = UDim2.new(0, 0, 0, DanceListLayout.AbsoluteContentSize.Y)
 end
 
--- LOGIKA SCANNER OTOMATIS: DUMP UI & REPLICATED STORAGE
-local function autoScanDances()
-	if not featureStates.DanceLogger then return end
+-- Hook Semua Tombol UI Game (Termasuk UI Dance)
+local hookedButtons = {}
+local function hookUIButtons()
+	local pGui = LocalPlayer:WaitForChild("PlayerGui")
 	
-	local foundCount = 0
-	local uniqueIDs = {}
-	local logFileBuffer = {}
-
-	local searchLocations = {
-		LocalPlayer:WaitForChild("PlayerGui"),
-		game:GetService("ReplicatedStorage")
-	}
-
-	for _, parent in ipairs(searchLocations) do
-		for _, obj in ipairs(parent:GetDescendants()) do
-			local name = nil
-			local id = nil
-
-			-- Scenario A: Tombol UI (TextButton/ImageButton) punya child/attribute Animation
-			if obj:IsA("TextButton") or obj:IsA("ImageButton") then
-				local textName = obj:IsA("TextButton") and obj.Text or obj.Name
-				textName = string.gsub(textName, "[\r\n]", " ")
-
-				local animChild = obj:FindFirstChildOfClass("Animation") or obj:FindFirstChild("Animation")
-				if animChild and animChild:IsA("Animation") and animChild.AnimationId ~= "" then
-					name = textName
-					id = animChild.AnimationId
-				else
-					-- Cek Value/Attribute di tombol
-					for _, child in ipairs(obj:GetChildren()) do
-						if child:IsA("StringValue") and string.find(child.Value, "rbxassetid://") then
-							name = textName
-							id = child.Value
-							break
-						end
-					end
+	local function processButton(btn)
+		if (btn:IsA("TextButton") or btn:IsA("ImageButton")) and not hookedButtons[btn] then
+			hookedButtons[btn] = true
+			btn.MouseButton1Click:Connect(function()
+				local tName = btn:IsA("TextButton") and btn.Text or btn.Name
+				if tName and tName ~= "" and tName ~= " " and not string.find(tName, "Ikyy") then
+					tName = string.gsub(tName, "[\r\n]", " ")
+					lastClickedDanceName = tName
 				end
-			-- Scenario B: Objek Animation Murni di Storage/UI
-			elseif obj:IsA("Animation") and obj.AnimationId ~= "" then
-				name = (obj.Parent and obj.Parent:IsA("TextButton")) and obj.Parent.Text or obj.Name
-				id = obj.AnimationId
-			end
-
-			-- Jika ID dan Nama valid
-			if name and id and id ~= "" and not uniqueIDs[id] then
-				uniqueIDs[id] = true
-				foundCount = foundCount + 1
-				
-				table.insert(savedDances, {Name = name, Id = id})
-				
-				local entry = string.format("name dance : %s\nid dance : %s\n----------------------------------------", name, id)
-				table.insert(logFileBuffer, entry)
-			end
+			end)
 		end
 	end
 
-	refreshDanceList()
-	setConsoleMessage("Auto Scanned: " .. foundCount .. " Dances!", Color3.fromRGB(150, 255, 150))
-
-	-- Simpan otomatis ke file TXT jika AutoSave Aktif
-	if writefile and featureStates.AutoSave and #logFileBuffer > 0 then
-		pcall(function()
-			local fullText = table.concat(logFileBuffer, "\n") .. "\n"
-			writefile("saved_dances.txt", fullText)
-		end)
+	for _, obj in ipairs(pGui:GetDescendants()) do
+		processButton(obj)
 	end
+	pGui.DescendantAdded:Connect(processButton)
 end
 
--- Jalankan Auto Scan Otomatis saat Script Di-Execute
+-- AnimationPlayed Listener untuk Menangkap Dance Pas Karakter Bergerak
+local function hookAnimator(animator)
+	if not animator then return end
+	animator.AnimationPlayed:Connect(function(track)
+		if not featureStates.DanceLogger then return end
+		if track and track.Animation and track.Animation.AnimationId ~= "" then
+			local id = track.Animation.AnimationId
+			local name = lastClickedDanceName
+
+			if name == "Dance" and track.Name ~= "Animation" and track.Name ~= "AnimationTrack" then
+				name = track.Name
+			end
+
+			for _, d in ipairs(savedDances) do
+				if d.Id == id then return end
+			end
+
+			table.insert(savedDances, {Name = name, Id = id})
+			refreshDanceList()
+
+			setConsoleMessage("[DANCE RECORDED]\n" .. name, Color3.fromRGB(255, 220, 100))
+
+			-- Simpan Otomatis Format 'name dance :' & 'id dance :'
+			if writefile and featureStates.AutoSave then
+				pcall(function()
+					local logEntry = string.format("name dance : %s\nid dance : %s\n----------------------------------------\n", name, id)
+					if appendfile then
+						appendfile("saved_dances.txt", logEntry)
+					else
+						local existing = isfile("saved_dances.txt") and readfile("saved_dances.txt") or ""
+						writefile("saved_dances.txt", existing .. logEntry)
+					end
+				end)
+			end
+		end
+	end)
+end
+
 task.spawn(function()
-	task.wait(1)
-	autoScanDances()
+	hookUIButtons()
+	
+	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local humanoid = char:WaitForChild("Humanoid")
+	local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid
+	hookAnimator(animator)
+
+	LocalPlayer.CharacterAdded:Connect(function(newChar)
+		local h = newChar:WaitForChild("Humanoid")
+		local a = h:FindFirstChildOfClass("Animator") or h
+		hookAnimator(a)
+	end)
 end)
 
 ToggleCopyBtn.MouseButton1Click:Connect(function()
@@ -674,7 +678,7 @@ end)
 
 ClearBtn.MouseButton1Click:Connect(function()
 	for part, hl in pairs(highlights) do
-		if hl then hl:Destroy() end
+		if hl me then hl:Destroy() end
 	end
 	selectedParts = {}
 	highlights = {}
