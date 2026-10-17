@@ -1,7 +1,7 @@
 -- ======================================================
 -- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE)
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
--- UPDATE: HYBRID UI HOOK & ANIMATION LISTENER
+-- UPDATE: HYBRID UI HOOK & REALTIME DANCE LOGGER
 -- ======================================================
 
 local Players = game:GetService("Players")
@@ -678,7 +678,7 @@ end)
 
 ClearBtn.MouseButton1Click:Connect(function()
 	for part, hl in pairs(highlights) do
-		if hl me then hl:Destroy() end
+		if hl then hl:Destroy() end
 	end
 	selectedParts = {}
 	highlights = {}
