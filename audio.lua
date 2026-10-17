@@ -1,5 +1,5 @@
 -- ======================================================
--- SPTZYY X IKYYXD - INTEGRATED DANCE MANAGER & LOGGER
+-- SPTZYY X IKYYXD - FULL INTEGRATED DANCE TOOL & MANAGER
 -- ======================================================
 
 local Players = game:GetService("Players")
@@ -8,11 +8,12 @@ local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer and LocalPlayer:FindFirstChildOfClass("PlayerGui")
 
--- Clean Up Old UI
+-- Clean Up GUI Lama
 if PlayerGui and PlayerGui:FindFirstChild("SptzyyDanceUI") then
     PlayerGui.SptzyyDanceUI:Destroy()
 end
@@ -23,6 +24,47 @@ end
 local isLoggerEnabled = true
 local isAutoSaveEnabled = true
 local savedDances = {}
+
+--------------------------------------------------
+-- HELPER: DRAGGABLE GUI LOGIC
+--------------------------------------------------
+local function makeDraggable(topBarObject, objectToMove)
+    local dragging, dragInput, dragStart, startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        objectToMove.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+
+    topBarObject.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = objectToMove.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    topBarObject.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+end
 
 --------------------------------------------------
 -- 1. SCREEN GUI & FLOATING ICON
@@ -41,7 +83,6 @@ ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 ToggleButton.Text = "💃"
 ToggleButton.TextSize = 16
 ToggleButton.Active = true
-ToggleButton.Draggable = true
 ToggleButton.Parent = screenGui
 
 local UICornerIcon = Instance.new("UICorner")
@@ -53,7 +94,9 @@ UIStrokeIcon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStrokeIcon.Thickness = 1.5
 UIStrokeIcon.Parent = ToggleButton
 
--- Main Frame (360x380 di Tengah)
+makeDraggable(ToggleButton, ToggleButton)
+
+-- Main Frame (360x380)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 360, 0, 380)
@@ -101,7 +144,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
 end)
 
--- Top Header
+-- Top Header (Draggable Handle)
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 35)
 header.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
@@ -137,6 +180,8 @@ closeBtn.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
+makeDraggable(header, mainFrame)
+
 -- Container Pages
 local container = Instance.new("Frame")
 container.Size = UDim2.new(1, 0, 1, -75)
@@ -168,7 +213,7 @@ local splashSub = Instance.new("TextLabel")
 splashSub.Size = UDim2.new(1, 0, 0, 20)
 splashSub.Position = UDim2.new(0, 0, 0.4, 20)
 splashSub.BackgroundTransparency = 1
-splashSub.Text = "Initializing Scanner System..."
+splashSub.Text = "Initializing System..."
 splashSub.TextColor3 = Color3.fromRGB(180, 180, 180)
 splashSub.TextSize = 11
 splashSub.Font = Enum.Font.Gotham
@@ -196,7 +241,7 @@ outputPage.BackgroundTransparency = 1
 outputPage.Visible = false
 outputPage.Parent = container
 
--- --- PAGE 1: HOME (INTERNAL TXT DETECTOR) ---
+-- --- HOME PAGE ---
 local homeTitle = Instance.new("TextLabel")
 homeTitle.Size = UDim2.new(1, -20, 0, 25)
 homeTitle.Position = UDim2.new(0, 10, 0, 5)
@@ -224,7 +269,7 @@ local homeCorner = Instance.new("UICorner")
 homeCorner.CornerRadius = UDim.new(0, 8)
 homeCorner.Parent = homeScroll
 
--- --- PAGE 2: SCANNER (LIVE LOGGER IKYYXD) ---
+-- --- SCANNER PAGE ---
 local PageKiri = Instance.new("Frame")
 PageKiri.Size = UDim2.new(0, 120, 1, -10)
 PageKiri.Position = UDim2.new(0, 10, 0, 5)
@@ -326,10 +371,24 @@ local UICornerConsole = Instance.new("UICorner")
 UICornerConsole.CornerRadius = UDim.new(0, 4)
 UICornerConsole.Parent = ConsoleLog
 
--- --- PAGE 3: OUTPUT / EDITABLE TEXTBOX ---
+-- --- OUTPUT PAGE ---
+local copyOutputBtn = Instance.new("TextButton")
+copyOutputBtn.Size = UDim2.new(1, -20, 0, 26)
+copyOutputBtn.Position = UDim2.new(0, 10, 0, 5)
+copyOutputBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 230)
+copyOutputBtn.Text = "📋 Copy Semua Output"
+copyOutputBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+copyOutputBtn.Font = Enum.Font.GothamBold
+copyOutputBtn.TextSize = 11
+copyOutputBtn.Parent = outputPage
+
+local copyCorner = Instance.new("UICorner")
+copyCorner.CornerRadius = UDim.new(0, 6)
+copyCorner.Parent = copyOutputBtn
+
 local outputScroll = Instance.new("ScrollingFrame")
-outputScroll.Size = UDim2.new(1, -20, 1, -10)
-outputScroll.Position = UDim2.new(0, 10, 0, 5)
+outputScroll.Size = UDim2.new(1, -20, 1, -40)
+outputScroll.Position = UDim2.new(0, 10, 0, 35)
 outputScroll.BackgroundColor3 = Color3.fromRGB(12, 12, 15)
 outputScroll.BorderSizePixel = 0
 outputScroll.ScrollBarThickness = 6
@@ -343,7 +402,7 @@ local outputBox = Instance.new("TextBox")
 outputBox.Size = UDim2.new(1, -12, 1, 0)
 outputBox.Position = UDim2.new(0, 6, 0, 4)
 outputBox.BackgroundTransparency = 1
-outputBox.Text = "Pilih file .txt di Home untuk mulai memproses...\n(Dapat diedit & di-copy manual)"
+outputBox.Text = "Pilih file .txt di Home untuk mulai memproses...\n(Bisa diedit & di-copy manual)"
 outputBox.TextColor3 = Color3.fromRGB(220, 220, 220)
 outputBox.TextSize = 12
 outputBox.Font = Enum.Font.Code
@@ -361,8 +420,22 @@ local function updateCanvas()
 end
 outputBox:GetPropertyChangedSignal("Text"):Connect(updateCanvas)
 
+-- Handler Tombol Copy Output
+copyOutputBtn.MouseButton1Click:Connect(function()
+    if setclipboard then
+        setclipboard(outputBox.Text)
+        copyOutputBtn.Text = "✓ Berhasil Di-copy ke Clipboard!"
+        task.wait(1.5)
+        copyOutputBtn.Text = "📋 Copy Semua Output"
+    else
+        copyOutputBtn.Text = "Blok teks manual di bawah"
+        task.wait(1.5)
+        copyOutputBtn.Text = "📋 Copy Semua Output"
+    end
+end)
+
 --------------------------------------------------
--- BOTTOM NAVIGATION BAR & WATERMARK
+-- BOTTOM BAR & NAVIGATION
 --------------------------------------------------
 local bottomBar = Instance.new("Frame")
 bottomBar.Size = UDim2.new(1, 0, 0, 40)
@@ -439,7 +512,43 @@ tabScanBtn.MouseButton1Click:Connect(function() switchTab("Scanner") end)
 tabOutputBtn.MouseButton1Click:Connect(function() switchTab("Output") end)
 
 --------------------------------------------------
--- LOGIKA SCANNER & DANCE LOGGER
+-- CEK NAMA (LOGIKA WEB API + MARKETPLACE)
+--------------------------------------------------
+local function getDanceName(assetId, fallbackName)
+    local danceName = "Unknown / Private"
+    
+    -- 1. Web API Roblox Economy
+    local reqSuccess, response = pcall(function()
+        return game:HttpGet("https://economy.roblox.com/v2/assets/" .. tostring(assetId) .. "/details")
+    end)
+    
+    if reqSuccess and response then
+        local decodeSuccess, data = pcall(function()
+            return HttpService:JSONDecode(response)
+        end)
+        if decodeSuccess and data and data.Name then
+            return data.Name
+        end
+    end
+    
+    -- 2. Fallback MarketplaceService
+    local mpSuccess, assetInfo = pcall(function()
+        return MarketplaceService:GetProductInfo(assetId, Enum.InfoType.Asset)
+    end)
+    
+    if mpSuccess and assetInfo and assetInfo.Name then
+        return assetInfo.Name
+    end
+
+    if fallbackName and fallbackName ~= "Animation" and fallbackName ~= "AnimationTrack" then
+        return fallbackName
+    end
+
+    return "Dance_" .. tostring(assetId)
+end
+
+--------------------------------------------------
+-- SCANNER & LIVE LOGGER LOGIC
 --------------------------------------------------
 local function setConsoleMessage(text, color)
     ConsoleLog.Text = "> " .. text
@@ -517,41 +626,6 @@ local function refreshDanceList()
     DanceFrame.CanvasSize = UDim2.new(0, 0, 0, DanceListLayout.AbsoluteContentSize.Y)
 end
 
--- Function Fetch Nama Asli
-local function getDanceName(assetId, fallbackName)
-    local danceName = "Unknown / Private"
-    
-    -- Web API Roblox Economy
-    local reqSuccess, response = pcall(function()
-        return game:HttpGet("https://economy.roblox.com/v2/assets/" .. tostring(assetId) .. "/details")
-    end)
-    
-    if reqSuccess and response then
-        local decodeSuccess, data = pcall(function()
-            return HttpService:JSONDecode(response)
-        end)
-        if decodeSuccess and data and data.Name then
-            return data.Name
-        end
-    end
-    
-    -- Fallback MarketplaceService
-    local mpSuccess, assetInfo = pcall(function()
-        return MarketplaceService:GetProductInfo(assetId, Enum.InfoType.Asset)
-    end)
-    
-    if mpSuccess and assetInfo and assetInfo.Name then
-        return assetInfo.Name
-    end
-
-    if fallbackName and fallbackName ~= "Animation" and fallbackName ~= "AnimationTrack" then
-        return fallbackName
-    end
-
-    return "Dance_" .. tostring(assetId)
-end
-
--- Animator Listener
 local function hookAnimator(animator)
     if not animator then return end
     animator.AnimationPlayed:Connect(function(track)
@@ -575,7 +649,6 @@ local function hookAnimator(animator)
 
                 setConsoleMessage("[LOGGED] " .. danceName, Color3.fromRGB(255, 220, 100))
 
-                -- Auto Save ke file saved_dances.txt
                 if writefile and isAutoSaveEnabled then
                     pcall(function()
                         local logEntry = string.format("name dance : %s\nid dance : %s\n----------------------------------------\n", danceName, fullAssetId)
@@ -606,7 +679,7 @@ task.spawn(function()
 end)
 
 --------------------------------------------------
--- PARSING TXT FILE & AUTO SAVE SYSTEM
+-- TXT READER & AUTO SAVE PROCESSOR
 --------------------------------------------------
 local function processTxtFile(content, fileName)
     switchTab("Output")
@@ -701,7 +774,7 @@ local function loadInternalFiles()
     end
 end
 
--- Initialize Splash Screen
+-- Init Splash Animation
 task.spawn(function()
     task.wait(1.5)
     TweenService:Create(splashFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
