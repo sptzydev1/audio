@@ -1,7 +1,7 @@
 -- ======================================================
 -- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE)
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
--- UPDATE: FEATURE TOGGLES & ADVANCED DANCE LOGGER
+-- UPDATE: FULL AUTO DANCE SCANNER (WITHOUT CLICKING)
 -- ======================================================
 
 local Players = game:GetService("Players")
@@ -36,7 +36,6 @@ local featureStates = {
 }
 
 local savedDances = {} -- Table untuk menampung {Name = ..., Id = ...}
-local lastClickedDanceName = "Unknown Dance"
 
 --------------------------------------------------
 -- 1. UTAMA: SCREEN GUI & FLOATING ICON
@@ -450,7 +449,7 @@ TabSwitchBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- 6. LOGIKA SYSTEM & DANCE LOGGER
+-- 6. LOGIKA AUTO SCANNER DANCE (TANPA KLIK)
 --------------------------------------------------
 local isCopyEnabled = false
 local isSelecting = false
@@ -493,14 +492,13 @@ local function refreshDanceList()
 		btn.Size = UDim2.new(1, -20, 1, 0)
 		btn.Position = UDim2.new(0, 4, 0, 0)
 		btn.BackgroundTransparency = 1
-		btn.Text = idx .. ". " .. danceData.Name .. " | " .. string.sub(danceData.Id, 1, 12) .. "..."
+		btn.Text = idx .. ". " .. danceData.Name .. " | " .. string.sub(danceData.Id, 1, 10) .. "..."
 		btn.TextColor3 = Color3.fromRGB(220, 220, 220)
 		btn.TextXAlignment = Enum.TextXAlignment.Left
 		btn.TextSize = 8
 		btn.Font = Enum.Font.SourceSans
 		btn.Parent = itemFrame
 
-		-- Copy ID Dance ke Clipboard/Log saat diklik
 		btn.MouseButton1Click:Connect(function()
 			if setclipboard then
 				setclipboard(danceData.Id)
@@ -528,79 +526,78 @@ local function refreshDanceList()
 	DanceFrame.CanvasSize = UDim2.new(0, 0, 0, DanceListLayout.AbsoluteContentSize.Y)
 end
 
--- Listener untuk Menangkap Teks/Nama Tombol UI yang Diklik
-local function hookUIButtonNames()
-	local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+-- LOGIKA SCANNER OTOMATIS: DUMP UI & REPLICATED STORAGE
+local function autoScanDances()
+	if not featureStates.DanceLogger then return end
 	
-	local function checkAndHook(guiObj)
-		if guiObj:IsA("TextButton") or guiObj:IsA("ImageButton") then
-			guiObj.MouseButton1Click:Connect(function()
-				local btnText = guiObj:IsA("TextButton") and guiObj.Text or guiObj.Name
-				if btnText and btnText ~= "" then
-					btnText = string.gsub(btnText, "[\r\n]", " ")
-					lastClickedDanceName = btnText
-				end
-			end)
-		end
-	end
+	local foundCount = 0
+	local uniqueIDs = {}
+	local logFileBuffer = {}
 
-	for _, obj in ipairs(playerGui:GetDescendants()) do
-		checkAndHook(obj)
-	end
-	playerGui.DescendantAdded:Connect(checkAndHook)
-end
+	local searchLocations = {
+		LocalPlayer:WaitForChild("PlayerGui"),
+		game:GetService("ReplicatedStorage")
+	}
 
-task.spawn(hookUIButtonNames)
+	for _, parent in ipairs(searchLocations) do
+		for _, obj in ipairs(parent:GetDescendants()) do
+			local name = nil
+			local id = nil
 
--- Hook Animation Listener dengan Format 'name dance :' dan 'id dance :'
-local function hookAnimator(animator)
-	if not animator then return end
-	animator.AnimationPlayed:Connect(function(track)
-		if not featureStates.DanceLogger then return end
-		if track and track.Animation and track.Animation.AnimationId ~= "" then
-			local id = track.Animation.AnimationId
-			
-			local finalName = lastClickedDanceName
-			if finalName == "Unknown Dance" and track.Name ~= "Animation" and track.Name ~= "AnimationTrack" then
-				finalName = track.Name
-			end
+			-- Scenario A: Tombol UI (TextButton/ImageButton) punya child/attribute Animation
+			if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+				local textName = obj:IsA("TextButton") and obj.Text or obj.Name
+				textName = string.gsub(textName, "[\r\n]", " ")
 
-			for _, d in ipairs(savedDances) do
-				if d.Id == id then return end
-			end
-
-			table.insert(savedDances, {Name = finalName, Id = id})
-			refreshDanceList()
-			
-			setConsoleMessage("[DANCE LOGGED]\n" .. finalName, Color3.fromRGB(255, 220, 100))
-
-			-- Format Output Lengkap ke File TXT
-			if writefile and featureStates.AutoSave then
-				pcall(function()
-					local logText = string.format("name dance : %s\nid dance : %s\n----------------------------------------\n", finalName, id)
-					if appendfile then
-						appendfile("saved_dances.txt", logText)
-					else
-						local existing = isfile("saved_dances.txt") and readfile("saved_dances.txt") or ""
-						writefile("saved_dances.txt", existing .. logText)
+				local animChild = obj:FindFirstChildOfClass("Animation") or obj:FindFirstChild("Animation")
+				if animChild and animChild:IsA("Animation") and animChild.AnimationId ~= "" then
+					name = textName
+					id = animChild.AnimationId
+				else
+					-- Cek Value/Attribute di tombol
+					for _, child in ipairs(obj:GetChildren()) do
+						if child:IsA("StringValue") and string.find(child.Value, "rbxassetid://") then
+							name = textName
+							id = child.Value
+							break
+						end
 					end
-				end)
+				end
+			-- Scenario B: Objek Animation Murni di Storage/UI
+			elseif obj:IsA("Animation") and obj.AnimationId ~= "" then
+				name = (obj.Parent and obj.Parent:IsA("TextButton")) and obj.Parent.Text or obj.Name
+				id = obj.AnimationId
+			end
+
+			-- Jika ID dan Nama valid
+			if name and id and id ~= "" and not uniqueIDs[id] then
+				uniqueIDs[id] = true
+				foundCount = foundCount + 1
+				
+				table.insert(savedDances, {Name = name, Id = id})
+				
+				local entry = string.format("name dance : %s\nid dance : %s\n----------------------------------------", name, id)
+				table.insert(logFileBuffer, entry)
 			end
 		end
-	end)
+	end
+
+	refreshDanceList()
+	setConsoleMessage("Auto Scanned: " .. foundCount .. " Dances!", Color3.fromRGB(150, 255, 150))
+
+	-- Simpan otomatis ke file TXT jika AutoSave Aktif
+	if writefile and featureStates.AutoSave and #logFileBuffer > 0 then
+		pcall(function()
+			local fullText = table.concat(logFileBuffer, "\n") .. "\n"
+			writefile("saved_dances.txt", fullText)
+		end)
+	end
 end
 
+-- Jalankan Auto Scan Otomatis saat Script Di-Execute
 task.spawn(function()
-	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-	local humanoid = char:WaitForChild("Humanoid")
-	local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid
-	hookAnimator(animator)
-
-	LocalPlayer.CharacterAdded:Connect(function(newChar)
-		local h = newChar:WaitForChild("Humanoid")
-		local a = h:FindFirstChildOfClass("Animator") or h
-		hookAnimator(a)
-	end)
+	task.wait(1)
+	autoScanDances()
 end)
 
 ToggleCopyBtn.MouseButton1Click:Connect(function()
@@ -794,7 +791,6 @@ local function refreshResultList()
 		itemBtn.Font = Enum.Font.SourceSans
 		itemBtn.Parent = itemFrame
 
-		-- Klik Item -> Direct Paste
 		itemBtn.MouseButton1Click:Connect(function()
 			if next(multiSelectedMap) then
 				multiSelectedMap[idx] = not multiSelectedMap[idx] or nil
@@ -804,7 +800,6 @@ local function refreshResultList()
 			end
 		end)
 
-		-- Popup Menu Dropdown Hapus
 		itemMenuBtn.MouseButton1Click:Connect(function()
 			closeAllDropdowns()
 			DropdownOverlay.Visible = true
