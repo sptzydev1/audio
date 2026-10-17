@@ -1,7 +1,7 @@
 -- ======================================================
 -- MINI 3-PAGE BUILD COPIER & PASTER (DARK WHITE)
 -- COPYRIGHT (C) IkyyXD - ALL RIGHTS RESERVED
--- UPDATE: ON/OFF FEATURE TOGGLES & DANCE LOGGER LIST
+-- UPDATE: FEATURE TOGGLES & ADVANCED DANCE LOGGER
 -- ======================================================
 
 local Players = game:GetService("Players")
@@ -36,6 +36,7 @@ local featureStates = {
 }
 
 local savedDances = {} -- Table untuk menampung {Name = ..., Id = ...}
+local lastClickedDanceName = "Unknown Dance"
 
 --------------------------------------------------
 -- 1. UTAMA: SCREEN GUI & FLOATING ICON
@@ -492,7 +493,7 @@ local function refreshDanceList()
 		btn.Size = UDim2.new(1, -20, 1, 0)
 		btn.Position = UDim2.new(0, 4, 0, 0)
 		btn.BackgroundTransparency = 1
-		btn.Text = idx .. ". " .. danceData.Name .. " | " .. string.sub(danceData.Id, 1, 14) .. "..."
+		btn.Text = idx .. ". " .. danceData.Name .. " | " .. string.sub(danceData.Id, 1, 12) .. "..."
 		btn.TextColor3 = Color3.fromRGB(220, 220, 220)
 		btn.TextXAlignment = Enum.TextXAlignment.Left
 		btn.TextSize = 8
@@ -503,7 +504,7 @@ local function refreshDanceList()
 		btn.MouseButton1Click:Connect(function()
 			if setclipboard then
 				setclipboard(danceData.Id)
-				setConsoleMessage("Copied: " .. danceData.Name .. " ID!")
+				setConsoleMessage("Copied: " .. danceData.Name)
 			else
 				setConsoleMessage("ID: " .. danceData.Id)
 			end
@@ -527,29 +528,61 @@ local function refreshDanceList()
 	DanceFrame.CanvasSize = UDim2.new(0, 0, 0, DanceListLayout.AbsoluteContentSize.Y)
 end
 
--- Hook Animation Listener untuk Dance Logger
+-- Listener untuk Menangkap Teks/Nama Tombol UI yang Diklik
+local function hookUIButtonNames()
+	local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+	
+	local function checkAndHook(guiObj)
+		if guiObj:IsA("TextButton") or guiObj:IsA("ImageButton") then
+			guiObj.MouseButton1Click:Connect(function()
+				local btnText = guiObj:IsA("TextButton") and guiObj.Text or guiObj.Name
+				if btnText and btnText ~= "" then
+					btnText = string.gsub(btnText, "[\r\n]", " ")
+					lastClickedDanceName = btnText
+				end
+			end)
+		end
+	end
+
+	for _, obj in ipairs(playerGui:GetDescendants()) do
+		checkAndHook(obj)
+	end
+	playerGui.DescendantAdded:Connect(checkAndHook)
+end
+
+task.spawn(hookUIButtonNames)
+
+-- Hook Animation Listener dengan Format 'name dance :' dan 'id dance :'
 local function hookAnimator(animator)
 	if not animator then return end
 	animator.AnimationPlayed:Connect(function(track)
 		if not featureStates.DanceLogger then return end
 		if track and track.Animation and track.Animation.AnimationId ~= "" then
 			local id = track.Animation.AnimationId
-			local name = track.Name or "Dance"
+			
+			local finalName = lastClickedDanceName
+			if finalName == "Unknown Dance" and track.Name ~= "Animation" and track.Name ~= "AnimationTrack" then
+				finalName = track.Name
+			end
 
-			-- Hindari Duplikasi ID
 			for _, d in ipairs(savedDances) do
 				if d.Id == id then return end
 			end
 
-			table.insert(savedDances, {Name = name, Id = id})
+			table.insert(savedDances, {Name = finalName, Id = id})
 			refreshDanceList()
-			setConsoleMessage("[LOGGED DANCE]\n" .. name, Color3.fromRGB(255, 220, 100))
+			
+			setConsoleMessage("[DANCE LOGGED]\n" .. finalName, Color3.fromRGB(255, 220, 100))
 
-			-- Auto save file khusus dance jika AutoSave aktif
+			-- Format Output Lengkap ke File TXT
 			if writefile and featureStates.AutoSave then
 				pcall(function()
+					local logText = string.format("name dance : %s\nid dance : %s\n----------------------------------------\n", finalName, id)
 					if appendfile then
-						appendfile("saved_dances.txt", name .. " = " .. id .. "\n")
+						appendfile("saved_dances.txt", logText)
+					else
+						local existing = isfile("saved_dances.txt") and readfile("saved_dances.txt") or ""
+						writefile("saved_dances.txt", existing .. logText)
 					end
 				end)
 			end
