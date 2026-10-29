@@ -587,9 +587,14 @@ local function refreshDanceList()
     end
 
     for idx, danceData in ipairs(savedDances) do
+        -- Lock nilai variabel untuk menghindari closure issue
+        local currentId = danceData.Id
+        local currentName = danceData.Name
+        local currentIndex = idx
+
         local itemFrame = Instance.new("Frame")
         itemFrame.Size = UDim2.new(1, -4, 0, 20)
-        itemFrame.LayoutOrder = idx
+        itemFrame.LayoutOrder = currentIndex
         itemFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
         itemFrame.Parent = DanceFrame
 
@@ -601,7 +606,7 @@ local function refreshDanceList()
         btn.Size = UDim2.new(1, -22, 1, 0)
         btn.Position = UDim2.new(0, 4, 0, 0)
         btn.BackgroundTransparency = 1
-        btn.Text = idx .. ". " .. danceData.Name
+        btn.Text = currentIndex .. ". " .. currentName
         btn.TextColor3 = Color3.fromRGB(220, 220, 220)
         btn.TextXAlignment = Enum.TextXAlignment.Left
         btn.TextSize = 9
@@ -610,10 +615,10 @@ local function refreshDanceList()
 
         btn.MouseButton1Click:Connect(function()
             if setclipboard then
-                setclipboard(danceData.Id)
-                setConsoleMessage("Copied ID: " .. danceData.Name)
+                setclipboard(currentId)
+                setConsoleMessage("Copied ID: " .. currentName)
             else
-                setConsoleMessage("ID: " .. danceData.Id)
+                setConsoleMessage("ID: " .. currentId)
             end
         end)
 
@@ -628,7 +633,7 @@ local function refreshDanceList()
         delBtn.Parent = itemFrame
 
         delBtn.MouseButton1Click:Connect(function()
-            table.remove(savedDances, idx)
+            table.remove(savedDances, currentIndex)
             refreshDanceList()
         end)
     end
